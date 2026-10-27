@@ -1,0 +1,1882 @@
+[
+  {
+    "id": "about.about",
+    "group": "Meet Sibel",
+    "text": "About"
+  },
+  {
+    "id": "about.sibel-mcginnis",
+    "group": "Meet Sibel",
+    "text": "Sibel McGinnis"
+  },
+  {
+    "id": "about.corporate-trainer-life-coach-and-mentor-who-views-transformation-",
+    "group": "Meet Sibel",
+    "text": "Corporate trainer, life coach, and mentor who views transformation as an ongoing journey of discovery, action, and growth."
+  },
+  {
+    "id": "about.her-career-began-as-an-entrepreneur-shortly-after-college-over-ti",
+    "group": "Meet Sibel",
+    "text": "Her career began as an entrepreneur shortly after college. Over time, a period of dissatisfaction led her to embark on a deeper journey of self-discovery and pursue a career shift. Committed to her personal and professional development, she completed several psychology-informed Train-the-Trainer programs to become a professional soft-skills trainer."
+  },
+  {
+    "id": "about.today-her-work-is-grounded-in-the-belief-that-meaningful-change-u",
+    "group": "Meet Sibel",
+    "text": "Today, her work is grounded in the belief that meaningful change unfolds through awareness, intention, and aligned action over time. She is a women’s personal-growth mentor helping individuals redefine possibilities, rediscover their voice, reimagine their paths, and step into their next chapter with confidence, clarity, and care."
+  },
+  {
+    "id": "about.meaningful-change-is-a-craft-not-a-one-time-event-by-uncovering-i",
+    "group": "Meet Sibel",
+    "text": "Meaningful change is a craft, not a one-time event. By uncovering inner resources, removing self-imposed barriers, and aligning daily choices with deepest values, Sibel helps individuals weave lives that feel deliberate, vibrant, and resilient."
+  },
+  {
+    "id": "about.what-to-expect",
+    "group": "Meet Sibel",
+    "text": "What to Expect"
+  },
+  {
+    "id": "about.a-collaborative-partnership",
+    "group": "Meet Sibel",
+    "text": "A collaborative partnership"
+  },
+  {
+    "id": "about.grounded-in-empathy-integrity-and-accountability",
+    "group": "Meet Sibel",
+    "text": "Grounded in empathy, integrity, and accountability."
+  },
+  {
+    "id": "about.clear-actionable-roadmaps",
+    "group": "Meet Sibel",
+    "text": "Clear, actionable roadmaps"
+  },
+  {
+    "id": "about.tangible-next-steps-and-measurable-progress",
+    "group": "Meet Sibel",
+    "text": "Tangible next steps and measurable progress."
+  },
+  {
+    "id": "about.mindful-coaching",
+    "group": "Meet Sibel",
+    "text": "Mindful coaching"
+  },
+  {
+    "id": "about.respects-your-pace-while-gently-expanding-possibilities",
+    "group": "Meet Sibel",
+    "text": "Respects your pace while gently expanding possibilities."
+  },
+  {
+    "id": "about.a-holistic-view-of-life",
+    "group": "Meet Sibel",
+    "text": "A holistic view of life"
+  },
+  {
+    "id": "about.when-one-area-improves-others-follow",
+    "group": "Meet Sibel",
+    "text": "When one area improves, others follow."
+  },
+  {
+    "id": "about.working-with-organizations",
+    "group": "Meet Sibel",
+    "text": "Working with organizations"
+  },
+  {
+    "id": "about.sibel-partners-with-organizations-to-unlock-sustainable-growth-th",
+    "group": "Meet Sibel",
+    "text": "Sibel partners with organizations to unlock sustainable growth through a people-centered, results-oriented approach. Focus areas include corporate transformation, leadership development, performance improvement, well-being, change management, and communications."
+  },
+  {
+    "id": "about.explore-solutions",
+    "group": "Meet Sibel",
+    "text": "Explore solutions"
+  },
+  {
+    "id": "account.included-with-premium-saturday-circles-session-notes-podcast-audi",
+    "group": "Member panel",
+    "text": "Included with Premium: Saturday circles, session notes, podcast audio and one-on-one time with Sibel."
+  },
+  {
+    "id": "account.see-premium",
+    "group": "Member panel",
+    "text": "See Premium"
+  },
+  {
+    "id": "account.podcast",
+    "group": "Member panel",
+    "text": "Podcast"
+  },
+  {
+    "id": "account.catch-up-on-saturday-conversations-and-bonus-episodes-right-here-",
+    "group": "Member panel",
+    "text": "Catch up on Saturday conversations and bonus episodes, right here in your member area."
+  },
+  {
+    "id": "account.podcast-audio-is-a-premium-feature",
+    "group": "Member panel",
+    "text": "Podcast audio is a Premium feature"
+  },
+  {
+    "id": "account.blog-library",
+    "group": "Member panel",
+    "text": "Blog library"
+  },
+  {
+    "id": "account.premium",
+    "group": "Member panel",
+    "text": "🔒 Premium"
+  },
+  {
+    "id": "account.session-notes-amp-podcast",
+    "group": "Member panel",
+    "text": "Session notes & podcast"
+  },
+  {
+    "id": "account.listen",
+    "group": "Member panel",
+    "text": "Listen"
+  },
+  {
+    "id": "account.open-the-full-podcast",
+    "group": "Member panel",
+    "text": "Open the full podcast"
+  },
+  {
+    "id": "account.session-notes-are-a-premium-feature",
+    "group": "Member panel",
+    "text": "Session notes are a Premium feature"
+  },
+  {
+    "id": "account.book-a-consultation",
+    "group": "Member panel",
+    "text": "Book a consultation"
+  },
+  {
+    "id": "account.included-with-your-membership",
+    "group": "Member panel",
+    "text": "Included with your membership:"
+  },
+  {
+    "id": "account.of",
+    "group": "Member panel",
+    "text": "of"
+  },
+  {
+    "id": "account.remaining-this-month",
+    "group": "Member panel",
+    "text": "remaining this month ·"
+  },
+  {
+    "id": "account.minutes-on-zoom",
+    "group": "Member panel",
+    "text": "minutes on Zoom."
+  },
+  {
+    "id": "account.my-consultations",
+    "group": "Member panel",
+    "text": "My consultations"
+  },
+  {
+    "id": "account.open-consultation",
+    "group": "Member panel",
+    "text": "Open consultation"
+  },
+  {
+    "id": "account.cancel-booking",
+    "group": "Member panel",
+    "text": "Cancel booking"
+  },
+  {
+    "id": "account.nothing-booked-yet",
+    "group": "Member panel",
+    "text": "Nothing booked yet."
+  },
+  {
+    "id": "account.one-on-one-consultations-are-a-premium-perk",
+    "group": "Member panel",
+    "text": "One-on-one consultations are a Premium perk"
+  },
+  {
+    "id": "account.membership",
+    "group": "Member panel",
+    "text": "Membership"
+  },
+  {
+    "id": "account.premium-2",
+    "group": "Member panel",
+    "text": "Premium"
+  },
+  {
+    "id": "account.free",
+    "group": "Member panel",
+    "text": "Free"
+  },
+  {
+    "id": "account.free-membership",
+    "group": "Member panel",
+    "text": "Free membership"
+  },
+  {
+    "id": "account.billing-will-be-managed-securely-through-stripe-once-checkout-is-",
+    "group": "Member panel",
+    "text": "Billing will be managed securely through Stripe once checkout is connected."
+  },
+  {
+    "id": "account.hello",
+    "group": "Member panel",
+    "text": "Hello,"
+  },
+  {
+    "id": "account.your-next-saturday-circle",
+    "group": "Member panel",
+    "text": "Your next Saturday circle"
+  },
+  {
+    "id": "account.topic",
+    "group": "Member panel",
+    "text": "Topic:"
+  },
+  {
+    "id": "account.this-week-s-meeting-protected-session-access",
+    "group": "Member panel",
+    "text": "This week’s meeting: protected session access"
+  },
+  {
+    "id": "account.your-premium-membership-is-checked-when-you-open-the-session-even",
+    "group": "Member panel",
+    "text": "Your Premium membership is checked when you open the session, even from a saved calendar invitation."
+  },
+  {
+    "id": "account.open-session",
+    "group": "Member panel",
+    "text": "Open session"
+  },
+  {
+    "id": "account.your-meeting-link-will-be-added-soon",
+    "group": "Member panel",
+    "text": "Your meeting link will be added soon."
+  },
+  {
+    "id": "account.the-zoom-link-is-available-to-premium-members",
+    "group": "Member panel",
+    "text": "The Zoom link is available to Premium members."
+  },
+  {
+    "id": "account.unlock-my-zoom-link",
+    "group": "Member panel",
+    "text": "Unlock my Zoom link"
+  },
+  {
+    "id": "account.no-saturday-session-scheduled-yet",
+    "group": "Member panel",
+    "text": "No Saturday session scheduled yet"
+  },
+  {
+    "id": "account.check-back-soon-for-your-next-circle",
+    "group": "Member panel",
+    "text": "Check back soon for your next circle."
+  },
+  {
+    "id": "account.upcoming-saturdays",
+    "group": "Member panel",
+    "text": "Upcoming Saturdays"
+  },
+  {
+    "id": "account.access-is-checked-when-you-join",
+    "group": "Member panel",
+    "text": "Access is checked when you join."
+  },
+  {
+    "id": "account.1-1-consultation",
+    "group": "Member panel",
+    "text": "1:1 consultation"
+  },
+  {
+    "id": "account.at",
+    "group": "Member panel",
+    "text": "at"
+  },
+  {
+    "id": "account.no-consultation-booked-yet-you-have",
+    "group": "Member panel",
+    "text": "No consultation booked yet. You have"
+  },
+  {
+    "id": "account.left-this-month",
+    "group": "Member panel",
+    "text": "left this month."
+  },
+  {
+    "id": "account.book-a-time",
+    "group": "Member panel",
+    "text": "Book a time"
+  },
+  {
+    "id": "account.one-on-one-time-with-sibel-is-a-premium-perk",
+    "group": "Member panel",
+    "text": "One-on-one time with Sibel is a Premium perk."
+  },
+  {
+    "id": "account.latest-for-you",
+    "group": "Member panel",
+    "text": "Latest for you"
+  },
+  {
+    "id": "account.open-library",
+    "group": "Member panel",
+    "text": "Open library"
+  },
+  {
+    "id": "account.admin-panel",
+    "group": "Member panel",
+    "text": "Admin panel"
+  },
+  {
+    "id": "account.sign-out",
+    "group": "Member panel",
+    "text": "Sign out"
+  },
+  {
+    "id": "blog.blog",
+    "group": "Blog",
+    "text": "Blog"
+  },
+  {
+    "id": "blog.insights-inspiration-and-connection",
+    "group": "Blog",
+    "text": "Insights, Inspiration, and Connection"
+  },
+  {
+    "id": "blog.reflections-tips-and-stories-from-the-morning-coffee-community-so",
+    "group": "Blog",
+    "text": "Reflections, tips, and stories from the Morning Coffee Community. Some posts are open to everyone, others are for members."
+  },
+  {
+    "id": "blog.all",
+    "group": "Blog",
+    "text": "all"
+  },
+  {
+    "id": "blog.all-posts",
+    "group": "Blog",
+    "text": "All posts"
+  },
+  {
+    "id": "blog.everyone",
+    "group": "Blog",
+    "text": "Everyone"
+  },
+  {
+    "id": "blog.free-members",
+    "group": "Blog",
+    "text": "Free members"
+  },
+  {
+    "id": "blog.premium",
+    "group": "Blog",
+    "text": "Premium"
+  },
+  {
+    "id": "contact.contact",
+    "group": "Contact",
+    "text": "Contact"
+  },
+  {
+    "id": "contact.let-s-start-a-conversation",
+    "group": "Contact",
+    "text": "Let’s start a conversation"
+  },
+  {
+    "id": "contact.questions-about-membership-coaching-or-corporate-training-write-t",
+    "group": "Contact",
+    "text": "Questions about membership, coaching or corporate training? Write to us."
+  },
+  {
+    "id": "contact.send-message",
+    "group": "Contact",
+    "text": "Send message"
+  },
+  {
+    "id": "contact.name",
+    "group": "Contact",
+    "text": "Name"
+  },
+  {
+    "id": "contact.email",
+    "group": "Contact",
+    "text": "Email"
+  },
+  {
+    "id": "contact.i-m-interested-in",
+    "group": "Contact",
+    "text": "I’m interested in"
+  },
+  {
+    "id": "contact.message",
+    "group": "Contact",
+    "text": "Message"
+  },
+  {
+    "id": "contact.email-delivery-is-being-prepared-this-form-currently-validates-me",
+    "group": "Contact",
+    "text": "Email delivery is being prepared. This form currently validates messages for local review."
+  },
+  {
+    "id": "join.membership-plans",
+    "group": "Join",
+    "text": "← Membership plans"
+  },
+  {
+    "id": "join.join-for-free",
+    "group": "Join",
+    "text": "Join for free"
+  },
+  {
+    "id": "join.create-a-sample-membership-for-local-review-no-payment-is-taken-a",
+    "group": "Join",
+    "text": "Create a sample membership for local review. No payment is taken and no live account is created."
+  },
+  {
+    "id": "join.create-review-account",
+    "group": "Join",
+    "text": "Create review account"
+  },
+  {
+    "id": "join.full-name",
+    "group": "Join",
+    "text": "Full name"
+  },
+  {
+    "id": "join.email",
+    "group": "Join",
+    "text": "Email"
+  },
+  {
+    "id": "join.membership-registration-will-open-when-account-services-and-check",
+    "group": "Join",
+    "text": "Membership registration will open when account services and checkout are connected."
+  },
+  {
+    "id": "join.get-in-touch",
+    "group": "Join",
+    "text": "Get in touch"
+  },
+  {
+    "id": "join.for-details",
+    "group": "Join",
+    "text": "for details."
+  },
+  {
+    "id": "login.welcome-back",
+    "group": "Sign in",
+    "text": "Welcome back"
+  },
+  {
+    "id": "login.local-review-accounts-these-sample-accounts-are-disabled-in-produ",
+    "group": "Sign in",
+    "text": "Local review accounts. These sample accounts are disabled in production."
+  },
+  {
+    "id": "login.m0",
+    "group": "Sign in",
+    "text": "m0"
+  },
+  {
+    "id": "login.ah",
+    "group": "Sign in",
+    "text": "AH"
+  },
+  {
+    "id": "login.amelia-hart",
+    "group": "Sign in",
+    "text": "Amelia Hart"
+  },
+  {
+    "id": "login.free-member",
+    "group": "Sign in",
+    "text": "Free member"
+  },
+  {
+    "id": "login.m1",
+    "group": "Sign in",
+    "text": "m1"
+  },
+  {
+    "id": "login.ld",
+    "group": "Sign in",
+    "text": "LD"
+  },
+  {
+    "id": "login.layla-demir",
+    "group": "Sign in",
+    "text": "Layla Demir"
+  },
+  {
+    "id": "login.premium-member-20-month",
+    "group": "Sign in",
+    "text": "Premium member · $20/month"
+  },
+  {
+    "id": "login.sm",
+    "group": "Sign in",
+    "text": "SM"
+  },
+  {
+    "id": "login.sibel-mcginnis",
+    "group": "Sign in",
+    "text": "Sibel McGinnis"
+  },
+  {
+    "id": "login.admin",
+    "group": "Sign in",
+    "text": "Admin"
+  },
+  {
+    "id": "login.member-sign-in-will-be-available-when-our-membership-service-is-c",
+    "group": "Sign in",
+    "text": "Member sign-in will be available when our membership service is connected."
+  },
+  {
+    "id": "login.new-here",
+    "group": "Sign in",
+    "text": "New here?"
+  },
+  {
+    "id": "login.see-membership-plans",
+    "group": "Sign in",
+    "text": "See membership plans"
+  },
+  {
+    "id": "meetings.morning-coffee-community",
+    "group": "Meeting entry",
+    "text": "Morning Coffee Community"
+  },
+  {
+    "id": "meetings.minutes",
+    "group": "Meeting entry",
+    "text": "minutes"
+  },
+  {
+    "id": "meetings.your-premium-access-is-active",
+    "group": "Meeting entry",
+    "text": "Your Premium access is active."
+  },
+  {
+    "id": "meetings.your-membership-is-checked-each-time-you-open-this-page-including",
+    "group": "Meeting entry",
+    "text": "Your membership is checked each time you open this page, including from an earlier calendar invitation."
+  },
+  {
+    "id": "meetings.zoom-registration-is-not-connected-in-this-review-a-direct-meetin",
+    "group": "Meeting entry",
+    "text": "Zoom registration is not connected in this review. A direct meeting link is not issued here."
+  },
+  {
+    "id": "meetings.the-live-service-must-issue-a-personal-zoom-registration-and-revo",
+    "group": "Meeting entry",
+    "text": "The live service must issue a personal Zoom registration and revoke it when your paid access ends. Shared Zoom links cannot enforce individual subscription expiry."
+  },
+  {
+    "id": "meetings.sign-in-to-access-your-session",
+    "group": "Meeting entry",
+    "text": "Sign in to access your session"
+  },
+  {
+    "id": "meetings.an-active-premium-membership-is-required",
+    "group": "Meeting entry",
+    "text": "An active Premium membership is required"
+  },
+  {
+    "id": "meetings.session-unavailable",
+    "group": "Meeting entry",
+    "text": "Session unavailable"
+  },
+  {
+    "id": "meetings.your-premium-access-has-ended-or-is-inactive-a-saved-calendar-inv",
+    "group": "Meeting entry",
+    "text": "Your Premium access has ended or is inactive. A saved calendar invitation does not grant access to this session."
+  },
+  {
+    "id": "meetings.use-your-member-account-to-check-access-a-saved-link-is-not-an-ad",
+    "group": "Meeting entry",
+    "text": "Use your member account to check access. A saved link is not an admission ticket."
+  },
+  {
+    "id": "meetings.this-session-or-consultation-is-not-available-to-your-account",
+    "group": "Meeting entry",
+    "text": "This session or consultation is not available to your account."
+  },
+  {
+    "id": "meetings.sign-in",
+    "group": "Meeting entry",
+    "text": "Sign in"
+  },
+  {
+    "id": "meetings.review-membership",
+    "group": "Meeting entry",
+    "text": "Review membership"
+  },
+  {
+    "id": "meetings.back-to-my-account",
+    "group": "Meeting entry",
+    "text": "Back to my account"
+  },
+  {
+    "id": "morning-coffee.ladies-only-online",
+    "group": "Community & membership",
+    "text": "Ladies-only · Online"
+  },
+  {
+    "id": "morning-coffee.morning-coffee-community",
+    "group": "Community & membership",
+    "text": "Morning Coffee Community"
+  },
+  {
+    "id": "morning-coffee.a-weekly-gathering-where-women-connect-reflect-and-grow-together",
+    "group": "Community & membership",
+    "text": "A weekly gathering where women connect, reflect, and grow together,"
+  },
+  {
+    "id": "morning-coffee.at",
+    "group": "Community & membership",
+    "text": "at"
+  },
+  {
+    "id": "morning-coffee.morning-coffee-gathering",
+    "group": "Community & membership",
+    "text": "Morning Coffee gathering"
+  },
+  {
+    "id": "morning-coffee.a-structured-space-for-shared-insight",
+    "group": "Community & membership",
+    "text": "A structured space for shared insight"
+  },
+  {
+    "id": "morning-coffee.each-week-we-explore-topics-that-foster-confidence-empathy-and-gr",
+    "group": "Community & membership",
+    "text": "Each week we explore topics that foster confidence, empathy, and grounded living, helping individuals grow while strengthening a connected, elegant community."
+  },
+  {
+    "id": "morning-coffee.weekly-90-minute-sessions",
+    "group": "Community & membership",
+    "text": "Weekly 90-minute sessions"
+  },
+  {
+    "id": "morning-coffee.quarterly-themes-for-holistic-growth",
+    "group": "Community & membership",
+    "text": "Quarterly themes for holistic growth"
+  },
+  {
+    "id": "morning-coffee.post-meeting-notes-and-a-podcast-if-you-miss-a-session",
+    "group": "Community & membership",
+    "text": "Post-meeting notes and a podcast if you miss a session"
+  },
+  {
+    "id": "morning-coffee.tools-and-resources-for-daily-practice",
+    "group": "Community & membership",
+    "text": "Tools and resources for daily practice"
+  },
+  {
+    "id": "morning-coffee.genuine-community-support-and-lasting-friendships",
+    "group": "Community & membership",
+    "text": "Genuine community support and lasting friendships"
+  },
+  {
+    "id": "morning-coffee.membership",
+    "group": "Community & membership",
+    "text": "Membership"
+  },
+  {
+    "id": "morning-coffee.choose-how-you-d-like-to-join",
+    "group": "Community & membership",
+    "text": "Choose how you’d like to join"
+  },
+  {
+    "id": "morning-coffee.flexible-membership-upgrade-pause-or-cancel-anytime",
+    "group": "Community & membership",
+    "text": "Flexible membership, upgrade, pause or cancel anytime."
+  },
+  {
+    "id": "morning-coffee.free-member",
+    "group": "Community & membership",
+    "text": "Free Member"
+  },
+  {
+    "id": "morning-coffee.get-a-taste-of-the-community",
+    "group": "Community & membership",
+    "text": "Get a taste of the community."
+  },
+  {
+    "id": "morning-coffee.0",
+    "group": "Community & membership",
+    "text": "$0"
+  },
+  {
+    "id": "morning-coffee.month",
+    "group": "Community & membership",
+    "text": "/ month"
+  },
+  {
+    "id": "morning-coffee.what-s-included",
+    "group": "Community & membership",
+    "text": "What’s included?"
+  },
+  {
+    "id": "morning-coffee.public-blog-posts",
+    "group": "Community & membership",
+    "text": "Public blog posts"
+  },
+  {
+    "id": "morning-coffee.free-member-blog-posts",
+    "group": "Community & membership",
+    "text": "Free-member blog posts"
+  },
+  {
+    "id": "morning-coffee.community-newsletter",
+    "group": "Community & membership",
+    "text": "Community newsletter"
+  },
+  {
+    "id": "morning-coffee.join-for-free",
+    "group": "Community & membership",
+    "text": "Join for free"
+  },
+  {
+    "id": "morning-coffee.popular",
+    "group": "Community & membership",
+    "text": "Popular"
+  },
+  {
+    "id": "morning-coffee.premium-member",
+    "group": "Community & membership",
+    "text": "Premium Member"
+  },
+  {
+    "id": "morning-coffee.the-full-morning-coffee-experience",
+    "group": "Community & membership",
+    "text": "The full Morning Coffee experience."
+  },
+  {
+    "id": "morning-coffee.everything-in-free",
+    "group": "Community & membership",
+    "text": "Everything in Free"
+  },
+  {
+    "id": "morning-coffee.protected-access-to-every-saturday-session",
+    "group": "Community & membership",
+    "text": "Protected access to every Saturday session"
+  },
+  {
+    "id": "morning-coffee.one-on-one-consultation-with-sibel-month",
+    "group": "Community & membership",
+    "text": "one-on-one consultation with Sibel / month"
+  },
+  {
+    "id": "morning-coffee.premium-posts-quarterly-themes-workbooks",
+    "group": "Community & membership",
+    "text": "Premium posts, quarterly themes & workbooks"
+  },
+  {
+    "id": "morning-coffee.full-access-to-the-morning-coffee-podcast-audio",
+    "group": "Community & membership",
+    "text": "Full access to the Morning Coffee podcast (audio)"
+  },
+  {
+    "id": "morning-coffee.session-notes-for-every-saturday",
+    "group": "Community & membership",
+    "text": "Session notes for every Saturday"
+  },
+  {
+    "id": "morning-coffee.join-premium",
+    "group": "Community & membership",
+    "text": "Join Premium"
+  },
+  {
+    "id": "morning-coffee.questions",
+    "group": "Community & membership",
+    "text": "Questions"
+  },
+  {
+    "id": "morning-coffee.can-i-miss-a-session",
+    "group": "Community & membership",
+    "text": "Can I miss a session?"
+  },
+  {
+    "id": "morning-coffee.of-course-premium-members-get-post-meeting-notes-and-a-podcast-to",
+    "group": "Community & membership",
+    "text": "Of course. Premium members get post-meeting notes and a podcast to catch up."
+  },
+  {
+    "id": "morning-coffee.how-do-i-join-a-saturday-session",
+    "group": "Community & membership",
+    "text": "How do I join a Saturday session?"
+  },
+  {
+    "id": "morning-coffee.sign-in-and-open-your-account-the-link-for-the-next-saturday-sess",
+    "group": "Community & membership",
+    "text": "Sign in and open your account. The link for the next Saturday session is waiting on your dashboard."
+  },
+  {
+    "id": "morning-coffee.can-i-cancel",
+    "group": "Community & membership",
+    "text": "Can I cancel?"
+  },
+  {
+    "id": "morning-coffee.yes-anytime-from-your-account-no-questions-asked",
+    "group": "Community & membership",
+    "text": "Yes, anytime from your account, no questions asked."
+  },
+  {
+    "id": "home.sibel-mcginnis",
+    "group": "Homepage",
+    "text": "SIBEL MCGINNIS"
+  },
+  {
+    "id": "home.ah",
+    "group": "Homepage",
+    "text": "AH"
+  },
+  {
+    "id": "home.ld",
+    "group": "Homepage",
+    "text": "LD"
+  },
+  {
+    "id": "home.na",
+    "group": "Homepage",
+    "text": "NA"
+  },
+  {
+    "id": "home.join-our-community",
+    "group": "Homepage",
+    "text": "Join our Community"
+  },
+  {
+    "id": "home.explore-coaching",
+    "group": "Homepage",
+    "text": "Explore coaching"
+  },
+  {
+    "id": "home.90-min",
+    "group": "Homepage",
+    "text": "90 min"
+  },
+  {
+    "id": "home.weekly-live-sessions",
+    "group": "Homepage",
+    "text": "weekly live sessions"
+  },
+  {
+    "id": "home.zoom",
+    "group": "Homepage",
+    "text": "Zoom"
+  },
+  {
+    "id": "home.join-from-anywhere",
+    "group": "Homepage",
+    "text": "join from anywhere"
+  },
+  {
+    "id": "home.4",
+    "group": "Homepage",
+    "text": "4"
+  },
+  {
+    "id": "home.quarterly-themes-a-year",
+    "group": "Homepage",
+    "text": "quarterly themes a year"
+  },
+  {
+    "id": "home.ladies-only",
+    "group": "Homepage",
+    "text": "Ladies-only"
+  },
+  {
+    "id": "home.warm-supportive-circle",
+    "group": "Homepage",
+    "text": "warm, supportive circle"
+  },
+  {
+    "id": "home.programs",
+    "group": "Homepage",
+    "text": "Programs"
+  },
+  {
+    "id": "home.ways-to-grow-with-sibel",
+    "group": "Homepage",
+    "text": "Ways to grow with Sibel"
+  },
+  {
+    "id": "home.join-a-weekly-circle-book-one-on-one-time-or-catch-up-on-the-podc",
+    "group": "Homepage",
+    "text": "Join a weekly circle, book one-on-one time, or catch up on the podcast at your own pace."
+  },
+  {
+    "id": "home.morning-coffee-circle",
+    "group": "Homepage",
+    "text": "Morning Coffee Circle"
+  },
+  {
+    "id": "home.a-ladies-only-weekly-zoom-conversation-on-emotional-health-self-a",
+    "group": "Homepage",
+    "text": "A ladies-only weekly Zoom conversation on emotional health, self-awareness and personal clarity."
+  },
+  {
+    "id": "home.join-the-circle",
+    "group": "Homepage",
+    "text": "Join the circle"
+  },
+  {
+    "id": "home.one-on-one-coaching",
+    "group": "Homepage",
+    "text": "One-on-One Coaching"
+  },
+  {
+    "id": "home.guided-reflection-and-practical-next-steps-with-sibel-included-ev",
+    "group": "Homepage",
+    "text": "Guided reflection and practical next steps with Sibel. Included every month with Premium."
+  },
+  {
+    "id": "home.schedule-a-session",
+    "group": "Homepage",
+    "text": "Schedule a session"
+  },
+  {
+    "id": "home.the-podcast",
+    "group": "Homepage",
+    "text": "The Podcast"
+  },
+  {
+    "id": "home.missed-a-saturday-listen-to-every-conversation-plus-bonus-episode",
+    "group": "Homepage",
+    "text": "Missed a Saturday? Listen to every conversation, plus bonus episodes. Premium members only."
+  },
+  {
+    "id": "home.hear-the-episodes",
+    "group": "Homepage",
+    "text": "Hear the episodes"
+  },
+  {
+    "id": "home.about-the-community",
+    "group": "Homepage",
+    "text": "About the community"
+  },
+  {
+    "id": "home.with-a",
+    "group": "Homepage",
+    "text": "With a"
+  },
+  {
+    "id": "home.weekly-circle",
+    "group": "Homepage",
+    "text": "weekly circle"
+  },
+  {
+    "id": "home.built-for-honest-reflection-our-mission-is-to-help-women-slow-dow",
+    "group": "Homepage",
+    "text": "built for honest reflection, our mission is to help women slow down,"
+  },
+  {
+    "id": "home.reconnect-with-themselves",
+    "group": "Homepage",
+    "text": "reconnect with themselves"
+  },
+  {
+    "id": "home.and-grow-with-care",
+    "group": "Homepage",
+    "text": "and grow with care."
+  },
+  {
+    "id": "home.how-it-works",
+    "group": "Homepage",
+    "text": "How it works"
+  },
+  {
+    "id": "home.create-a-step-by-step-reflection-practice-you-can-actually-follow",
+    "group": "Homepage",
+    "text": "Create a step-by-step reflection practice you can actually follow"
+  },
+  {
+    "id": "home.notice-what-you-feel-without-judgement",
+    "group": "Homepage",
+    "text": "Notice what you feel, without judgement"
+  },
+  {
+    "id": "home.name-what-you-need",
+    "group": "Homepage",
+    "text": "Name what you need"
+  },
+  {
+    "id": "home.take-one-small-aligned-action",
+    "group": "Homepage",
+    "text": "Take one small aligned action"
+  },
+  {
+    "id": "home.90",
+    "group": "Homepage",
+    "text": "90"
+  },
+  {
+    "id": "home.min",
+    "group": "Homepage",
+    "text": "min"
+  },
+  {
+    "id": "home.saturday-circle",
+    "group": "Homepage",
+    "text": "Saturday circle"
+  },
+  {
+    "id": "home.quarterly-themes",
+    "group": "Homepage",
+    "text": "Quarterly themes"
+  },
+  {
+    "id": "home.4-year",
+    "group": "Homepage",
+    "text": "4 / year"
+  },
+  {
+    "id": "home.topics-explored",
+    "group": "Homepage",
+    "text": "Topics explored"
+  },
+  {
+    "id": "home.11",
+    "group": "Homepage",
+    "text": "11"
+  },
+  {
+    "id": "home.zoom-notes-podcast",
+    "group": "Homepage",
+    "text": "Zoom, notes & podcast"
+  },
+  {
+    "id": "home.included",
+    "group": "Homepage",
+    "text": "included"
+  },
+  {
+    "id": "home.why-join",
+    "group": "Homepage",
+    "text": "Why join"
+  },
+  {
+    "id": "home.a-community-experience-for-lasting-growth",
+    "group": "Homepage",
+    "text": "A Community Experience for Lasting Growth"
+  },
+  {
+    "id": "home.every-session-is-warm-practical-and-deeply-connected-to-the-life-",
+    "group": "Homepage",
+    "text": "Every session is warm, practical and deeply connected to the life you want to build."
+  },
+  {
+    "id": "home.guided-gentle-conversations",
+    "group": "Homepage",
+    "text": "Guided, Gentle Conversations"
+  },
+  {
+    "id": "home.structured-reflection-on-emotional-awareness-boundaries-and-confi",
+    "group": "Homepage",
+    "text": "Structured reflection on emotional awareness, boundaries and confidence, at your own pace."
+  },
+  {
+    "id": "home.catch-up-anytime",
+    "group": "Homepage",
+    "text": "Catch Up Anytime"
+  },
+  {
+    "id": "home.post-meeting-notes-and-a-premium-podcast-mean-you-never-lose-the-",
+    "group": "Homepage",
+    "text": "Post-meeting notes and a premium podcast mean you never lose the thread if you miss a Saturday."
+  },
+  {
+    "id": "home.support-that-lasts",
+    "group": "Homepage",
+    "text": "Support That Lasts"
+  },
+  {
+    "id": "home.genuine-community-collective-insights-and-lasting-friendships-plu",
+    "group": "Homepage",
+    "text": "Genuine community, collective insights and lasting friendships, plus one-on-one time with Sibel."
+  },
+  {
+    "id": "home.ready-to-step-into-your-next-chapter",
+    "group": "Homepage",
+    "text": "Ready to step into your next chapter?"
+  },
+  {
+    "id": "home.join-morning-coffee",
+    "group": "Homepage",
+    "text": "Join Morning Coffee"
+  },
+  {
+    "id": "home.ask-a-question",
+    "group": "Homepage",
+    "text": "Ask a question"
+  },
+  {
+    "id": "home.your-transformation-begins-with-one-honest-conversation-and-the-l",
+    "group": "Homepage",
+    "text": "Your transformation begins with one honest conversation, and the life you want is closer than you think."
+  },
+  {
+    "id": "home.membership",
+    "group": "Homepage",
+    "text": "Membership"
+  },
+  {
+    "id": "home.choose-how-you-d-like-to-join",
+    "group": "Homepage",
+    "text": "Choose How You’d Like to Join"
+  },
+  {
+    "id": "home.flexible-membership-upgrade-pause-or-cancel-anytime",
+    "group": "Homepage",
+    "text": "Flexible membership. Upgrade, pause or cancel anytime."
+  },
+  {
+    "id": "home.free-member",
+    "group": "Homepage",
+    "text": "Free Member"
+  },
+  {
+    "id": "home.get-a-taste-of-the-community",
+    "group": "Homepage",
+    "text": "Get a taste of the community."
+  },
+  {
+    "id": "home.0",
+    "group": "Homepage",
+    "text": "$0"
+  },
+  {
+    "id": "home.month",
+    "group": "Homepage",
+    "text": "/ month"
+  },
+  {
+    "id": "home.what-s-included",
+    "group": "Homepage",
+    "text": "What’s included?"
+  },
+  {
+    "id": "home.public-blog-posts",
+    "group": "Homepage",
+    "text": "Public blog posts"
+  },
+  {
+    "id": "home.free-member-blog-posts",
+    "group": "Homepage",
+    "text": "Free-member blog posts"
+  },
+  {
+    "id": "home.community-newsletter",
+    "group": "Homepage",
+    "text": "Community newsletter"
+  },
+  {
+    "id": "home.join-for-free",
+    "group": "Homepage",
+    "text": "Join for free"
+  },
+  {
+    "id": "home.popular",
+    "group": "Homepage",
+    "text": "Popular"
+  },
+  {
+    "id": "home.premium-member",
+    "group": "Homepage",
+    "text": "Premium Member"
+  },
+  {
+    "id": "home.the-full-morning-coffee-experience",
+    "group": "Homepage",
+    "text": "The full Morning Coffee experience."
+  },
+  {
+    "id": "home.protected-access-to-every-saturday-circle",
+    "group": "Homepage",
+    "text": "Protected access to every Saturday circle"
+  },
+  {
+    "id": "home.one-on-one-consultation-each-month",
+    "group": "Homepage",
+    "text": "One-on-one consultation each month"
+  },
+  {
+    "id": "home.premium-posts-and-workbooks",
+    "group": "Homepage",
+    "text": "Premium posts and workbooks"
+  },
+  {
+    "id": "home.podcast-audio-and-session-notes",
+    "group": "Homepage",
+    "text": "Podcast audio and session notes"
+  },
+  {
+    "id": "home.join-premium",
+    "group": "Homepage",
+    "text": "Join Premium"
+  },
+  {
+    "id": "home.topics",
+    "group": "Homepage",
+    "text": "Topics"
+  },
+  {
+    "id": "home.what-we-explore-in-our-saturday-meetings",
+    "group": "Homepage",
+    "text": "What we explore in our Saturday meetings"
+  },
+  {
+    "id": "home.from-the-blog",
+    "group": "Homepage",
+    "text": "From the blog"
+  },
+  {
+    "id": "home.insights-inspiration-and-connection",
+    "group": "Homepage",
+    "text": "Insights, Inspiration and Connection"
+  },
+  {
+    "id": "home.some-posts-are-open-to-everyone-others-are-for-members",
+    "group": "Homepage",
+    "text": "Some posts are open to everyone, others are for members."
+  },
+  {
+    "id": "home.read-all-posts",
+    "group": "Homepage",
+    "text": "Read all posts"
+  },
+  {
+    "id": "home.faqs",
+    "group": "Homepage",
+    "text": "FAQs"
+  },
+  {
+    "id": "home.frequently-asked-questions",
+    "group": "Homepage",
+    "text": "Frequently Asked Questions"
+  },
+  {
+    "id": "home.what-is-morning-coffee-community",
+    "group": "Homepage",
+    "text": "What is Morning Coffee Community?"
+  },
+  {
+    "id": "home.a-ladies-only-online-community-with-a-weekly-virtual-meeting-dedi",
+    "group": "Homepage",
+    "text": "A ladies-only online community with a weekly virtual meeting dedicated to personal growth, meaningful conversations and collective well-being."
+  },
+  {
+    "id": "home.when-do-the-meetings-take-place",
+    "group": "Homepage",
+    "text": "When do the meetings take place?"
+  },
+  {
+    "id": "home.at",
+    "group": "Homepage",
+    "text": "at"
+  },
+  {
+    "id": "home.for-about-90-minutes-on-zoom",
+    "group": "Homepage",
+    "text": ", for about 90 minutes on Zoom."
+  },
+  {
+    "id": "home.what-if-i-miss-a-session",
+    "group": "Homepage",
+    "text": "What if I miss a session?"
+  },
+  {
+    "id": "home.premium-members-get-post-meeting-notes-and-the-podcast-to-catch-u",
+    "group": "Homepage",
+    "text": "Premium members get post-meeting notes and the podcast to catch up."
+  },
+  {
+    "id": "home.how-do-i-join-a-saturday-session",
+    "group": "Homepage",
+    "text": "How do I join a Saturday session?"
+  },
+  {
+    "id": "home.sign-in-as-a-premium-member-and-open-your-account-the-link-for-th",
+    "group": "Homepage",
+    "text": "Sign in as a Premium member and open your account. The link for the next Saturday is on your dashboard."
+  },
+  {
+    "id": "home.are-one-on-one-consultations-included",
+    "group": "Homepage",
+    "text": "Are one-on-one consultations included?"
+  },
+  {
+    "id": "home.yes-premium-membership-includes-a-monthly-one-on-one-consultation",
+    "group": "Homepage",
+    "text": "Yes. Premium membership includes a monthly one-on-one consultation with Sibel, booked from your account."
+  },
+  {
+    "id": "home.can-i-cancel-anytime",
+    "group": "Homepage",
+    "text": "Can I cancel anytime?"
+  },
+  {
+    "id": "home.yes-membership-is-flexible-and-you-can-pause-or-cancel-from-your-",
+    "group": "Homepage",
+    "text": "Yes. Membership is flexible and you can pause or cancel from your account."
+  },
+  {
+    "id": "podcast.premium-audio",
+    "group": "Podcast",
+    "text": "Premium · Audio"
+  },
+  {
+    "id": "podcast.the-morning-coffee-podcast",
+    "group": "Podcast",
+    "text": "The Morning Coffee Podcast"
+  },
+  {
+    "id": "podcast.missed-a-saturday-catch-up-on-every-conversation-plus-bonus-episo",
+    "group": "Podcast",
+    "text": "Missed a Saturday? Catch up on every conversation, plus bonus episodes, wherever you are."
+  },
+  {
+    "id": "podcast.unlock-every-episode",
+    "group": "Podcast",
+    "text": "Unlock every episode"
+  },
+  {
+    "id": "podcast.episodes-and-counting-included-with-your",
+    "group": "Podcast",
+    "text": "episodes and counting, included with your $"
+  },
+  {
+    "id": "podcast.month-premium-membership",
+    "group": "Podcast",
+    "text": "/month Premium membership."
+  },
+  {
+    "id": "podcast.see-membership-plans",
+    "group": "Podcast",
+    "text": "See membership plans"
+  },
+  {
+    "id": "podcast.back-to-my-account",
+    "group": "Podcast",
+    "text": "Back to my account"
+  },
+  {
+    "id": "post.all-posts",
+    "group": "Blog article",
+    "text": "← All posts"
+  },
+  {
+    "id": "post.this-post-is-for-members",
+    "group": "Blog article",
+    "text": "This post is for members"
+  },
+  {
+    "id": "post.premium-members-only",
+    "group": "Blog article",
+    "text": "Premium members only"
+  },
+  {
+    "id": "post.join-for-free-to-keep-reading-this-and-other-member-only-posts",
+    "group": "Blog article",
+    "text": "Join for free to keep reading this and other member-only posts."
+  },
+  {
+    "id": "post.upgrade-to-premium-to-read-this-post-join-the-saturday-zoom-circl",
+    "group": "Blog article",
+    "text": "Upgrade to Premium to read this post, join the Saturday Zoom circle and book one-on-one consultations."
+  },
+  {
+    "id": "post.join-for-free",
+    "group": "Blog article",
+    "text": "Join for free"
+  },
+  {
+    "id": "post.see-premium",
+    "group": "Blog article",
+    "text": "See Premium"
+  },
+  {
+    "id": "post.sign-in",
+    "group": "Blog article",
+    "text": "Sign in"
+  },
+  {
+    "id": "solutions.solutions",
+    "group": "Solutions",
+    "text": "Solutions"
+  },
+  {
+    "id": "solutions.personal-and-professional-growth-guided-with-clarity-and-experien",
+    "group": "Solutions",
+    "text": "Personal and Professional Growth, Guided with Clarity and Experience"
+  },
+  {
+    "id": "solutions.tailored-solutions-for-women-seeking-personal-growth-as-well-as-o",
+    "group": "Solutions",
+    "text": "Tailored solutions for women seeking personal growth, as well as organizations pursuing people-centered, sustainable development."
+  },
+  {
+    "id": "solutions.personal-coaching-with-sibel",
+    "group": "Solutions",
+    "text": "Personal Coaching with Sibel"
+  },
+  {
+    "id": "solutions.guided-reflection-open-dialogue-and-actionable-strategies-to-help",
+    "group": "Solutions",
+    "text": "Guided reflection, open dialogue, and actionable strategies to help you redefine possibilities and move forward with confidence."
+  },
+  {
+    "id": "solutions.one-on-one-mentorship",
+    "group": "Solutions",
+    "text": "One-on-one mentorship"
+  },
+  {
+    "id": "solutions.guided-exploration-of-emotional-awareness",
+    "group": "Solutions",
+    "text": "Guided exploration of emotional awareness"
+  },
+  {
+    "id": "solutions.practical-tools-and-exercises",
+    "group": "Solutions",
+    "text": "Practical tools and exercises"
+  },
+  {
+    "id": "solutions.mindful-support-that-respects-your-pace",
+    "group": "Solutions",
+    "text": "Mindful support that respects your pace"
+  },
+  {
+    "id": "solutions.included-with-premium",
+    "group": "Solutions",
+    "text": "Included with Premium"
+  },
+  {
+    "id": "solutions.schedule-a-session",
+    "group": "Solutions",
+    "text": "Schedule a session"
+  },
+  {
+    "id": "solutions.morning-coffee-community-membership",
+    "group": "Solutions",
+    "text": "Morning Coffee Community Membership"
+  },
+  {
+    "id": "solutions.a-weekly-online-gathering-where-women-connect-reflect-and-grow-to",
+    "group": "Solutions",
+    "text": "A weekly online gathering where women connect, reflect, and grow together."
+  },
+  {
+    "id": "solutions.weekly-90-minute-sessions",
+    "group": "Solutions",
+    "text": "Weekly 90-minute sessions"
+  },
+  {
+    "id": "solutions.quarterly-themes",
+    "group": "Solutions",
+    "text": "Quarterly themes"
+  },
+  {
+    "id": "solutions.post-meeting-notes-podcast",
+    "group": "Solutions",
+    "text": "Post-meeting notes & podcast"
+  },
+  {
+    "id": "solutions.tools-for-daily-practice",
+    "group": "Solutions",
+    "text": "Tools for daily practice"
+  },
+  {
+    "id": "solutions.community-support",
+    "group": "Solutions",
+    "text": "Community support"
+  },
+  {
+    "id": "solutions.join-the-community",
+    "group": "Solutions",
+    "text": "Join the community"
+  },
+  {
+    "id": "solutions.organizational-corporate-solutions",
+    "group": "Solutions",
+    "text": "Organizational & Corporate Solutions"
+  },
+  {
+    "id": "solutions.behavioral-science-and-practical-execution-to-create-measurable-i",
+    "group": "Solutions",
+    "text": "Behavioral science and practical execution to create measurable impact while safeguarding well-being."
+  },
+  {
+    "id": "solutions.discovery-and-diagnostics",
+    "group": "Solutions",
+    "text": "Discovery and diagnostics"
+  },
+  {
+    "id": "solutions.co-designed-coaching-training",
+    "group": "Solutions",
+    "text": "Co-designed coaching & training"
+  },
+  {
+    "id": "solutions.leadership-development",
+    "group": "Solutions",
+    "text": "Leadership development"
+  },
+  {
+    "id": "solutions.workshops-virtual-sessions-microlearning",
+    "group": "Solutions",
+    "text": "Workshops, virtual sessions, microlearning"
+  },
+  {
+    "id": "solutions.request-a-consultation",
+    "group": "Solutions",
+    "text": "Request a consultation"
+  },
+  {
+    "id": "solutions.ready-to-begin",
+    "group": "Solutions",
+    "text": "Ready to Begin"
+  },
+  {
+    "id": "solutions.whether-you-are-seeking-personal-growth-meaningful-connection-or-",
+    "group": "Solutions",
+    "text": "Whether you are seeking personal growth, meaningful connection, or organizational development, Sibel’s solutions provide practical guidance delivered with clarity, care, and intention."
+  },
+  {
+    "id": "solutions.get-started",
+    "group": "Solutions",
+    "text": "Get started"
+  },
+  {
+    "id": "site-chrome.sibel-mcginnis",
+    "group": "Header & footer",
+    "text": "Sibel McGinnis"
+  },
+  {
+    "id": "site-chrome.admin-panel",
+    "group": "Header & footer",
+    "text": "Admin panel"
+  },
+  {
+    "id": "site-chrome.my-account",
+    "group": "Header & footer",
+    "text": "My account"
+  },
+  {
+    "id": "site-chrome.sign-in",
+    "group": "Header & footer",
+    "text": "Sign In"
+  },
+  {
+    "id": "site-chrome.join",
+    "group": "Header & footer",
+    "text": "Join"
+  },
+  {
+    "id": "site-chrome.get-in-touch",
+    "group": "Header & footer",
+    "text": "Get in touch"
+  },
+  {
+    "id": "site-chrome.send-a-message",
+    "group": "Header & footer",
+    "text": "Send a message"
+  },
+  {
+    "id": "site-chrome.join-morning-coffee",
+    "group": "Header & footer",
+    "text": "Join Morning Coffee"
+  },
+  {
+    "id": "site-chrome.step-into-your-next-chapter-with-confidence-clarity-and-care",
+    "group": "Header & footer",
+    "text": "Step into your next chapter with confidence, clarity, and care."
+  },
+  {
+    "id": "site-chrome.explore",
+    "group": "Header & footer",
+    "text": "Explore"
+  },
+  {
+    "id": "site-chrome.follow",
+    "group": "Header & footer",
+    "text": "Follow"
+  },
+  {
+    "id": "site-chrome.instagram",
+    "group": "Header & footer",
+    "text": "Instagram"
+  },
+  {
+    "id": "site-chrome.facebook",
+    "group": "Header & footer",
+    "text": "Facebook"
+  },
+  {
+    "id": "site-chrome.sibel-mcginnis-morning-coffee-community",
+    "group": "Header & footer",
+    "text": "Sibel McGinnis · Morning Coffee Community"
+  },
+  {
+    "id": "post-cards.everyone",
+    "group": "Blog labels",
+    "text": "Everyone"
+  },
+  {
+    "id": "post-cards.free-members",
+    "group": "Blog labels",
+    "text": "Free members"
+  },
+  {
+    "id": "post-cards.premium",
+    "group": "Blog labels",
+    "text": "Premium"
+  },
+  {
+    "id": "post-cards.read-post",
+    "group": "Blog labels",
+    "text": "Read post →"
+  },
+  {
+    "id": "post-cards.sign-in-to-read",
+    "group": "Blog labels",
+    "text": "Sign in to read"
+  },
+  {
+    "id": "post-cards.premium-members-only",
+    "group": "Blog labels",
+    "text": "Premium members only"
+  },
+  {
+    "id": "post-cards.no-posts-yet",
+    "group": "Blog labels",
+    "text": "No posts yet."
+  },
+  {
+    "id": "podcast-library.min",
+    "group": "Audio player",
+    "text": "min"
+  },
+  {
+    "id": "podcast-library.your-browser-does-not-support-audio-playback",
+    "group": "Audio player",
+    "text": "Your browser does not support audio playback."
+  },
+  {
+    "id": "podcast-library.audio-has-not-been-uploaded-for-this-review-episode",
+    "group": "Audio player",
+    "text": "Audio has not been uploaded for this review episode."
+  },
+  {
+    "id": "podcast-library.premium",
+    "group": "Audio player",
+    "text": "Premium"
+  },
+  {
+    "id": "podcast-library.new-episodes-will-appear-here-soon",
+    "group": "Audio player",
+    "text": "New episodes will appear here soon."
+  },
+  {
+    "id": "consultation-calendar.no-times-available-just-now",
+    "group": "Booking calendar",
+    "text": "No times available just now"
+  },
+  {
+    "id": "consultation-calendar.there-are-no-remaining-consultation-slots-available-to-your-membe",
+    "group": "Booking calendar",
+    "text": "There are no remaining consultation slots available to your membership in the next three weeks. Please check again later."
+  },
+  {
+    "id": "consultation-calendar.sm",
+    "group": "Booking calendar",
+    "text": "SM"
+  },
+  {
+    "id": "consultation-calendar.sibel-mcginnis",
+    "group": "Booking calendar",
+    "text": "Sibel McGinnis"
+  },
+  {
+    "id": "consultation-calendar.your-one-on-one-consultation",
+    "group": "Booking calendar",
+    "text": "Your one-on-one consultation"
+  },
+  {
+    "id": "consultation-calendar.minutes",
+    "group": "Booking calendar",
+    "text": "minutes"
+  },
+  {
+    "id": "consultation-calendar.online-on-zoom",
+    "group": "Booking calendar",
+    "text": "Online, on Zoom"
+  },
+  {
+    "id": "consultation-calendar.a-little-time-set-aside-for-your-questions-your-growth-and-your-n",
+    "group": "Booking calendar",
+    "text": "A little time set aside for your questions, your growth, and your next chapter."
+  },
+  {
+    "id": "consultation-calendar.included-with-your-premium-membership",
+    "group": "Booking calendar",
+    "text": "Included with your Premium membership."
+  },
+  {
+    "id": "consultation-calendar.times-are-shown-as-scheduled-by-sibel-the-meeting-timezone-will-b",
+    "group": "Booking calendar",
+    "text": "Times are shown as scheduled by Sibel. The meeting timezone will be confirmed before live bookings open."
+  },
+  {
+    "id": "consultation-calendar.select-a-date-amp-time",
+    "group": "Booking calendar",
+    "text": "Select a date & time"
+  },
+  {
+    "id": "consultation-calendar.available-dates",
+    "group": "Booking calendar",
+    "text": "Available dates"
+  },
+  {
+    "id": "consultation-calendar.appointments-are-open-for-the-next-three-weeks",
+    "group": "Booking calendar",
+    "text": "Appointments are open for the next three weeks."
+  },
+  {
+    "id": "consultation-calendar.available-times",
+    "group": "Booking calendar",
+    "text": "Available times"
+  },
+  {
+    "id": "consultation-calendar.choose-a-consultation-time",
+    "group": "Booking calendar",
+    "text": "Choose a consultation time"
+  },
+  {
+    "id": "consultation-calendar.at",
+    "group": "Booking calendar",
+    "text": "at"
+  },
+  {
+    "id": "consultation-calendar.minutes-zoom",
+    "group": "Booking calendar",
+    "text": "minutes · Zoom"
+  },
+  {
+    "id": "consultation-calendar.what-would-you-like-to-talk-about",
+    "group": "Booking calendar",
+    "text": "What would you like to talk about?"
+  },
+  {
+    "id": "consultation-calendar.choose-a-time-to-continue",
+    "group": "Booking calendar",
+    "text": "Choose a time to continue."
+  },
+  {
+    "id": "calendar-buttons.google-calendar",
+    "group": "Calendar buttons",
+    "text": "＋ Google Calendar"
+  },
+  {
+    "id": "calendar-buttons.apple-outlook-ics",
+    "group": "Calendar buttons",
+    "text": "＋ Apple / Outlook (.ics)"
+  },
+  {
+    "id": "copy-link.copy-link",
+    "group": "Copy link",
+    "text": "Copy link"
+  },
+  {
+    "id": "navigation./",
+    "group": "Navigation",
+    "text": "Home"
+  },
+  {
+    "id": "navigation./about",
+    "group": "Navigation",
+    "text": "Meet Sibel"
+  },
+  {
+    "id": "navigation./morning-coffee",
+    "group": "Navigation",
+    "text": "Morning Coffee Community"
+  },
+  {
+    "id": "navigation./solutions",
+    "group": "Navigation",
+    "text": "Solutions"
+  },
+  {
+    "id": "navigation./blog",
+    "group": "Navigation",
+    "text": "Blog"
+  },
+  {
+    "id": "navigation./contact",
+    "group": "Navigation",
+    "text": "Contact"
+  },
+  {
+    "id": "account.tab-overview",
+    "group": "Member panel",
+    "text": "Overview"
+  },
+  {
+    "id": "account.tab-library",
+    "group": "Member panel",
+    "text": "Blog library"
+  },
+  {
+    "id": "account.tab-sessions",
+    "group": "Member panel",
+    "text": "Session notes"
+  },
+  {
+    "id": "account.tab-book",
+    "group": "Member panel",
+    "text": "Book a consultation"
+  },
+  {
+    "id": "account.tab-membership",
+    "group": "Member panel",
+    "text": "Membership"
+  },
+  {
+    "id": "account.tab-podcast",
+    "group": "Member panel",
+    "text": "Podcast"
+  },
+  {
+    "id": "account.notes-coming",
+    "group": "Member panel",
+    "text": "Notes will be added soon."
+  },
+  {
+    "id": "account.review-downgrade",
+    "group": "Member panel",
+    "text": "Review downgrade to Free"
+  },
+  {
+    "id": "contact.option-membership",
+    "group": "Contact",
+    "text": "Morning Coffee membership"
+  },
+  {
+    "id": "contact.option-coaching",
+    "group": "Contact",
+    "text": "Personal coaching"
+  },
+  {
+    "id": "contact.option-corporate",
+    "group": "Contact",
+    "text": "Corporate solutions"
+  },
+  {
+    "id": "contact.option-other",
+    "group": "Contact",
+    "text": "Something else"
+  }
+]
