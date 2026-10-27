@@ -151,6 +151,48 @@ const paths = {
       <circle cx="10" cy="17" r="2" />
     </>
   ),
+  layout: (
+    <>
+      <rect x="3.5" y="4" width="17" height="16" rx="2.5" />
+      <path d="M3.5 10h17" />
+    </>
+  ),
+  heading: <path d="M6.5 5v14M17.5 5v14M6.5 12h11" />,
+  quote: (
+    <>
+      <path d="M5 6.5h5v5c0 3-1.6 5.2-4.5 6" />
+      <path d="M14 6.5h5v5c0 3-1.6 5.2-4.5 6" />
+    </>
+  ),
+  minus: <path d="M4 12h16" />,
+  spacer: (
+    <>
+      <path d="M4 5h16M4 19h16" />
+      <path d="m9 10 3-2.5 3 2.5M9 14l3 2.5 3-2.5" />
+    </>
+  ),
+  code: <path d="m8.5 7-5 5 5 5M15.5 7l5 5-5 5" />,
+  fine: <path d="M5 8h14M7.5 12h9M9.5 16h5" />,
+  up: <path d="M12 19V5M6.5 10.5 12 5l5.5 5.5" />,
+  down: <path d="M12 5v14M6.5 13.5 12 19l5.5-5.5" />,
+  copy: (
+    <>
+      <rect x="8.5" y="8.5" width="12" height="12" rx="2.5" />
+      <path d="M15.5 8.5V6A2.5 2.5 0 0 0 13 3.5H6A2.5 2.5 0 0 0 3.5 6v7A2.5 2.5 0 0 0 6 15.5h2.5" />
+    </>
+  ),
+  save: (
+    <>
+      <path d="M5 3.5h11l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V5A1.5 1.5 0 0 1 5 3.5z" />
+      <path d="M8 3.5V8h7V3.5M7.5 20.5v-6h9v6" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
 } as const;
 export type IconName = keyof typeof paths;
 export function Icon({

@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/auth";
 import { getDemoState } from "@/lib/store";
 import { siteImageSlots } from "@/lib/site-images";
+import { announcementVisible } from "@/lib/announcements";
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -14,7 +15,15 @@ export async function GET(
   const image = state.images.get(id);
   if (!image) return new Response("Not found", { status: 404, headers });
   // Admins browse the whole media library; visitors only see images placed on published pages.
-  if ((await getUser())?.role !== "admin") {
+  const user = await getUser();
+  const inMessage =
+    !!user &&
+    state.data.announcements.some(
+      (announcement) =>
+        announcement.html?.includes(`/api/site-image/${id}`) &&
+        announcementVisible(announcement, user.id, user.role),
+    );
+  if (user?.role !== "admin" && !inMessage) {
     const slots = Object.entries(state.data.siteImages ?? {})
       .filter(([, value]) => value.imageId === id)
       .map(([slotId]) => siteImageSlots().find((slot) => slot.id === slotId))

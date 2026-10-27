@@ -36,15 +36,29 @@ test("individual announcements are private, sanitized, personalized and include 
   await page.getByRole("button", { name: /^A personal note/ }).click();
   const subject = `Private coaching note ${Date.now()}`;
   await page.getByLabel("Subject", { exact: true }).fill(subject);
+  await page.getByRole("button", { name: /^Image/ }).click();
+  await page
+    .getByRole("button", { name: "Choose an image", exact: true })
+    .click();
+  const picker = page.getByRole("dialog", { name: "Choose an image" });
+  await picker.getByRole("tab", { name: "Upload files" }).click();
+  await picker
+    .locator('input[type="file"]')
+    .setInputFiles("public/images/womens-e1767706912925.webp");
+  await expect(picker.locator(".media-picker-selection")).toHaveText(
+    "womens-e1767706912925.webp",
+  );
+  await picker.getByLabel("Image description").fill("Session image");
+  await picker.getByRole("button", { name: "Use this image" }).click();
   await page.getByRole("button", { name: "HTML code", exact: true }).click();
+  const code = await page.getByLabel("Message HTML code").inputValue();
+  expect(code.split(/\r?\n/).length).toBeGreaterThan(20);
+  const imageTag = code.match(/<img[^>]+>/)![0];
   await page
     .getByLabel("Message HTML code")
     .fill(
-      '<table style="background-color:#ededed"><tr><td><h1>Hello {{first_name}}</h1><p>Only your next chapter.</p><a href="javascript:alert(1)">Unsafe link</a><img src="x" onerror="alert(1)"><script>alert("unsafe-content")</script><p>{{account_url}}</p></td></tr></table>',
+      `<table style="background-color:#ededed"><tr><td>${imageTag}<h1>Hello {{first_name}}</h1><p>Only your next chapter.</p><a href="javascript:alert(1)">Unsafe link</a><img src="x" onerror="alert(1)"><script>alert("unsafe-content")</script><p>{{account_url}}</p></td></tr></table>`,
     );
-  await page
-    .getByLabel("Upload session image")
-    .setInputFiles("public/images/womens-e1767706912925.webp");
   await page
     .getByRole("button", { name: "Preview email", exact: true })
     .click();
@@ -59,9 +73,6 @@ test("individual announcements are private, sanitized, personalized and include 
   await expect(page.getByRole("status")).toContainText(
     "Use a protected session page link",
   );
-  await expect(
-    page.getByText("Selected: womens-e1767706912925.webp", { exact: true }),
-  ).toBeVisible();
   await page.getByLabel("Message HTML code").fill(editedHtml);
   await page
     .getByRole("button", { name: "Publish & prepare email", exact: true })
@@ -80,7 +91,7 @@ test("individual announcements are private, sanitized, personalized and include 
   expect(draft.status()).toBe(200);
   const eml = await draft.text();
   expect(eml).toContain("To: amelia.hart@example.com");
-  expect(eml).toContain("Content-ID: <session-image>");
+  expect(eml).toContain("Content-ID: <media-0>");
   const htmlPart = eml
     .split(
       'Content-Type: text/html; charset="UTF-8"\r\nContent-Transfer-Encoding: base64\r\n\r\n',
@@ -91,7 +102,7 @@ test("individual announcements are private, sanitized, personalized and include 
     "base64",
   ).toString("utf8");
   expect(rendered).toContain("Hello Amelia");
-  expect(rendered).toContain('src="cid:session-image"');
+  expect(rendered).toContain('src="cid:media-0"');
   expect(rendered).not.toContain("javascript:");
   expect(rendered).not.toContain("onerror");
   expect(rendered).not.toContain("<script");
@@ -236,4 +247,43 @@ test("announcement composer remains usable on mobile", async ({ page }) => {
     path: "test-results/announcement-mobile.png",
     fullPage: true,
   });
+});
+
+test("emails are built from blocks, saved as reusable templates and share a common footer", async ({
+  page,
+}) => {
+  await signIn(page, "Sibel");
+  await page.goto("/admin/announce");
+  await page.getByRole("button", { name: /^Heading/ }).click();
+  await page.getByLabel("Heading", { exact: true }).fill("Plans for November");
+  const name = `November note ${Date.now()}`;
+  await page.getByRole("button", { name: "Save as template" }).click();
+  const save = page.getByRole("dialog", { name: "Save as template" });
+  await save.getByLabel("Template name").fill(name);
+  await save.getByRole("button", { name: "Save template" }).click();
+  await expect(page.getByText(`Saved as “${name}”.`)).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: new RegExp(`^${name}`) }).click();
+  await expect(page.getByLabel("Heading", { exact: true })).toHaveValue(
+    "Plans for November",
+  );
+  await page.getByRole("button", { name: "Edit footer" }).click();
+  let footer = page.getByRole("dialog", { name: "Common email footer" });
+  await footer
+    .getByRole("textbox", { name: "Small print" })
+    .fill("Thank you for being here.");
+  await footer.getByRole("button", { name: "Save footer" }).click();
+  await expect(page.locator(".email-footer-preview")).toContainText(
+    "Thank you for being here.",
+  );
+  await page.getByRole("button", { name: "Edit footer" }).click();
+  footer = page.getByRole("dialog", { name: "Common email footer" });
+  await footer.getByRole("button", { name: "Use the original footer" }).click();
+  await footer.getByRole("button", { name: "Save footer" }).click();
+  await expect(page.locator(".email-footer-preview")).toContainText(
+    "A little space to connect",
+  );
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: `Delete template ${name}` }).click();
+  await expect(page.getByText("Template deleted.")).toBeVisible();
 });

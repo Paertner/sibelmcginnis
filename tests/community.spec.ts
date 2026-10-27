@@ -305,3 +305,26 @@ test("mobile menu works and public pages stay inside the viewport", async ({
     ).toBeTruthy();
   }
 });
+
+test("contact form offers an in-place date and time picker", async ({
+  page,
+}) => {
+  await page.goto("/contact");
+  await page.getByLabel("Name", { exact: true }).fill("Test Visitor");
+  await page.getByLabel("Email", { exact: true }).fill("visitor@example.com");
+  await page.getByLabel("Message", { exact: true }).fill("Hello Sibel");
+  await page.getByRole("button", { name: /Preferred time for a call/ }).click();
+  const picker = page.getByRole("dialog", {
+    name: "Preferred time for a call (optional)",
+  });
+  await picker.getByRole("button", { name: "Next month" }).click();
+  await picker.getByRole("gridcell").nth(9).click();
+  await picker.getByRole("option", { name: "2:30 PM", exact: true }).click();
+  await picker.getByRole("button", { name: "Done" }).click();
+  await expect(picker).toBeHidden();
+  await expect(page.locator('input[name="preferredTime"]')).toHaveValue(
+    /^\d{4}-\d{2}-\d{2}T14:30$/,
+  );
+  await page.getByRole("button", { name: "Send message" }).click();
+  await expect(page.getByRole("status")).toContainText("Form validated");
+});

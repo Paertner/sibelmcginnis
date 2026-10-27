@@ -2,6 +2,8 @@ import { SiteSelect } from "./site-select";
 import { ActionForm, ConfirmDelete } from "./action-form";
 import { AdminDialog, AdminCancel } from "./admin-dialog";
 import { adminMutation } from "@/lib/actions";
+import { CoverField } from "./media-library";
+import type { MediaItem, SiteImage } from "@/lib/site-images";
 import { fmtDate, today, nextSaturday } from "@/lib/dates";
 import type { Episode, Member, Post, Session, Store } from "@/lib/store";
 type InputProps = {
@@ -144,7 +146,15 @@ export function MemberEditor({ member }: { member?: Member }) {
     </Editor>
   );
 }
-export function PostEditor({ post }: { post?: Post }) {
+export function PostEditor({
+  post,
+  cover,
+  media,
+}: {
+  post?: Post;
+  cover: SiteImage;
+  media: MediaItem[];
+}) {
   return (
     <Editor
       title={post ? `Edit: ${post.title}` : "+ New blog post"}
@@ -164,8 +174,6 @@ export function PostEditor({ post }: { post?: Post }) {
           value={post?.status ?? "draft"}
           options={["draft", "published"]}
         />
-      </div>
-      <div className="row">
         <Select
           name="access"
           label="Who can read this post?"
@@ -176,17 +184,17 @@ export function PostEditor({ post }: { post?: Post }) {
             ["premium", "Premium members"],
           ]}
         />
-        <Select
-          name="cover"
-          label="Cover photo"
-          value={post?.cover ?? 0}
-          options={[
-            ["0", "Community gathering"],
-            ["1", "Coaching"],
-            ["2", "Sibel"],
-          ]}
-        />
       </div>
+      <input type="hidden" name="cover" value={post?.cover ?? 0} />
+      <CoverField
+        key={`${cover.mediaId}|${cover.alt}|${cover.position}`}
+        cover={{
+          ...cover,
+          group: "Blog post",
+          label: post?.title ?? "New post",
+        }}
+        media={media}
+      />
       <Field
         name="excerpt"
         label="Short excerpt"

@@ -1888,5 +1888,15 @@
     "id": "contact.option-other",
     "group": "Contact",
     "text": "Something else"
+  },
+  {
+    "id": "contact.preferred-time",
+    "group": "Contact",
+    "text": "Preferred time for a call (optional)"
+  },
+  {
+    "id": "contact.preferred-time-hint",
+    "group": "Contact",
+    "text": "Pick a time that suits you and Sibel will confirm by email."
   }
 ]

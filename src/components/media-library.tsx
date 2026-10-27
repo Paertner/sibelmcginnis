@@ -1,5 +1,12 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { adminMutation } from "@/lib/actions";
 import { Icon } from "./admin-icons";
 import { SiteSelect } from "./site-select";
@@ -181,16 +188,23 @@ function Details({
   );
 }
 
-function Picker({
+export type MediaChoice = { media: MediaItem; alt: string; position: string };
+// Saves straight to a page placement, or hands the choice back to a form via onChoose.
+export function MediaPicker({
   slot,
   media,
   onClose,
   onSaved,
+  onChoose,
+  framing = true,
 }: {
   slot: SiteImage;
   media: MediaItem[];
   onClose: () => void;
-  onSaved: (message: string) => void;
+  onSaved?: (message: string) => void;
+  onChoose?: (choice: MediaChoice) => void;
+  /** Show the focus control; off where the image is never cropped. */
+  framing?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [tab, setTab] = useState<"library" | "upload">("library");
@@ -213,6 +227,12 @@ function Picker({
     }
   };
   const save = async () => {
+    if (onChoose) {
+      if (item)
+        onChoose({ media: item, alt, position: slot.logo ? "center" : focus });
+      onClose();
+      return;
+    }
     const result = await run({
       entity: "siteImages",
       slot: slot.id,
@@ -221,7 +241,7 @@ function Picker({
       position: slot.logo ? "center" : focus,
     });
     if (result.ok) {
-      onSaved(`${slot.label}: image updated.`);
+      onSaved?.(`${slot.label}: image updated.`);
       onClose();
     }
   };
@@ -297,7 +317,7 @@ function Picker({
                 placeholder="Describe the image for screen readers, or leave blank if decorative"
               />
             </label>
-            {!slot.logo ? (
+            {framing && !slot.logo ? (
               <SiteSelect
                 label="Image focus"
                 value={focus}
@@ -310,7 +330,7 @@ function Picker({
                 ].map(([value, label]) => ({ value, label }))}
               />
             ) : null}
-            {!slot.logo ? (
+            {framing && !slot.logo ? (
               <div className="focus-preview" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.src} alt="" style={{ objectPosition: focus }} />
@@ -597,12 +617,77 @@ export function MediaLibrary({
         </section>
       )}
       {pickingSlot ? (
-        <Picker
+        <MediaPicker
           key={pickingSlot.id}
           slot={pickingSlot}
           media={media}
           onClose={() => setPicking(undefined)}
           onSaved={(message) => setFeedback({ message, ok: true })}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+export function CoverField({
+  cover,
+  media,
+}: {
+  cover: SiteImage;
+  media: MediaItem[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [choice, setChoice] = useState<MediaChoice>();
+  const labelId = useId();
+  const current =
+    choice?.media ?? media.find((item) => item.id === cover.mediaId);
+  return (
+    <div className="field cover-field">
+      <span id={labelId}>Cover photo</span>
+      <div className="cover-picker">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={choice?.media.src ?? cover.src}
+          alt=""
+          style={{ objectPosition: choice?.position ?? cover.position }}
+        />
+        <div>
+          <b>{current?.fileName ?? "Cover image"}</b>
+          <small>
+            {choice
+              ? "New cover. It is saved with the post."
+              : cover.custom
+                ? "Chosen for this post"
+                : "Default cover"}
+          </small>
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost"
+            aria-describedby={labelId}
+            onClick={() => setOpen(true)}
+          >
+            <Icon name="image" size={16} /> Select media
+          </button>
+        </div>
+      </div>
+      {choice ? (
+        <>
+          <input type="hidden" name="coverMedia" value={choice.media.id} />
+          <input type="hidden" name="coverAlt" value={choice.alt} />
+          <input type="hidden" name="coverPosition" value={choice.position} />
+        </>
+      ) : null}
+      {open ? (
+        <MediaPicker
+          slot={{
+            ...cover,
+            mediaId: choice?.media.id ?? cover.mediaId,
+            alt: choice?.alt ?? cover.alt,
+            position: choice?.position ?? cover.position,
+          }}
+          media={media}
+          onClose={() => setOpen(false)}
+          onChoose={setChoice}
         />
       ) : null}
     </div>

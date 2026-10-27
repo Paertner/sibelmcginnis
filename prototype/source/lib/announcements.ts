@@ -129,7 +129,21 @@ export function emailDraft(draftId: string) {
   if (!draft || !announcement) return null;
   const boundary = `mcc-${draft.id}`,
     image = announcement.imageId && state.images.get(announcement.imageId);
-  const content = personalizedHtml(announcement, { name: draft.name });
+  // Library images in the message travel inside the email; other site links become absolute.
+  const inline = [
+    ...new Set(
+      [
+        ...personalizedHtml(announcement, { name: draft.name }).matchAll(
+          /\/api\/site-image\/([\w-]+)/g,
+        ),
+      ].map((match) => match[1]),
+    ),
+  ].filter((id) => state.images.has(id));
+  let content = personalizedHtml(announcement, { name: draft.name });
+  inline.forEach((id, index) => {
+    content = content.replaceAll(`/api/site-image/${id}`, `cid:media-${index}`);
+  });
+  content = content.replace(/(src|href)="\//g, `$1="${siteOrigin()}/`);
   const html = image
     ? `<img src="cid:session-image" alt="Session image" style="display:block;max-width:600px;width:100%;margin:auto">${content}`
     : content;
@@ -162,6 +176,18 @@ export function emailDraft(draftId: string) {
       "",
       base64(Buffer.from(image.bytes)),
     );
+  inline.forEach((id, index) => {
+    const media = state.images.get(id)!;
+    lines.push(
+      `--${boundary}`,
+      `Content-Type: ${media.type}`,
+      "Content-Transfer-Encoding: base64",
+      `Content-ID: <media-${index}>`,
+      `Content-Disposition: inline; filename="${media.name}"`,
+      "",
+      base64(Buffer.from(media.bytes)),
+    );
+  });
   lines.push(`--${boundary}--`, "");
   return lines.join("\r\n");
 }

@@ -1,3 +1,4 @@
+import { assetUrl } from "../../preview/assets";
 import Image from "next/image";
 import { personalizedHtml } from "@/lib/announcements";
 import type { Announcement } from "@/lib/store";
@@ -23,10 +24,9 @@ export function AnnouncementContent({
       <div
         className="rich-message"
         dangerouslySetInnerHTML={{
-          __html: personalizedHtml(announcement, { name }).replace(
-            /<(\/?)h1\b/gi,
-            "<$1h2",
-          ),
+          __html: personalizedHtml(announcement, { name })
+            .replace(/<(\/?)h1\b/gi, "<$1h2")
+            .replace(/\/api\/site-image\/[\w-]+/g, (path) => assetUrl(path)),
         }}
       />
     </div>

@@ -211,3 +211,47 @@ test("invalid images are rejected and the admin fits mobile screens", async ({
     ).toBeTruthy();
   }
 });
+test("a post's cover is chosen from the media picker inside the post editor", async ({
+  page,
+}) => {
+  await openMedia(page);
+  await page.goto("/admin/posts");
+  const post = seed.posts.find(
+    (post) => post.status === "published" && post.access === "public",
+  )!;
+  await page.getByRole("button", { name: `Edit: ${post.title}` }).click();
+  const editor = page.getByRole("dialog", { name: `Edit: ${post.title}` });
+  await editor.getByRole("button", { name: "Select media" }).click();
+  const picker = page.getByRole("dialog", { name: "Choose an image" });
+  await picker.getByRole("tab", { name: "Upload files" }).click();
+  await picker
+    .locator('input[type="file"]')
+    .setInputFiles({
+      name: "cover-pick.png",
+      mimeType: "image/png",
+      buffer: png,
+    });
+  await expect(picker.locator(".media-picker-selection")).toHaveText(
+    "cover-pick.png",
+  );
+  await picker.getByLabel("Image description").fill("A picked cover");
+  await picker.getByRole("button", { name: "Use this image" }).click();
+  await expect(editor.locator(".cover-field")).toContainText("cover-pick.png");
+  await editor.getByRole("button", { name: "Save changes" }).click();
+  await expect(editor).toBeHidden();
+  await page.goto(`/post/${post.id}`);
+  await expect(page.locator(".article-cover")).toHaveAttribute(
+    "src",
+    /^\/api\/site-image\//,
+  );
+  await expect(page.locator(".article-cover")).toHaveAttribute(
+    "alt",
+    "A picked cover",
+  );
+  await page.goto("/admin/media");
+  await chooseGroup(page, "Blog posts");
+  await placement(page, post.title)
+    .getByRole("button", { name: "Restore original", exact: true })
+    .click();
+  await expect(pageStatus(page)).toHaveText("Original image restored.");
+});

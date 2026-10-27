@@ -2,6 +2,7 @@ import { siteText } from "@/lib/site-copy";
 import { SiteSelect } from "@/components/site-select";
 import { ActionForm } from "@/components/action-form";
 import { contact } from "@/lib/actions";
+import { DateTimePicker } from "@/components/datetime-picker";
 export const metadata = { title: "Contact" };
 export default function Contact() {
   return (
@@ -53,6 +54,11 @@ export default function Contact() {
                   siteText("contact.option-corporate"),
                   siteText("contact.option-other"),
                 ].map((value) => ({ value, label: value }))}
+              />
+              <DateTimePicker
+                name="preferredTime"
+                label={siteText("contact.preferred-time")}
+                hint={siteText("contact.preferred-time-hint")}
               />
               <label className="field">
                 {siteText("contact.message")}

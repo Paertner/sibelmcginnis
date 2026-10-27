@@ -10,6 +10,7 @@ import { AnnouncementComposer } from "@/components/announcement-composer";
 import { AnnouncementHistory } from "@/components/announcement-history";
 import { CopyLink } from "@/components/copy-link";
 import { memberRole } from "@/lib/membership";
+import { defaultEmailFooter } from "@/lib/email-templates";
 import { meetingUrl } from "@/lib/site-url";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -98,6 +99,10 @@ export default async function Admin({
   await searchParams;
   const data = getStore(),
     settings = data.settings;
+  const media =
+    section === "posts" || section === "media" || section === "announce"
+      ? mediaLibrary()
+      : [];
   const [, title, , subtitle] = sections.find(([key]) => key === section)!;
   const next = upcomingSessions()[0];
   const name = (id: string) =>
@@ -161,7 +166,9 @@ export default async function Admin({
           </div>
           <div className="admin-head-actions">
             {section === "members" ? <MemberEditor /> : null}
-            {section === "posts" ? <PostEditor /> : null}
+            {section === "posts" ? (
+              <PostEditor cover={siteImage("blog.cover-0")} media={media} />
+            ) : null}
             {section === "podcast" ? <EpisodeEditor /> : null}
             {section === "sessions" ? (
               <>
@@ -294,7 +301,11 @@ export default async function Admin({
                         {fmtDate(p.date, { month: "short", day: "numeric" })}
                       </td>
                       <td className="admin-row-actions">
-                        <PostEditor post={p} />{" "}
+                        <PostEditor
+                          post={p}
+                          cover={siteImage(`post.${p.id}`)}
+                          media={media}
+                        />{" "}
                         <Link
                           className="btn btn-sm btn-ghost"
                           href={`/post/${p.id}`}
@@ -578,13 +589,16 @@ export default async function Admin({
                 email: member.email,
                 tier: memberRole(member),
               }))}
+              media={media}
+              templates={data.emailTemplates ?? []}
+              footer={data.emailFooter ?? defaultEmailFooter}
             />
             <AnnouncementHistory />
           </div>
         ) : null}
         {section === "media" ? (
           <MediaLibrary
-            media={mediaLibrary()}
+            media={media}
             slots={siteImageSlots().map((slot) => siteImage(slot.id))}
           />
         ) : null}

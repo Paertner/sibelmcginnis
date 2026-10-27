@@ -9,6 +9,7 @@ import { addDays, nextSaturday, today } from "./dates";
 import { isPremium } from "./access";
 import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
+import { parseBlocks } from "./email-blocks";
 
 const text = (f: FormData, key: string, max = 20000) =>
   String(f.get(key) ?? "")
@@ -111,6 +112,13 @@ export async function contact(
     required(form, "name", 120);
     email(form);
     required(form, "message");
+    const preferred = text(form, "preferredTime", 16);
+    if (
+      preferred &&
+      (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(preferred) ||
+        !validDate(preferred.slice(0, 10)))
+    )
+      throw new Error("Choose a valid date and time for a call.");
     checkDemo();
     return {
       ok: true,
@@ -301,8 +309,19 @@ export async function adminMutation(
         cover: number(form, "cover", 0, 2),
       };
       const item = data.posts.find((x) => x.id === id);
+      const postId = item?.id ?? uid();
       if (item) Object.assign(item, value);
-      else data.posts.push({ id: uid(), date: today(), ...value });
+      else data.posts.push({ id: postId, date: today(), ...value });
+      // A cover chosen in the media picker becomes this post's own image.
+      const coverMedia = text(form, "coverMedia", 200);
+      if (coverMedia) {
+        const cover = new FormData();
+        cover.set("slot", `post.${postId}`);
+        cover.set("media", coverMedia);
+        cover.set("alt", text(form, "coverAlt", 300));
+        cover.set("position", text(form, "coverPosition", 40) || "center");
+        await updateSiteImage(cover);
+      }
     } else if (entity === "sessions") {
       if (op === "next") {
         const latest = data.sessions.toSorted((a, b) =>
@@ -431,6 +450,34 @@ export async function adminMutation(
       );
     } else if (entity === "siteImages") {
       return success(await updateSiteImage(form));
+    } else if (entity === "emailTemplates") {
+      if (op === "remove") {
+        data.emailTemplates = (data.emailTemplates ?? []).filter(
+          (template) => template.id !== id,
+        );
+        return success("Template deleted.");
+      }
+      const value = {
+        name: required(form, "name", 80),
+        subject: required(form, "subject", 250),
+        blocks: parseBlocks(text(form, "blocks", 400000)),
+        footer: form.get("footer") === "on",
+        updatedAt: new Date().toISOString(),
+      };
+      const existing = (data.emailTemplates ?? []).find((t) => t.id === id);
+      if (existing) {
+        Object.assign(existing, value);
+        return { ...success(`“${value.name}” updated.`), id: existing.id };
+      }
+      const templateId = uid();
+      data.emailTemplates = [
+        ...(data.emailTemplates ?? []),
+        { id: templateId, ...value },
+      ];
+      return { ...success(`Saved as “${value.name}”.`), id: templateId };
+    } else if (entity === "emailFooter") {
+      data.emailFooter = parseBlocks(text(form, "blocks", 200000));
+      return success("Footer saved. It is used by every email that includes it.");
     } else if (entity === "media") {
       if (op === "remove") return success(await deleteMedia(form));
       const { id: mediaId, message } = await uploadMedia(form);

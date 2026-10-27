@@ -1,5 +1,6 @@
 import "server-only";
 import seed from "./seed.json";
+import type { EmailBlock, SavedEmailTemplate } from "./email-blocks";
 import { addDays, nextSaturday, today } from "./dates";
 
 export type Member = (typeof seed)["members"][number] & {
@@ -23,6 +24,8 @@ export type Store = Omit<typeof seed, "members" | "announcements"> & {
   siteCopy?: Record<string,string>;
   siteImages?: Record<string, {imageId?:string;builtin?:string;alt?:string;position?:string;fileName?:string}>;
   media?: MediaFile[];
+  emailTemplates?: SavedEmailTemplate[];
+  emailFooter?: EmailBlock[];
   members: Member[];
   announcements: Announcement[];
 };

@@ -100,6 +100,8 @@ export function postImageProps(post: Post) {
 export type MediaItem = {
   id: string;
   src: string;
+  /** Stable address saved in content; src may be a browser-local URL. */
+  path: string;
   fileName: string;
   type: string;
   size?: number;
@@ -139,12 +141,14 @@ export function mediaLibrary(): MediaItem[] {
       .map((file) => ({
         ...file,
         src: assetUrl(`/api/site-image/${file.id}`),
+        path: `/api/site-image/${file.id}`,
         builtin: false,
         usedBy: usedBy(file.id),
       })),
     ...builtins.map((src) => ({
       id: builtinId(src),
       src,
+      path: src,
       fileName: src.split("/").at(-1)!,
       type: src.endsWith(".svg") ? "image/svg+xml" : "image/webp",
       builtin: true,
