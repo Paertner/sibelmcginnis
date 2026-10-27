@@ -146,6 +146,7 @@ test("admin can publish gated content, upload protected audio and edit site copy
     "podcast",
     "consults",
     "announce",
+    "media",
     "content",
   ]) {
     await page.goto(`/admin/${route}`);

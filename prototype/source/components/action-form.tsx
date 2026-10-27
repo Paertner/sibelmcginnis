@@ -1,6 +1,6 @@
 import { useActionState } from "react";
 import { useAdminDialog } from "./admin-dialog";
-export type ActionResult = { message: string; ok?: boolean };
+export type ActionResult = { message: string; ok?: boolean; id?: string };
 export function ActionForm({
   action,
   children,

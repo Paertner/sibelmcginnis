@@ -1,13 +1,11 @@
 import { useId, useState } from "react";
-const labels = ["General settings", "Page text", "Page images"];
+const labels = ["General settings", "Page text"];
 export function SiteContentTabs({
   settings,
   text,
-  images,
 }: {
   settings: React.ReactNode;
   text: React.ReactNode;
-  images: React.ReactNode;
 }) {
   const [tab, setTab] = useState(0),
     id = useId();
@@ -38,8 +36,9 @@ export function SiteContentTabs({
                 event.key === "Home"
                   ? 0
                   : event.key === "End"
-                    ? 2
-                    : (tab + (event.key === "ArrowRight" ? 1 : 2)) % 3;
+                    ? labels.length - 1
+                    : (tab + (event.key === "ArrowRight" ? 1 : labels.length - 1)) %
+                      labels.length;
               setTab(next);
               document.getElementById(`${id}-tab-${next}`)?.focus();
             }}
@@ -48,7 +47,7 @@ export function SiteContentTabs({
           </button>
         ))}
       </div>
-      {[settings, text, images].map((node, index) => (
+      {[settings, text].map((node, index) => (
         <div
           role="tabpanel"
           aria-labelledby={`${id}-tab-${index}`}

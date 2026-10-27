@@ -1,16 +1,20 @@
 import { AdminDialog } from "@/components/admin-dialog";
+import { AdminDashboard } from "@/components/admin-dashboard";
+import { Icon, type IconName } from "@/components/admin-icons";
+import { MediaLibrary } from "@/components/media-library";
 import { SiteContentEditor } from "@/components/site-content-editor";
 import { SiteContentTabs } from "@/components/site-content-tabs";
-import { SiteImageEditor } from "@/components/site-image-editor";
-import { siteImage, siteImageSlots } from "@/lib/site-images";
+import { mediaLibrary, siteImage, siteImageSlots } from "@/lib/site-images";
 import { AdminTable, AdminRow } from "@/components/admin-table";
 import { AnnouncementComposer } from "@/components/announcement-composer";
 import { AnnouncementHistory } from "@/components/announcement-history";
+import { CopyLink } from "@/components/copy-link";
 import { memberRole } from "@/lib/membership";
+import { meetingUrl } from "@/lib/site-url";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import { getStore, upcomingSessions } from "@/lib/store";
+import { getStore, upcomingSessions, type Session } from "@/lib/store";
 import { fmtDate, today } from "@/lib/dates";
 import { adminMutation, cancelBooking, signOut } from "@/lib/actions";
 import { ActionForm } from "@/components/action-form";
@@ -27,16 +31,58 @@ export const metadata = {
   title: "Admin",
   robots: { index: false, follow: false },
 };
-const sections = [
-  ["dashboard", "Dashboard", "📊"],
-  ["members", "Members", "👥"],
-  ["posts", "Blog posts", "📝"],
-  ["sessions", "Saturday sessions", "🎥"],
-  ["podcast", "Podcast", "🎧"],
-  ["consults", "Consultations", "📅"],
-  ["announce", "Announcements", "✉️"],
-  ["content", "Site content", "🖼️"],
+const sections: [string, string, IconName, string][] = [
+  ["dashboard", "Dashboard", "home", ""],
+  [
+    "members",
+    "Members",
+    "users",
+    "Everyone with an account, their membership and status.",
+  ],
+  [
+    "posts",
+    "Blog posts",
+    "pen",
+    "Write posts and choose who can read each one.",
+  ],
+  [
+    "sessions",
+    "Saturday sessions",
+    "video",
+    "Plan each Saturday circle, its Zoom link and follow-up.",
+  ],
+  ["podcast", "Podcast", "headphones", "Audio episodes for Premium members."],
+  [
+    "consults",
+    "Consultations",
+    "calendar",
+    "Bookings, your open times and consultation rules.",
+  ],
+  [
+    "announce",
+    "Announcements",
+    "mail",
+    "Send a message to members’ accounts and prepare emails.",
+  ],
+  [
+    "media",
+    "Media library",
+    "image",
+    "Every image on the site, and the photos you upload.",
+  ],
+  [
+    "content",
+    "Site content",
+    "text",
+    "Homepage settings and all the wording on the site.",
+  ],
 ];
+const initials = (name: string) =>
+  name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
 export default async function Admin({
   params,
   searchParams,
@@ -44,7 +90,7 @@ export default async function Admin({
   params: Promise<{ section?: string[] }>;
   searchParams: Promise<{ q?: string; tier?: string; access?: string }>;
 }) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const route = (await params).section ?? [],
     section = route[0] ?? "dashboard";
   if (route.length > 1 || !sections.some(([key]) => key === section))
@@ -52,22 +98,22 @@ export default async function Admin({
   await searchParams;
   const data = getStore(),
     settings = data.settings;
-  const title = sections.find(([key]) => key === section)![1];
-  const active = data.members.filter((m) => m.status === "active"),
-    premium = active.filter((m) => m.tier === "premium");
-  const upcoming = data.bookings
-    .filter((b) => b.date >= today() && b.status !== "cancelled")
-    .toSorted((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const [, title, , subtitle] = sections.find(([key]) => key === section)!;
   const next = upcomingSessions()[0];
   const name = (id: string) =>
     data.members.find((m) => m.id === id)?.name ?? "Removed member";
   return (
     <div className="ad">
       <aside className="ad-side">
-        <Link className="brand" href="/">
-          Sibel McGinnis
+        <Link className="ad-brand" href="/">
+          <span className="ad-brand-mark" aria-hidden="true">
+            S
+          </span>
+          <span>
+            Sibel McGinnis
+            <small>Admin</small>
+          </span>
         </Link>
-        <small>Admin panel</small>
         <nav aria-label="Admin navigation">
           {sections.map(([key, label, icon]) => (
             <Link
@@ -76,26 +122,50 @@ export default async function Admin({
               key={key}
               aria-current={key === section ? "page" : undefined}
             >
-              <span aria-hidden="true">{icon}</span>
+              <Icon name={icon} />
               {label}
             </Link>
           ))}
         </nav>
         <div className="sp" />
-        <Link href="/">↗ View website</Link>
-        <form action={signOut}>
-          <button className="side-signout">Sign out</button>
-        </form>
+        <div className="ad-side-foot">
+          <Link href="/">
+            <Icon name="external" />
+            View website
+          </Link>
+          <form action={signOut}>
+            <button className="side-signout">
+              <Icon name="logout" />
+              Sign out
+            </button>
+          </form>
+        </div>
       </aside>
       <main className="ad-main">
         <div className="ad-top">
-          <h1>{title}</h1>
+          <div className="ad-title">
+            <h1>
+              {section === "dashboard"
+                ? `Welcome back, ${user.name.split(" ")[0]}`
+                : title}
+            </h1>
+            <p>
+              {section === "dashboard"
+                ? fmtDate(today(), {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : subtitle}
+            </p>
+          </div>
           <div className="admin-head-actions">
             {section === "members" ? <MemberEditor /> : null}
             {section === "posts" ? <PostEditor /> : null}
             {section === "podcast" ? <EpisodeEditor /> : null}
             {section === "sessions" ? (
               <>
+                <SessionEditor episodes={data.podcasts} />
                 <ActionForm
                   action={adminMutation}
                   submitLabel="+ Add next Saturday"
@@ -103,170 +173,35 @@ export default async function Admin({
                   <EntityFields entity="sessions" />
                   <input type="hidden" name="op" value="next" />
                 </ActionForm>
-                <SessionEditor episodes={data.podcasts} />
               </>
             ) : null}
-            {section === "dashboard" || section === "content" ? (
-              <Link className="btn btn-sm btn-ghost" href="/">
-                {section === "content" ? "Preview site ↗" : "View site ↗"}
-              </Link>
-            ) : null}
-          </div>
-        </div>
-        {section === "dashboard" ? (
-          <>
-            <div className="stats">
-              {[
-                [active.length, "Active members"],
-                [premium.length, "Premium members"],
-                [
-                  `$${premium.length * settings.premiumPrice}`,
-                  "Monthly recurring revenue",
-                ],
-                [upcoming.length, "Upcoming consultations"],
-              ].map(([value, label]) => (
-                <div className="stat" key={label}>
-                  <b>{value}</b>
-                  <span>{label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="grid g2">
-              <div className="panel">
-                <h3>Next Saturday session</h3>
-                {next ? (
-                  <>
-                    <p style={{ marginBottom: 4 }}>
-                      <b>{fmtDate(next.date)}</b> · {settings.meetingTime}
-                    </p>
-                    <p className="muted">Topic: {next.topic}</p>
-                    <p className="meeting-link">
-                      Zoom: {next.zoom || "No meeting link yet"}
-                    </p>
-                  </>
-                ) : (
-                  <p>No sessions scheduled.</p>
-                )}
-                <Link className="btn btn-sm" href="/admin/sessions">
-                  Edit sessions &amp; Zoom link
-                </Link>
-              </div>
-              <div className="panel">
-                <h3>New members · last 6 months</h3>
-                <div className="bars">
-                  {Array.from({ length: 6 }, (_, i) => {
-                    const d = new Date(today() + "T12:00:00Z");
-                    d.setUTCDate(1);
-                    d.setUTCMonth(d.getUTCMonth() - (5 - i));
-                    const count = data.members.filter(
-                      (m) =>
-                        m.joined.slice(0, 7) === d.toISOString().slice(0, 7),
-                    ).length;
-                    return (
-                      <div key={i}>
-                        <i
-                          className={i === 5 ? "cur" : ""}
-                          style={{
-                            height: Math.max(
-                              4,
-                              (count /
-                                Math.max(
-                                  1,
-                                  ...Array.from({ length: 6 }, (_, j) => {
-                                    const month = new Date(
-                                      today() + "T12:00:00Z",
-                                    );
-                                    month.setUTCDate(1);
-                                    month.setUTCMonth(
-                                      month.getUTCMonth() - (5 - j),
-                                    );
-                                    return data.members.filter(
-                                      (m) =>
-                                        m.joined.slice(0, 7) ===
-                                        month.toISOString().slice(0, 7),
-                                    ).length;
-                                  }),
-                                )) *
-                                100,
-                            ),
-                          }}
-                        />
-                        {d.toLocaleDateString("en-US", {
-                          month: "short",
-                          timeZone: "UTC",
-                        })}
-                        <br />
-                        <b>{count}</b>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            <div className="grid g2">
-              <div className="panel">
-                <h3>Upcoming consultations</h3>
-                {upcoming.length ? (
-                  upcoming.slice(0, 5).map((b) => (
-                    <div className="list-item" key={b.id}>
-                      <div>
-                        <b>{name(b.memberId)}</b>
-                        <br />
-                        <small className="muted">
-                          {fmtDate(b.date, {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          })}{" "}
-                          · {b.time} — {b.topic}
-                        </small>
-                      </div>
-                      <span className="badge b-ok">{b.status}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p>None booked.</p>
-                )}
-              </div>
-              <div className="panel">
-                <h3>Recent members</h3>
-                {data.members
-                  .toSorted((a, b) => b.joined.localeCompare(a.joined))
-                  .slice(0, 5)
-                  .map((m) => (
-                    <div className="list-item" key={m.id}>
-                      <div>
-                        <b>{m.name}</b>
-                        <br />
-                        <small>
-                          Joined{" "}
-                          {fmtDate(m.joined, {
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </small>
-                      </div>
-                      <span className={`badge b-${m.tier}`}>{m.tier}</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-            <div className="panel">
-              <h3>Quick actions</h3>
-              <div className="hero-btns">
-                <Link className="btn btn-sm" href="/admin/posts">
-                  + New blog post
-                </Link>
+            {section === "dashboard" ? (
+              <>
                 <Link className="btn btn-sm btn-ghost" href="/admin/announce">
                   Email members
                 </Link>
-                <Link className="btn btn-sm btn-ghost" href="/admin/consults">
-                  Set availability
+                <Link className="btn btn-sm" href="/admin/posts">
+                  + New blog post
                 </Link>
-              </div>
-            </div>
-          </>
-        ) : null}
+              </>
+            ) : null}
+            {section === "content" || section === "media" ? (
+              <Link className="btn btn-sm btn-ghost" href="/">
+                Preview site ↗
+              </Link>
+            ) : null}
+            <span className="ad-user" title={user.name}>
+              <span className="avatar-soft" aria-hidden="true">
+                {initials(user.name)}
+              </span>
+              <span className="ad-user-name">
+                {user.name}
+                <small>Administrator</small>
+              </span>
+            </span>
+          </div>
+        </div>
+        {section === "dashboard" ? <AdminDashboard data={data} /> : null}
         {section === "members" ? (
           <AdminTable kind="members" count={data.members.length}>
             <table>
@@ -288,13 +223,19 @@ export default async function Admin({
                     category={m.tier}
                   >
                     <td>
-                      <b>{m.name}</b>
-                      {m.note && (
-                        <>
-                          <br />
-                          <small className="muted">📌 {m.note}</small>
-                        </>
-                      )}
+                      <span className="person">
+                        <span className="avatar-soft" aria-hidden="true">
+                          {initials(m.name)}
+                        </span>
+                        <span>
+                          <b>{m.name}</b>
+                          {m.note && (
+                            <small className="muted person-note">
+                              {m.note}
+                            </small>
+                          )}
+                        </span>
+                      </span>
                     </td>
                     <td>{m.email}</td>
                     <td>
@@ -320,272 +261,237 @@ export default async function Admin({
           </AdminTable>
         ) : null}
         {section === "posts" ? (
-          <>
-            <p className="hint">
-              Choose who can read each post: everyone, free members, or premium
-              members only.
-            </p>
-            <AdminTable kind="posts">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Visible to</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th aria-label="Actions" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.posts
-                    .toSorted((a, b) => b.date.localeCompare(a.date))
-                    .map((p) => (
-                      <AdminRow
-                        key={p.id}
-                        category={p.access}
-                        status={p.status}
-                      >
-                        <td>
-                          <b>{p.title}</b>
-                          <br />
-                          <small className="muted">{p.category}</small>
-                        </td>
-                        <td>
-                          <span className={`badge b-${p.access}`}>
-                            {p.access === "public" ? "Everyone" : p.access}
-                          </span>
-                        </td>
-                        <td>
-                          <Status value={p.status} />
-                        </td>
-                        <td>
-                          {fmtDate(p.date, { month: "short", day: "numeric" })}
-                        </td>
-                        <td className="admin-row-actions">
-                          <PostEditor post={p} />{" "}
-                          <Link
-                            className="btn btn-sm btn-ghost"
-                            href={`/post/${p.id}`}
-                          >
-                            View
-                          </Link>
-                        </td>
-                      </AdminRow>
-                    ))}
-                </tbody>
-              </table>
-            </AdminTable>
-          </>
+          <AdminTable kind="posts">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Visible to</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th aria-label="Actions" />
+                </tr>
+              </thead>
+              <tbody>
+                {data.posts
+                  .toSorted((a, b) => b.date.localeCompare(a.date))
+                  .map((p) => (
+                    <AdminRow key={p.id} category={p.access} status={p.status}>
+                      <td>
+                        <b>{p.title}</b>
+                        <br />
+                        <small className="muted">{p.category}</small>
+                      </td>
+                      <td>
+                        <span className={`badge b-${p.access}`}>
+                          {p.access === "public" ? "Everyone" : p.access}
+                        </span>
+                      </td>
+                      <td>
+                        <Status value={p.status} />
+                      </td>
+                      <td>
+                        {fmtDate(p.date, { month: "short", day: "numeric" })}
+                      </td>
+                      <td className="admin-row-actions">
+                        <PostEditor post={p} />{" "}
+                        <Link
+                          className="btn btn-sm btn-ghost"
+                          href={`/post/${p.id}`}
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </AdminRow>
+                  ))}
+              </tbody>
+            </table>
+          </AdminTable>
         ) : null}
         {section === "sessions" ? (
+          <SessionsPage
+            sessions={data.sessions}
+            next={next}
+            episodes={data.podcasts}
+            settings={settings}
+          />
+        ) : null}
+        {section === "podcast" ? (
+          <AdminTable>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Episode</th>
+                  <th>Date</th>
+                  <th>Length</th>
+                  <th>Audio</th>
+                  <th>Status</th>
+                  <th aria-label="Actions" />
+                </tr>
+              </thead>
+              <tbody>
+                {data.podcasts
+                  .toSorted((a, b) => b.num - a.num)
+                  .map((ep) => (
+                    <tr key={ep.id}>
+                      <td>
+                        <b>{ep.num}</b>
+                      </td>
+                      <td>
+                        <b>{ep.title}</b>
+                      </td>
+                      <td>
+                        {fmtDate(ep.date, { month: "short", day: "numeric" })}
+                      </td>
+                      <td>{ep.duration}</td>
+                      <td>
+                        {ep.audioName ? (
+                          <span className="file-chip">
+                            <Icon name="headphones" size={14} />
+                            {ep.audioName}
+                          </span>
+                        ) : (
+                          <span className="muted">No audio uploaded</span>
+                        )}
+                      </td>
+                      <td>
+                        <Status value={ep.status} />
+                      </td>
+                      <td className="admin-row-actions">
+                        <EpisodeEditor episode={ep} />
+                        {ep.audioName && (
+                          <>
+                            {" "}
+                            <AdminDialog
+                              title={`Preview #${ep.num}: ${ep.title}`}
+                              trigger="▶"
+                            >
+                              <audio
+                                controls
+                                preload="none"
+                                src={`/api/audio/${ep.id}`}
+                              />
+                            </AdminDialog>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                {!data.podcasts.length && (
+                  <tr>
+                    <td colSpan={7} className="muted">
+                      No episodes yet. Add one with + New episode.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </AdminTable>
+        ) : null}
+        {section === "consults" ? (
           <>
-            <ActionForm
-              action={adminMutation}
-              className="panel"
-              submitLabel="Save"
-            >
-              <EntityFields entity="content" />
-              <input
-                type="hidden"
-                name="heroTitle"
-                value={settings.heroTitle}
-              />
-              <input type="hidden" name="heroSub" value={settings.heroSub} />
-              <input
-                type="hidden"
-                name="topics"
-                value={settings.topics.join("\n")}
-              />
-              <input
-                type="hidden"
-                name="premiumPrice"
-                value={settings.premiumPrice}
-              />
-              <h3>Weekly meeting</h3>
-              <p className="hint">
-                Every Saturday gets its own Zoom link and passcode. Members
-                enter through a protected link that checks their current Premium
-                access.
-              </p>
-              <div className="row">
-                <label className="field">
-                  Meeting day
-                  <input value="Saturday" readOnly />
-                </label>
-                <Field
-                  name="meetingTime"
-                  label="Time"
-                  value={settings.meetingTime}
-                />
-                <Field
-                  name="meetingMinutes"
-                  label="Length (minutes)"
-                  type="number"
-                  value={settings.meetingMinutes}
-                />
-              </div>
-              <label className="checkbox-field">
-                <input
-                  type="checkbox"
-                  name="autoZoom"
-                  defaultChecked={settings.autoZoom}
-                />{" "}
-                Create a new placeholder Zoom link automatically for every new
-                Saturday
-              </label>
-            </ActionForm>
-            <div className="panel">
-              <h3>Schedule, Zoom links &amp; notes</h3>
+            <section className="panel" aria-labelledby="bookings-title">
+              <header className="card-head">
+                <div>
+                  <h2 id="bookings-title">Bookings</h2>
+                  <p className="card-sub">
+                    {
+                      data.bookings.filter(
+                        (b) => b.status === "pending" && b.date >= today(),
+                      ).length
+                    }{" "}
+                    waiting for confirmation ·{" "}
+                    {
+                      data.bookings.filter(
+                        (b) => b.status !== "cancelled" && b.date >= today(),
+                      ).length
+                    }{" "}
+                    upcoming
+                  </p>
+                </div>
+              </header>
               <div className="tcell">
                 <table>
                   <thead>
                     <tr>
-                      <th>Date</th>
+                      <th>When</th>
+                      <th>Member</th>
                       <th>Topic</th>
-                      <th>Zoom link &amp; passcode</th>
-                      <th>Notes</th>
-                      <th>Podcast</th>
+                      <th>Status</th>
                       <th aria-label="Actions" />
                     </tr>
                   </thead>
                   <tbody>
-                    {data.sessions
-                      .toSorted((a, b) => a.date.localeCompare(b.date))
-                      .map((s) => (
-                        <tr key={s.id}>
-                          <td>
-                            <b>
-                              {fmtDate(s.date, {
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </b>
-                            {s.id === next?.id && (
-                              <>
-                                {" "}
-                                <span className="badge b-ok">next</span>
-                              </>
-                            )}
-                          </td>
-                          <td>{s.topic}</td>
-                          <td className="admin-zoom">
-                            {s.zoom ? (
-                              <>
-                                {s.zoom.replace("https://", "")}
-                                <br />
-                                <span className="muted">
-                                  Passcode {s.pass || "—"}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="badge b-warn">no link</span>
-                            )}
-                          </td>
-                          <td>{s.notes ? "✓" : "—"}</td>
-                          <td>{s.podcast ? "✓" : "—"}</td>
-                          <td className="admin-row-actions">
-                            <ActionForm
-                              action={adminMutation}
-                              submitLabel="New link"
-                            >
-                              <EntityFields entity="sessions" id={s.id} />
-                              <input
-                                type="hidden"
-                                name="op"
-                                value="regenerate"
-                              />
-                            </ActionForm>{" "}
-                            <SessionEditor
-                              session={s}
-                              episodes={data.podcasts}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>
-        ) : null}
-        {section === "podcast" ? (
-          <>
-            <p className="hint">
-              Episodes are audio files visible to Premium members only. Link an
-              episode to a Saturday session in the Sessions page.
-            </p>
-            <AdminTable>
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Episode</th>
-                    <th>Date</th>
-                    <th>Length</th>
-                    <th>Audio</th>
-                    <th>Status</th>
-                    <th aria-label="Actions" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.podcasts
-                    .toSorted((a, b) => b.num - a.num)
-                    .map((ep) => (
-                      <tr key={ep.id}>
+                    {[
+                      ...data.bookings
+                        .filter((b) => b.date >= today())
+                        .toSorted((a, b) =>
+                          (a.date + a.time).localeCompare(b.date + b.time),
+                        ),
+                      ...data.bookings
+                        .filter((b) => b.date < today())
+                        .toSorted((a, b) =>
+                          (b.date + b.time).localeCompare(a.date + a.time),
+                        ),
+                    ].map((b) => (
+                      <tr
+                        key={b.id}
+                        className={b.date < today() ? "is-past" : ""}
+                      >
                         <td>
-                          <b>{ep.num}</b>
+                          <b>
+                            {fmtDate(b.date, {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </b>{" "}
+                          · {b.time}
                         </td>
+                        <td>{name(b.memberId)}</td>
+                        <td>{b.topic}</td>
                         <td>
-                          <b>{ep.title}</b>
-                        </td>
-                        <td>
-                          {fmtDate(ep.date, { month: "short", day: "numeric" })}
-                        </td>
-                        <td>{ep.duration}</td>
-                        <td>
-                          {ep.audioName ? (
-                            `🎵 ${ep.audioName}`
-                          ) : (
-                            <span className="muted">No audio uploaded</span>
-                          )}
-                        </td>
-                        <td>
-                          <Status value={ep.status} />
+                          <Status
+                            value={
+                              b.date < today() && b.status === "confirmed"
+                                ? "completed"
+                                : b.status
+                            }
+                          />
                         </td>
                         <td className="admin-row-actions">
-                          <EpisodeEditor episode={ep} />
-                          {ep.audioName && (
-                            <>
-                              {" "}
-                              <AdminDialog
-                                title={`Preview #${ep.num}: ${ep.title}`}
-                                trigger="▶"
-                              >
-                                <audio
-                                  controls
-                                  preload="none"
-                                  src={`/api/audio/${ep.id}`}
-                                />
-                              </AdminDialog>
-                            </>
+                          {b.status === "pending" && (
+                            <ActionForm
+                              action={adminMutation}
+                              submitLabel="Confirm"
+                            >
+                              <EntityFields entity="bookings" id={b.id} />
+                            </ActionForm>
+                          )}
+                          {b.status !== "cancelled" && b.date >= today() && (
+                            <ActionForm
+                              action={cancelBooking}
+                              submitLabel="Cancel"
+                            >
+                              <input name="id" type="hidden" value={b.id} />
+                            </ActionForm>
                           )}
                         </td>
                       </tr>
                     ))}
-                  {!data.podcasts.length && (
-                    <tr>
-                      <td colSpan={7} className="muted">
-                        No episodes yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </AdminTable>
-          </>
-        ) : null}
-        {section === "consults" ? (
-          <>
+                    {!data.bookings.length && (
+                      <tr>
+                        <td colSpan={5} className="muted">
+                          No bookings yet. Members can book as soon as you open
+                          times below.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
             <ActionForm
               action={adminMutation}
               className="availability-form"
@@ -595,8 +501,8 @@ export default async function Admin({
               <div className="panel">
                 <h3>Your availability</h3>
                 <p className="hint">
-                  Open times that members can book. Existing reservations stay
-                  in place when availability changes.
+                  Tick the times members can book. Existing bookings stay in
+                  place when you change these.
                 </p>
                 {[1, 2, 3, 4, 5, 6, 0].map((index) => {
                   const day = [
@@ -661,72 +567,6 @@ export default async function Admin({
                 </label>
               </div>
             </ActionForm>
-            <div className="panel">
-              <h3>Bookings</h3>
-              <div className="tcell">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>When</th>
-                      <th>Member</th>
-                      <th>Topic</th>
-                      <th>Status</th>
-                      <th aria-label="Actions" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.bookings
-                      .toSorted((a, b) =>
-                        (b.date + b.time).localeCompare(a.date + a.time),
-                      )
-                      .map((b) => (
-                        <tr key={b.id}>
-                          <td>
-                            <b>
-                              {fmtDate(b.date, {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </b>{" "}
-                            · {b.time}
-                          </td>
-                          <td>{name(b.memberId)}</td>
-                          <td>{b.topic}</td>
-                          <td>
-                            <Status value={b.status} />
-                          </td>
-                          <td className="admin-row-actions">
-                            {b.status === "pending" && (
-                              <ActionForm
-                                action={adminMutation}
-                                submitLabel="Confirm"
-                              >
-                                <EntityFields entity="bookings" id={b.id} />
-                              </ActionForm>
-                            )}
-                            {b.status !== "cancelled" && (
-                              <ActionForm
-                                action={cancelBooking}
-                                submitLabel="Cancel"
-                              >
-                                <input name="id" type="hidden" value={b.id} />
-                              </ActionForm>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    {!data.bookings.length && (
-                      <tr>
-                        <td colSpan={5} className="muted">
-                          No bookings yet.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </>
         ) : null}
         {section === "announce" ? (
@@ -742,15 +582,16 @@ export default async function Admin({
             <AnnouncementHistory />
           </div>
         ) : null}
+        {section === "media" ? (
+          <MediaLibrary
+            media={mediaLibrary()}
+            slots={siteImageSlots().map((slot) => siteImage(slot.id))}
+          />
+        ) : null}
         {section === "content" ? (
           <SiteContentTabs
             settings={<ContentForm settings={settings} />}
             text={<SiteContentEditor values={data.siteCopy ?? {}} />}
-            images={
-              <SiteImageEditor
-                images={siteImageSlots().map((slot) => siteImage(slot.id))}
-              />
-            }
           />
         ) : null}
       </main>
@@ -758,8 +599,220 @@ export default async function Admin({
   );
 }
 
+function SessionsPage({
+  sessions,
+  next,
+  episodes,
+  settings,
+}: {
+  sessions: Session[];
+  next?: Session;
+  episodes: Parameters<typeof SessionEditor>[0]["episodes"];
+  settings: ReturnType<typeof getStore>["settings"];
+}) {
+  const upcoming = sessions
+    .filter((s) => s.date >= today() && s.id !== next?.id)
+    .toSorted((a, b) => a.date.localeCompare(b.date));
+  const past = sessions
+    .filter((s) => s.date < today())
+    .toSorted((a, b) => b.date.localeCompare(a.date));
+  const followUps = past.filter(
+    (s) => !s.notes || !episodes.some((ep) => ep.id === s.podcast),
+  ).length;
+  const episode = (s: Session) => episodes.find((ep) => ep.id === s.podcast);
+  return (
+    <div className="sessions-page">
+      <div className="sessions-top">
+        {next ? (
+          <section className="next-circle" aria-labelledby="next-circle-title">
+            <p className="next-circle-eyebrow">Next circle</p>
+            <div className="next-circle-row">
+              <span className="date-block" aria-hidden="true">
+                <small>{fmtDate(next.date, { weekday: "short" })}</small>
+                <b>{fmtDate(next.date, { day: "numeric" })}</b>
+                <small>{fmtDate(next.date, { month: "short" })}</small>
+              </span>
+              <div>
+                <h2 id="next-circle-title">{next.topic}</h2>
+                <p>
+                  {fmtDate(next.date)} · {settings.meetingTime} ·{" "}
+                  {settings.meetingMinutes} minutes
+                </p>
+              </div>
+            </div>
+            <ul className="status-pills">
+              <li className={next.zoom ? "ok" : "warn"}>
+                <Icon name={next.zoom ? "check" : "clock"} size={15} />
+                {next.zoom ? "Zoom link ready" : "Add a Zoom link"}
+              </li>
+              <li className={next.pass ? "ok" : "warn"}>
+                <Icon name={next.pass ? "lock" : "clock"} size={15} />
+                {next.pass ? `Passcode ${next.pass}` : "No passcode"}
+              </li>
+            </ul>
+            <div className="next-circle-actions">
+              <SessionEditor session={next} episodes={episodes} />
+              <ActionForm action={adminMutation} submitLabel="New Zoom link">
+                <EntityFields entity="sessions" id={next.id} />
+                <input type="hidden" name="op" value="regenerate" />
+              </ActionForm>
+              <CopyLink value={meetingUrl("session", next.id)} />
+            </div>
+            <p className="next-circle-note">
+              Members join through their protected link. It checks Premium
+              access every time, so the Zoom details are never shared directly.
+            </p>
+          </section>
+        ) : (
+          <section className="next-circle empty">
+            <h2>No Saturday planned</h2>
+            <p>Add the next Saturday to open it to members.</p>
+          </section>
+        )}
+        <ActionForm
+          action={adminMutation}
+          className="panel weekly-settings"
+          submitLabel="Save weekly settings"
+        >
+          <EntityFields entity="content" />
+          <input type="hidden" name="heroTitle" value={settings.heroTitle} />
+          <input type="hidden" name="heroSub" value={settings.heroSub} />
+          <input
+            type="hidden"
+            name="topics"
+            value={settings.topics.join("\n")}
+          />
+          <input
+            type="hidden"
+            name="premiumPrice"
+            value={settings.premiumPrice}
+          />
+          <h3>
+            <Icon name="sliders" size={18} /> Every Saturday
+          </h3>
+          <div className="row">
+            <Field
+              name="meetingTime"
+              label="Start time"
+              value={settings.meetingTime}
+            />
+            <Field
+              name="meetingMinutes"
+              label="Length (minutes)"
+              type="number"
+              value={settings.meetingMinutes}
+            />
+          </div>
+          <label className="checkbox-field">
+            <input
+              type="checkbox"
+              name="autoZoom"
+              defaultChecked={settings.autoZoom}
+            />
+            Create a Zoom link automatically when I add a Saturday
+          </label>
+        </ActionForm>
+      </div>
+
+      <section className="panel" aria-labelledby="upcoming-title">
+        <header className="card-head">
+          <div>
+            <h2 id="upcoming-title">Coming up</h2>
+            <p className="card-sub">
+              {upcoming.length
+                ? `${upcoming.length} more Saturday${upcoming.length === 1 ? "" : "s"} planned`
+                : "Nothing planned after the next circle yet"}
+            </p>
+          </div>
+        </header>
+        {upcoming.length ? (
+          <ul className="session-list">
+            {upcoming.map((s) => (
+              <li key={s.id}>
+                <span className="date-chip">
+                  <b>{fmtDate(s.date, { day: "numeric" })}</b>
+                  {fmtDate(s.date, { month: "short" })}
+                </span>
+                <div className="session-main">
+                  <b>{s.topic}</b>
+                  <ul className="status-pills small">
+                    <li className={s.zoom ? "ok" : "warn"}>
+                      {s.zoom ? "Zoom ready" : "No Zoom link"}
+                    </li>
+                    {s.pass ? <li className="ok">Passcode {s.pass}</li> : null}
+                  </ul>
+                </div>
+                <div className="admin-row-actions">
+                  <ActionForm action={adminMutation} submitLabel="New link">
+                    <EntityFields entity="sessions" id={s.id} />
+                    <input type="hidden" name="op" value="regenerate" />
+                  </ActionForm>
+                  <SessionEditor session={s} episodes={episodes} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="empty-note">
+            Use + Add next Saturday to plan the following week.
+          </p>
+        )}
+      </section>
+
+      <section className="panel" aria-labelledby="past-title">
+        <header className="card-head">
+          <div>
+            <h2 id="past-title">After the circle</h2>
+            <p className="card-sub">
+              {followUps
+                ? `${followUps} session${followUps === 1 ? "" : "s"} still need notes or a podcast episode`
+                : "All past sessions have notes and an episode"}
+            </p>
+          </div>
+        </header>
+        <ul className="session-list">
+          {past.map((s) => (
+            <li key={s.id}>
+              <span className="date-chip muted-chip">
+                <b>{fmtDate(s.date, { day: "numeric" })}</b>
+                {fmtDate(s.date, { month: "short" })}
+              </span>
+              <div className="session-main">
+                <b>{s.topic}</b>
+                <ul className="status-pills small">
+                  <li className={s.notes ? "ok" : "warn"}>
+                    <Icon name={s.notes ? "check" : "notes"} size={13} />
+                    {s.notes ? "Notes shared" : "Notes missing"}
+                  </li>
+                  <li className={episode(s) ? "ok" : "warn"}>
+                    <Icon
+                      name={episode(s) ? "check" : "headphones"}
+                      size={13}
+                    />
+                    {episode(s)
+                      ? `Episode #${episode(s)!.num}`
+                      : "No podcast episode"}
+                  </li>
+                </ul>
+              </div>
+              <div className="admin-row-actions">
+                <SessionEditor session={s} episodes={episodes} />
+              </div>
+            </li>
+          ))}
+          {!past.length ? (
+            <li className="empty-note">Past Saturdays will appear here.</li>
+          ) : null}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
 function Status({ value }: { value: string }) {
-  const color = ["active", "confirmed", "published"].includes(value)
+  const color = ["active", "confirmed", "published", "completed"].includes(
+    value,
+  )
     ? "ok"
     : ["pending", "paused"].includes(value)
       ? "warn"

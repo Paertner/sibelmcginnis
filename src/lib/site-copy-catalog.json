@@ -1860,6 +1860,16 @@
     "text": "Review downgrade to Free"
   },
   {
+    "id": "account.messages-from-sibel",
+    "group": "Member panel",
+    "text": "Messages from Sibel"
+  },
+  {
+    "id": "account.premium-access-through",
+    "group": "Member panel",
+    "text": "Premium access through"
+  },
+  {
     "id": "contact.option-membership",
     "group": "Contact",
     "text": "Morning Coffee membership"

@@ -12,18 +12,20 @@ import { AnnouncementContent } from "@/components/announcement-content";
 import { announcementVisible } from "@/lib/announcements";
 import { meetingUrl } from "@/lib/site-url";
 import { CopyLink } from "@/components/copy-link";
+import { Icon, type IconName } from "@/components/admin-icons";
 import { BookingForm } from "@/components/consultation-calendar";
 import { ActionForm } from "@/components/action-form";
 import { cancelBooking, changeTier, signOut } from "@/lib/actions";
 export const metadata = { title: "My account" };
-const tabs = [
-  ["overview", "Overview"],
-  ["library", "Blog library"],
-  ["sessions", "Session notes"],
-  ["book", "Book a consultation"],
-  ["membership", "Membership"],
-  ["podcast", "Podcast"],
+const tabs: [string, string, IconName][] = [
+  ["overview", "Overview", "home"],
+  ["library", "Blog library", "book"],
+  ["sessions", "Session notes", "notes"],
+  ["book", "Book a consultation", "calendar"],
+  ["podcast", "Podcast", "headphones"],
+  ["membership", "Membership", "star"],
 ];
+const premiumTabs = ["sessions", "book", "podcast"];
 function PremiumGate({ title }: { title: string }) {
   return (
     <div className="card center">
@@ -60,6 +62,10 @@ export default async function Account({
   const posts = data.posts
     .filter((p) => p.status === "published")
     .toSorted((a, b) => b.date.localeCompare(a.date));
+  const messages = data.announcements.filter((a) =>
+    announcementVisible(a, user.id, user.role),
+  );
+  const member = data.members.find((m) => m.id === user.id);
   const upcomingBookings = bookings.filter(
     (b) => b.status !== "cancelled" && b.date >= today(),
   );
@@ -287,8 +293,8 @@ export default async function Account({
                 <br />
                 <small className="muted">
                   {user.email}
-                  {data.members.find((m) => m.id === user.id)?.joined
-                    ? ` · member since ${fmtDate(data.members.find((m) => m.id === user.id)!.joined, { month: "long", year: "numeric" })}`
+                  {member?.joined
+                    ? ` · member since ${fmtDate(member.joined, { month: "long", year: "numeric" })}`
                     : ""}
                 </small>
               </div>
@@ -303,6 +309,19 @@ export default async function Account({
                 ? `$${data.settings.premiumPrice} / month`
                 : siteText("account.free-membership")}
             </p>
+            {premium && member?.premiumUntil ? (
+              <p className="membership-until">
+                <Icon name="calendar" size={16} />
+                {siteText("account.premium-access-through")}{" "}
+                <b>
+                  {fmtDate(member.premiumUntil.slice(0, 10), {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </b>
+              </p>
+            ) : null}
             <p className="muted">
               {siteText(
                 "account.billing-will-be-managed-securely-through-stripe-once-checkout-is-",
@@ -388,6 +407,23 @@ export default async function Account({
             <p>{siteText("account.check-back-soon-for-your-next-circle")}</p>
           </div>
         )}
+        {messages.length ? (
+          <section
+            className="member-messages section-top"
+            aria-labelledby="messages-title"
+          >
+            <h2 id="messages-title" className="member-section-title">
+              <Icon name="mail" size={18} />
+              {siteText("account.messages-from-sibel")}
+            </h2>
+            {messages.map((a) => (
+              <div className="card" key={a.id}>
+                <h3>{a.subject}</h3>
+                <AnnouncementContent announcement={a} name={user.name} />
+              </div>
+            ))}
+          </section>
+        ) : null}
         {premium && sessions.length > 1 ? (
           <div className="card section-top">
             <h3>{siteText("account.upcoming-saturdays")}</h3>
@@ -424,7 +460,12 @@ export default async function Account({
                         {fmtDate(b.date)} {siteText("account.at")} {b.time}
                       </b>
                       <p>
-                        {b.topic} · {b.status}
+                        {b.topic}{" "}
+                        <span
+                          className={`badge b-${b.status === "confirmed" ? "ok" : "warn"}`}
+                        >
+                          {b.status}
+                        </span>
                       </p>
                       {b.status === "confirmed" ? (
                         <CalendarButtons
@@ -473,14 +514,6 @@ export default async function Account({
             </Link>
           </div>
         </div>
-        {data.announcements
-          .filter((a) => announcementVisible(a, user.id, user.role))
-          .map((a) => (
-            <div className="card section-top" key={a.id}>
-              <h3>{a.subject}</h3>
-              <AnnouncementContent announcement={a} name={user.name} />
-            </div>
-          ))}
       </>
     );
   })();
@@ -503,23 +536,33 @@ export default async function Account({
             </div>
           </div>
           <nav aria-label="Member area">
-            {tabs.map(([key, label]) => (
+            {tabs.map(([key, label, icon]) => (
               <Link
                 className={key === tab ? "on" : ""}
                 aria-current={key === tab ? "page" : undefined}
                 key={key}
                 href={`/account?tab=${key}`}
               >
-                {siteText(`account.tab-${key}`) || label}
-                {key === "podcast" && !premium ? " 🔒" : ""}
+                <Icon name={icon} size={18} />
+                <span>{siteText(`account.tab-${key}`) || label}</span>
+                {premiumTabs.includes(key) && !premium ? (
+                  <span className="tab-lock" title="Premium">
+                    <Icon name="lock" size={14} />
+                    <span className="visually-hidden">Premium</span>
+                  </span>
+                ) : null}
               </Link>
             ))}
             {user.role === "admin" ? (
-              <Link href="/admin">{siteText("account.admin-panel")}</Link>
+              <Link href="/admin">
+                <Icon name="sliders" size={18} />
+                <span>{siteText("account.admin-panel")}</span>
+              </Link>
             ) : null}
           </nav>
           <form action={signOut}>
             <button className="side-signout">
+              <Icon name="logout" size={18} />
               {siteText("account.sign-out")}
             </button>
           </form>

@@ -7,26 +7,27 @@ export async function GET(
 ) {
   const { id } = await params,
     state = getDemoState();
-  const reference = Object.entries(state.data.siteImages ?? {}).find(
-    ([, value]) => value.imageId === id,
-  );
-  const slot =
-    reference && siteImageSlots().find((slot) => slot.id === reference[0]);
-  const image = slot && state.images.get(id);
   const headers = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
   };
-  if (!image || !slot)
-    return new Response("Not found", { status: 404, headers });
-  if (
-    slot.postId &&
-    !state.data.posts.some(
-      (post) => post.id === slot.postId && post.status === "published",
-    ) &&
-    (await getUser())?.role !== "admin"
-  )
-    return new Response("Not found", { status: 404, headers });
+  const image = state.images.get(id);
+  if (!image) return new Response("Not found", { status: 404, headers });
+  // Admins browse the whole media library; visitors only see images placed on published pages.
+  if ((await getUser())?.role !== "admin") {
+    const slots = Object.entries(state.data.siteImages ?? {})
+      .filter(([, value]) => value.imageId === id)
+      .map(([slotId]) => siteImageSlots().find((slot) => slot.id === slotId))
+      .filter((slot) => !!slot);
+    const visible = slots.some(
+      (slot) =>
+        !slot.postId ||
+        state.data.posts.some(
+          (post) => post.id === slot.postId && post.status === "published",
+        ),
+    );
+    if (!visible) return new Response("Not found", { status: 404, headers });
+  }
   return new Response(Buffer.from(image.bytes), {
     headers: { ...headers, "Content-Type": image.type },
   });

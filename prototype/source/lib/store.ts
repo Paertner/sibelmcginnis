@@ -12,9 +12,17 @@ export type Announcement = (typeof seed)["announcements"][number] & {
   imageId?: string;
   emailStatus?: "prepared";
 };
+export type MediaFile = {
+  id: string;
+  fileName: string;
+  type: string;
+  size: number;
+  uploadedAt: string;
+};
 export type Store = Omit<typeof seed, "members" | "announcements"> & {
   siteCopy?: Record<string,string>;
-  siteImages?: Record<string, {imageId?:string;alt?:string;position?:string;fileName?:string}>;
+  siteImages?: Record<string, {imageId?:string;builtin?:string;alt?:string;position?:string;fileName?:string}>;
+  media?: MediaFile[];
   members: Member[];
   announcements: Announcement[];
 };

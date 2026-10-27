@@ -2,7 +2,7 @@ import { SiteSelect } from "./site-select";
 import { ActionForm, ConfirmDelete } from "./action-form";
 import { AdminDialog, AdminCancel } from "./admin-dialog";
 import { adminMutation } from "@/lib/actions";
-import { today, nextSaturday } from "@/lib/dates";
+import { fmtDate, today, nextSaturday } from "@/lib/dates";
 import type { Episode, Member, Post, Session, Store } from "@/lib/store";
 type InputProps = {
   name: string;
@@ -73,14 +73,20 @@ function Editor({
   entity,
   id,
   children,
+  quiet = false,
 }: {
   title: string;
   entity: string;
   id?: string;
   children: React.ReactNode;
+  quiet?: boolean;
 }) {
   return (
-    <AdminDialog title={title} trigger={id ? "Edit" : title} primary={!id}>
+    <AdminDialog
+      title={title}
+      trigger={id ? "Edit" : title}
+      primary={!id && !quiet}
+    >
       <ActionForm action={adminMutation}>
         <EntityFields entity={entity} id={id} />
         {children}
@@ -206,10 +212,13 @@ export function SessionEditor({
   return (
     <Editor
       title={
-        session ? `Edit ${session.date}: ${session.topic}` : "+ Add session"
+        session
+          ? `Edit ${fmtDate(session.date, { month: "short", day: "numeric" })}: ${session.topic}`
+          : "Add a session"
       }
       entity="sessions"
       id={session?.id}
+      quiet
     >
       <div className="row">
         <Field

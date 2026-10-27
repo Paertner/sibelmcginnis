@@ -9,7 +9,7 @@ import { isPremium } from "./access";
 import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
 import copyCatalog from "./site-copy-catalog.json";
-import { updateSiteImage } from "./site-images";
+import { deleteMedia, updateSiteImage, uploadMedia } from "./site-images";
 
 const text = (f: FormData, key: string, max = 20000) =>
   String(f.get(key) ?? "")
@@ -432,6 +432,10 @@ export async function adminMutation(
       );
     } else if (entity === "siteImages") {
       return success(await updateSiteImage(form));
+    } else if (entity === "media") {
+      if (op === "remove") return success(await deleteMedia(form));
+      const { id: mediaId, message } = await uploadMedia(form);
+      return { ...success(message), id: mediaId };
     } else if (entity === "siteCopy") {
       const allowed = new Map(
         copyCatalog.map((entry) => [entry.id, entry.text]),

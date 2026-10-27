@@ -1,4 +1,4 @@
-import { updateSiteImage } from "./site-images";
+import { deleteMedia, updateSiteImage, uploadMedia } from "./site-images";
 import copyCatalog from "./site-copy-catalog.json";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
@@ -431,6 +431,10 @@ export async function adminMutation(
       );
     } else if (entity === "siteImages") {
       return success(await updateSiteImage(form));
+    } else if (entity === "media") {
+      if (op === "remove") return success(await deleteMedia(form));
+      const { id: mediaId, message } = await uploadMedia(form);
+      return { ...success(message), id: mediaId };
     } else if (entity === "siteCopy") {
       const allowed = new Map(
         copyCatalog.map((entry) => [entry.id, entry.text]),
