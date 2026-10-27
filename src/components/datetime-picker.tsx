@@ -41,10 +41,6 @@ export function DateTimePicker({
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
   const [focusDay, setFocusDay] = useState(today);
-  const zone = useMemo(
-    () => Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " "),
-    [],
-  );
   const now = new Date();
   const nowTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
@@ -245,7 +241,6 @@ export function DateTimePicker({
                 );
               })}
             </div>
-            <small className="dtp-zone">Times in your time zone ({zone})</small>
           </div>
           <div className="dtp-actions">
             <button

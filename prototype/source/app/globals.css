@@ -5657,11 +5657,6 @@ ul.ticks li::before {
   opacity: 0.35;
   cursor: default;
 }
-.dtp-zone {
-  margin-top: 10px;
-  font-size: 0.72rem;
-  color: var(--muted);
-}
 .dtp-actions {
   grid-column: 1 / -1;
   display: flex;
