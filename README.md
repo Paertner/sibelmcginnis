@@ -1,6 +1,6 @@
 # Morning Coffee Community
 
-Next.js App Router + TypeScript + Tailwind port of the approved HTML prototype. The original remains in `../morning-coffee-prototype/`.
+Next.js App Router + TypeScript + Tailwind port of the approved HTML prototype. The approved legacy HTML prototype remains in the project workspace; this repository contains the active Next.js application.
 
 ## Run locally
 
@@ -74,4 +74,4 @@ Site content has separate General settings, Page text and Page images tabs. src/
 
 ## Vercel preview
 
-This repository hosts the review version of the Morning Coffee Community Next.js app. The review store is in-memory and resets on server restart. Production mode disables sample sign-in and all mutations. Supabase, Stripe, Zoom, and Resend are not connected; this deployment is for public review only, not live membership or payments.
+Import this repository into Vercel with the repository root as the project root. The app is deployable as a public review preview. Production mode disables sample sign-in and all state-changing actions. Supabase, Stripe, Zoom, and Resend are not connected; do not use this deployment for real memberships or payments.

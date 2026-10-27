@@ -1,0 +1,418 @@
+{
+  "settings": {
+    "heroTitle": "Step into your next chapter with confidence, clarity, and care.",
+    "heroSub": "Self-awareness is the foundation of personal growth, and by engaging in honest reflections, you can become a better version of yourself.",
+    "meetingDay": "Saturdays",
+    "meetingTime": "10:30 AM",
+    "meetingMinutes": 90,
+    "autoZoom": true,
+    "premiumPrice": 20,
+    "consultsPerMonth": 1,
+    "consultMinutes": 45,
+    "autoConfirm": true,
+    "topics": [
+      "Emotional Awareness",
+      "Mindful Presence",
+      "Inner Confidence",
+      "Personal Development",
+      "Stress Management",
+      "Feminine Growth",
+      "Authentic Communication",
+      "Body Language",
+      "Relationships & Boundaries",
+      "Community & Belonging",
+      "Leadership Foundations"
+    ]
+  },
+  "posts": [
+    {
+      "id": "p1",
+      "title": "Why Slowing Down Is a Leadership Skill",
+      "access": "public",
+      "status": "published",
+      "category": "Mindset",
+      "cover": 1,
+      "date": "2026-10-18",
+      "excerpt": "This week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply…",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p2",
+      "title": "Three Questions to Ask Before You Say Yes",
+      "access": "public",
+      "status": "published",
+      "category": "Boundaries",
+      "cover": 2,
+      "date": "2026-10-12",
+      "excerpt": "Try this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small…",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p3",
+      "title": "A Gentle Guide to Emotional Awareness",
+      "access": "free",
+      "status": "published",
+      "category": "Emotional Health",
+      "cover": 0,
+      "date": "2026-10-07",
+      "excerpt": "You do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. …",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p4",
+      "title": "Reading the Room: Body Language Basics",
+      "access": "free",
+      "status": "published",
+      "category": "Communication",
+      "cover": 1,
+      "date": "2026-09-30",
+      "excerpt": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, t…",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p5",
+      "title": "The Five-Minute Evening Reflection",
+      "access": "free",
+      "status": "published",
+      "category": "Practice",
+      "cover": 2,
+      "date": "2026-09-23",
+      "excerpt": "This week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply…",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p6",
+      "title": "Quarterly Theme Deep Dive: Inner Confidence",
+      "access": "premium",
+      "status": "published",
+      "category": "Quarterly Theme",
+      "cover": 0,
+      "date": "2026-10-16",
+      "excerpt": "Try this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small…",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p7",
+      "title": "Saturday Circle Recap: Relationships & Boundaries",
+      "access": "premium",
+      "status": "published",
+      "category": "Session Recap",
+      "cover": 1,
+      "date": "2026-10-09",
+      "excerpt": "You do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. …",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p8",
+      "title": "Overthinking Toolkit (Members Workbook)",
+      "access": "premium",
+      "status": "published",
+      "category": "Practice",
+      "cover": 2,
+      "date": "2026-10-02",
+      "excerpt": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, t…",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    },
+    {
+      "id": "p9",
+      "title": "Draft: Stress Management for Busy Seasons",
+      "access": "free",
+      "status": "draft",
+      "category": "Wellbeing",
+      "cover": 0,
+      "date": "2026-10-20",
+      "excerpt": "This week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply…",
+      "body": "Growth rarely arrives as a single dramatic moment. It shows up in small, honest pauses — the breath before you answer, the question you finally ask yourself, the boundary you say out loud.\n\nThis week we slowed down and looked at the stories we tell ourselves. Self-awareness is not self-criticism; it is simply noticing, with kindness, what is already there.\n\nTry this: set a timer for five minutes tonight. Write down one thing you felt today, one thing you needed, and one small action you can take tomorrow. Repeat for a week and watch the pattern appear.\n\nYou do not have to do this alone. The women in our Saturday circle bring different stories, yet the same quiet courage. Sharing it makes it lighter for everyone."
+    }
+  ],
+  "members": [
+    {
+      "id": "m0",
+      "name": "Amelia Hart",
+      "tier": "free",
+      "status": "active",
+      "email": "amelia.hart@example.com",
+      "joined": "2026-10-15",
+      "note": ""
+    },
+    {
+      "id": "m1",
+      "name": "Layla Demir",
+      "tier": "premium",
+      "status": "active",
+      "email": "layla.demir@example.com",
+      "joined": "2026-09-28",
+      "note": ""
+    },
+    {
+      "id": "m2",
+      "name": "Nigar Aliyeva",
+      "tier": "premium",
+      "status": "active",
+      "email": "nigar.aliyeva@example.com",
+      "joined": "2026-09-11",
+      "note": ""
+    },
+    {
+      "id": "m3",
+      "name": "Sophie Laurent",
+      "tier": "free",
+      "status": "active",
+      "email": "sophie.laurent@example.com",
+      "joined": "2026-08-25",
+      "note": ""
+    },
+    {
+      "id": "m4",
+      "name": "Dana Whitfield",
+      "tier": "premium",
+      "status": "active",
+      "email": "dana.whitfield@example.com",
+      "joined": "2026-08-08",
+      "note": ""
+    },
+    {
+      "id": "m5",
+      "name": "Aysel Karimova",
+      "tier": "premium",
+      "status": "active",
+      "email": "aysel.karimova@example.com",
+      "joined": "2026-07-22",
+      "note": ""
+    },
+    {
+      "id": "m6",
+      "name": "Priya Nair",
+      "tier": "free",
+      "status": "active",
+      "email": "priya.nair@example.com",
+      "joined": "2026-07-05",
+      "note": ""
+    },
+    {
+      "id": "m7",
+      "name": "Elena Petrova",
+      "tier": "premium",
+      "status": "active",
+      "email": "elena.petrova@example.com",
+      "joined": "2026-06-18",
+      "note": ""
+    },
+    {
+      "id": "m8",
+      "name": "Maya Collins",
+      "tier": "free",
+      "status": "active",
+      "email": "maya.collins@example.com",
+      "joined": "2026-06-01",
+      "note": ""
+    },
+    {
+      "id": "m9",
+      "name": "Zara Hussain",
+      "tier": "premium",
+      "status": "active",
+      "email": "zara.hussain@example.com",
+      "joined": "2026-05-15",
+      "note": ""
+    },
+    {
+      "id": "m10",
+      "name": "Olivia Brandt",
+      "tier": "free",
+      "status": "paused",
+      "email": "olivia.brandt@example.com",
+      "joined": "2026-04-28",
+      "note": ""
+    },
+    {
+      "id": "m11",
+      "name": "Leyla Mammadova",
+      "tier": "premium",
+      "status": "active",
+      "email": "leyla.mammadova@example.com",
+      "joined": "2026-04-11",
+      "note": ""
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s0",
+      "date": "2026-09-26",
+      "time": "10:30",
+      "topic": "Emotional Awareness",
+      "zoom": "https://example.invalid/zoom/s0",
+      "pass": "3zvrbz",
+      "notes": "Key takeaways and reflection prompts from this session.",
+      "podcast": "pc0"
+    },
+    {
+      "id": "s1",
+      "date": "2026-10-03",
+      "time": "10:30",
+      "topic": "Inner Confidence",
+      "zoom": "https://example.invalid/zoom/s1",
+      "pass": "pzpgdv",
+      "notes": "Key takeaways and reflection prompts from this session.",
+      "podcast": "pc1"
+    },
+    {
+      "id": "s2",
+      "date": "2026-10-10",
+      "time": "10:30",
+      "topic": "Relationships & Boundaries",
+      "zoom": "https://example.invalid/zoom/s2",
+      "pass": "w4kahx",
+      "notes": "Key takeaways and reflection prompts from this session.",
+      "podcast": "pc2"
+    },
+    {
+      "id": "s3",
+      "date": "2026-10-17",
+      "time": "10:30",
+      "topic": "Mindful Presence",
+      "zoom": "https://example.invalid/zoom/s3",
+      "pass": "030gdi",
+      "notes": "Key takeaways and reflection prompts from this session.",
+      "podcast": "pc3"
+    },
+    {
+      "id": "s4",
+      "date": "2026-10-24",
+      "time": "10:30",
+      "topic": "Stress Management",
+      "zoom": "https://example.invalid/zoom/s4",
+      "pass": "avpk8g",
+      "notes": "",
+      "podcast": ""
+    },
+    {
+      "id": "s5",
+      "date": "2026-10-31",
+      "time": "10:30",
+      "topic": "Authentic Communication",
+      "zoom": "https://example.invalid/zoom/s5",
+      "pass": "f4eayw",
+      "notes": "",
+      "podcast": ""
+    },
+    {
+      "id": "s6",
+      "date": "2026-11-07",
+      "time": "10:30",
+      "topic": "Body Language",
+      "zoom": "https://example.invalid/zoom/s6",
+      "pass": "ic9bil",
+      "notes": "",
+      "podcast": ""
+    },
+    {
+      "id": "s7",
+      "date": "2026-11-14",
+      "time": "10:30",
+      "topic": "Leadership Foundations",
+      "zoom": "https://example.invalid/zoom/s7",
+      "pass": "ekw8wv",
+      "notes": "",
+      "podcast": ""
+    }
+  ],
+  "availability": {
+    "1": ["10:00", "14:00"],
+    "2": ["11:00", "15:00"],
+    "3": ["10:00", "13:00", "16:00"],
+    "4": ["14:00"],
+    "5": ["10:00", "11:00"]
+  },
+  "bookings": [
+    {
+      "id": "b1",
+      "memberId": "m4",
+      "date": "2026-10-23",
+      "time": "14:00",
+      "topic": "Setting boundaries at work",
+      "status": "confirmed",
+      "zoom": "https://example.invalid/zoom/b1"
+    },
+    {
+      "id": "b2",
+      "memberId": "m7",
+      "date": "2026-10-25",
+      "time": "10:00",
+      "topic": "Confidence in meetings",
+      "status": "confirmed",
+      "zoom": "https://example.invalid/zoom/b2"
+    }
+  ],
+  "podcasts": [
+    {
+      "id": "pc0",
+      "num": 1,
+      "title": "Emotional Awareness: Naming What You Feel",
+      "status": "published",
+      "duration": "38:00",
+      "audioName": "",
+      "date": "2026-09-27",
+      "description": "Catch up on the conversation: key ideas, reflection prompts and one practice to try this week."
+    },
+    {
+      "id": "pc1",
+      "num": 2,
+      "title": "Inner Confidence: Quiet Strength",
+      "status": "published",
+      "duration": "42:00",
+      "audioName": "",
+      "date": "2026-10-04",
+      "description": "Catch up on the conversation: key ideas, reflection prompts and one practice to try this week."
+    },
+    {
+      "id": "pc2",
+      "num": 3,
+      "title": "Relationships & Boundaries: Saying No Kindly",
+      "status": "published",
+      "duration": "45:00",
+      "audioName": "",
+      "date": "2026-10-11",
+      "description": "Catch up on the conversation: key ideas, reflection prompts and one practice to try this week."
+    },
+    {
+      "id": "pc3",
+      "num": 4,
+      "title": "Mindful Presence: The Power of One Breath",
+      "status": "published",
+      "duration": "36:00",
+      "audioName": "",
+      "date": "2026-10-18",
+      "description": "Catch up on the conversation: key ideas, reflection prompts and one practice to try this week."
+    },
+    {
+      "id": "pc4",
+      "num": 5,
+      "title": "Bonus: A Morning Reset in 10 Minutes",
+      "status": "published",
+      "duration": "11:00",
+      "audioName": "",
+      "date": "2026-10-20",
+      "description": "Catch up on the conversation: key ideas, reflection prompts and one practice to try this week."
+    },
+    {
+      "id": "pc5",
+      "num": 6,
+      "title": "Bonus: Q&A With Sibel",
+      "status": "published",
+      "duration": "29:00",
+      "audioName": "",
+      "date": "2026-10-20",
+      "description": "Catch up on the conversation: key ideas, reflection prompts and one practice to try this week."
+    }
+  ],
+  "announcements": [
+    {
+      "id": "a1",
+      "subject": "Welcome to the new quarter: Inner Confidence",
+      "audience": "premium",
+      "date": "2026-10-15",
+      "body": "Dear members, this quarter we focus on Inner Confidence…"
+    }
+  ]
+}
