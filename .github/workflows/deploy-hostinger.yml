@@ -1,0 +1,69 @@
+# Builds the Vite prototype and publishes dist/ to the `hostinger` branch.
+# Point Hostinger's Git deployment (hPanel > Advanced > Git) at that branch.
+# The branch history is kept linear (no force-push) because Hostinger updates
+# its copy with a plain `git pull`.
+name: Deploy prototype to Hostinger branch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "prototype/**"
+      - ".github/workflows/deploy-hostinger.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: false
+
+env:
+  DEPLOY_BRANCH: hostinger
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: prototype/package-lock.json
+
+      - name: Build
+        working-directory: prototype
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Publish dist/ to deploy branch
+        env:
+          REPO_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads "$REPO_URL" "$DEPLOY_BRANCH" >/dev/null; then
+            git clone --quiet --depth 1 --branch "$DEPLOY_BRANCH" "$REPO_URL" deploy
+          else
+            git init --quiet deploy
+            git -C deploy checkout --quiet -b "$DEPLOY_BRANCH"
+            git -C deploy remote add origin "$REPO_URL"
+          fi
+
+          # Replace everything except .git with the fresh build.
+          find deploy -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a prototype/dist/. deploy/
+
+          cd deploy
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Build output unchanged; nothing to publish."
+            exit 0
+          fi
+          git commit --quiet -m "Deploy ${GITHUB_SHA::7} from main"
+          git push origin "$DEPLOY_BRANCH"
