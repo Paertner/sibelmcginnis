@@ -10,6 +10,7 @@ import { htmlText, safeHtml, escapeHtml } from "./safe-html";
 import { today } from "./dates";
 import { siteOrigin } from "./site-url";
 import { memberRole } from "./membership";
+import { assertEmailQuota, recordEmails } from "./email-quota";
 
 export function announcementVisible(
   announcement: Announcement,
@@ -65,6 +66,7 @@ export async function publishAnnouncement(form: FormData) {
   );
   if (!recipients.length)
     throw new Error("Choose at least one member or group.");
+  assertEmailQuota(recipients.length);
   const file = form.get("image");
   let upload: { bytes: Uint8Array; type: string; name: string } | undefined;
   if (file instanceof File && file.size) {
@@ -116,6 +118,7 @@ export async function publishAnnouncement(form: FormData) {
       name: member.name,
       subject,
     });
+  recordEmails(recipients.length);
   return recipients.length;
 }
 

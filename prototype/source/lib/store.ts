@@ -42,6 +42,7 @@ export type Integrations = {
     fromEmail?: string;
     keyTail?: string;
     savedAt?: string;
+    dailyLimit?: number;
   };
 };
 export type MediaFile = {
@@ -67,6 +68,8 @@ export type Store = Omit<
   media?: MediaFile[];
   siteSettings?: SiteSettings;
   integrations?: Integrations;
+  /** Emails sent on one UTC day, for the daily sending limit. */
+  emailUsage?: { date: string; sent: number };
   emailTemplates?: SavedEmailTemplate[];
   emailFooter?: EmailBlock[];
   members: Member[];

@@ -6770,3 +6770,56 @@ ul.ticks li::before {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Daily email limit: today's usage plus this announcement's recipients. */
+.quota-meter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin: 12px 0 4px;
+  font-size: 0.82rem;
+  color: var(--ad-muted);
+}
+.quota-meter b {
+  color: var(--ad-ink);
+  font-weight: 500;
+}
+.quota-bar {
+  display: flex;
+  width: 160px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ad-accent-soft);
+  overflow: hidden;
+}
+.quota-bar i {
+  display: block;
+  height: 100%;
+  background: var(--ad-accent);
+}
+.quota-bar i.quota-pending {
+  background: var(--ad-accent-line);
+  opacity: 0.6;
+}
+.quota-meter.over .quota-bar i.quota-pending {
+  background: #b3392c;
+  opacity: 1;
+}
+.quota-error {
+  flex-basis: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fbeceb;
+  color: #9d2f24;
+  font-size: 0.84rem;
+}
+.quota-summary b {
+  display: block;
+  margin-top: 6px;
+  font: 400 1.6rem var(--font-inter);
+  color: var(--ad-ink);
+}
+.ad .admin-row-actions .notify-link {
+  color: var(--ad-accent);
+}

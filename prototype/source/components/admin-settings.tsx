@@ -2,6 +2,7 @@ import { useState } from "react";
 import { adminMutation } from "@/lib/actions";
 import type { MediaItem, SiteImage } from "@/lib/site-images";
 import type { Integrations, SiteSettings } from "@/lib/store";
+import type { EmailQuota } from "@/lib/email-quota";
 import { ActionForm } from "./action-form";
 import { Icon } from "./admin-icons";
 import { MediaPicker } from "./media-library";
@@ -306,7 +307,13 @@ function Secret({
   );
 }
 
-function IntegrationsTab({ integrations }: { integrations: Integrations }) {
+function IntegrationsTab({
+  integrations,
+  quota,
+}: {
+  integrations: Integrations;
+  quota: EmailQuota;
+}) {
   const zoom = integrations.zoom,
     resend = integrations.resend;
   return (
@@ -389,6 +396,26 @@ function IntegrationsTab({ integrations }: { integrations: Integrations }) {
             placeholder="hello@sibelmcginnis.com"
           />
         </div>
+        <div className="row">
+          <Text
+            name="dailyLimit"
+            label="Daily email limit"
+            type="number"
+            value={String(quota.limit)}
+            required
+            hint="100 on Resend’s free plan. Raise it after upgrading the plan."
+          />
+          <div className="field quota-summary">
+            Sent today
+            <b>
+              {quota.sent} of {quota.limit}
+            </b>
+            <small className="setting-hint">
+              {quota.left} left. Counts every email the site sends; resets at
+              midnight UTC.
+            </small>
+          </div>
+        </div>
       </ActionForm>
     </>
   );
@@ -399,7 +426,9 @@ export function AdminSettings({
   integrations,
   logo,
   media,
+  quota,
 }: {
+  quota: EmailQuota;
   settings: SiteSettings;
   integrations: Integrations;
   logo: SiteImage;
@@ -426,7 +455,7 @@ export function AdminSettings({
       ) : tab === "payments" ? (
         <Payments stripe={integrations.stripe} />
       ) : (
-        <IntegrationsTab integrations={integrations} />
+        <IntegrationsTab integrations={integrations} quota={quota} />
       )}
     </div>
   );

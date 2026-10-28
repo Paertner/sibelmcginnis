@@ -14,6 +14,7 @@ import {
   type SavedEmailTemplate,
 } from "@/lib/email-blocks";
 import type { MediaItem } from "@/lib/site-images";
+import type { EmailQuota } from "@/lib/email-quota";
 import { Icon } from "./admin-icons";
 import type { ActionResult } from "./action-form";
 import {
@@ -124,16 +125,23 @@ export function AnnouncementComposer({
   templates,
   footer,
   initialRecipients = [],
+  quota,
+  draft,
 }: {
   initialRecipients?: string[];
+  quota: EmailQuota;
+  /** A ready-made email, e.g. from "Send notification" on a post or episode. */
+  draft?: { subject: string; blocks: EmailBlock[]; groups: string[] };
   members: Recipient[];
   media: MediaItem[];
   templates: SavedEmailTemplate[];
   footer: EmailBlock[];
 }) {
-  const first = emailTemplates[0];
+  const first = draft
+    ? { id: "", subject: draft.subject, blocks: draft.blocks, footer: true }
+    : emailTemplates[0];
   const [selectedMembers, setSelectedMembers] = useState<string[]>(initialRecipients),
-    [groups, setGroups] = useState<string[]>([]);
+    [groups, setGroups] = useState<string[]>(draft?.groups ?? []);
   const [listOpen, setListOpen] = useState(false);
   const [query, setQuery] = useState(""),
     [highlight, setHighlight] = useState(0);
@@ -423,6 +431,37 @@ export function AnnouncementComposer({
             {count} unique recipient{count === 1 ? "" : "s"}
           </span>
         </div>
+        <div
+          className={`quota-meter${count > quota.left ? " over" : ""}`}
+          aria-live="polite"
+        >
+          <span className="quota-bar" aria-hidden="true">
+            <i
+              style={{
+                width: `${Math.min(100, (quota.sent / quota.limit) * 100)}%`,
+              }}
+            />
+            <i
+              className="quota-pending"
+              style={{
+                width: `${Math.min(100 - Math.min(100, (quota.sent / quota.limit) * 100), (count / quota.limit) * 100)}%`,
+              }}
+            />
+          </span>
+          <span>
+            <b>
+              {quota.sent} of {quota.limit}
+            </b>{" "}
+            emails sent today · {quota.left} left
+          </span>
+          {count > quota.left ? (
+            <span className="quota-error" role="alert">
+              This email would go to {count} people, but only {quota.left} of
+              today’s {quota.limit} emails are left. Choose fewer recipients or
+              send the rest tomorrow.
+            </span>
+          ) : null}
+        </div>
         <p className="hint">
           Registered members only. A person selected individually and through a
           group receives one message.
@@ -642,7 +681,10 @@ export function AnnouncementComposer({
         />
       ) : null}
       <div className="composer-actions">
-        <button className="btn" disabled={pending || !count}>
+        <button
+          className="btn"
+          disabled={pending || !count || count > quota.left}
+        >
           {pending ? "Preparing…" : "Publish & prepare email"}
         </button>
       </div>

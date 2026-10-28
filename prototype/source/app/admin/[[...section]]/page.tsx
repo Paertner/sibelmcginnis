@@ -4,6 +4,8 @@ import { AdminDashboard } from "@/components/admin-dashboard";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { MediaLibrary } from "@/components/media-library";
 import { AdminSettings } from "@/components/admin-settings";
+import { emailQuota } from "@/lib/email-quota";
+import { notificationDraft } from "@/lib/notification-drafts";
 import { SiteContentEditor } from "@/components/site-content-editor";
 import { SiteContentTabs } from "@/components/site-content-tabs";
 import {
@@ -107,6 +109,7 @@ export default async function Admin({
     tier?: string;
     access?: string;
     to?: string;
+    about?: string;
   }>;
 }) {
   const user = await requireAdmin();
@@ -114,7 +117,7 @@ export default async function Admin({
     section = route[0] ?? "dashboard";
   if (route.length > 1 || !sections.some(([key]) => key === section))
     notFound();
-  const { to } = await searchParams;
+  const { to, about } = await searchParams;
   const data = getStore(),
     settings = data.settings;
   const media =
@@ -334,6 +337,14 @@ export default async function Admin({
                         >
                           View
                         </Link>
+                        {p.status === "published" ? (
+                          <Link
+                            className="btn btn-sm btn-ghost notify-link"
+                            href={`/admin/announce?about=post:${p.id}`}
+                          >
+                            Send notification
+                          </Link>
+                        ) : null}
                       </td>
                     </AdminRow>
                   ))}
@@ -394,6 +405,14 @@ export default async function Admin({
                       </td>
                       <td className="admin-row-actions">
                         <EpisodeEditor episode={ep} />
+                        {ep.status === "published" ? (
+                          <Link
+                            className="btn btn-sm btn-ghost notify-link"
+                            href={`/admin/announce?about=podcast:${ep.id}`}
+                          >
+                            Send notification
+                          </Link>
+                        ) : null}
                         {ep.audioName && (
                           <>
                             {" "}
@@ -619,7 +638,9 @@ export default async function Admin({
         {section === "announce" ? (
           <div className="admin-announcements">
             <AnnouncementComposer
-              key={to ?? ""}
+              key={`${to ?? ""}|${about ?? ""}`}
+              quota={emailQuota()}
+              draft={notificationDraft(about)}
               initialRecipients={
                 to && data.members.some((member) => member.id === to) ? [to] : []
               }
@@ -646,6 +667,7 @@ export default async function Admin({
           <AdminSettings
             settings={data.siteSettings ?? {}}
             integrations={data.integrations ?? {}}
+            quota={emailQuota()}
             logo={siteImage("shared.logo")}
             media={media}
           />

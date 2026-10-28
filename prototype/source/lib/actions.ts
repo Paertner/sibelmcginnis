@@ -596,6 +596,7 @@ export async function adminMutation(
           fromEmail,
           keyTail: key ? key.slice(-4) : integrations.resend?.keyTail,
           savedAt: now,
+          dailyLimit: number(form, "dailyLimit", 1, 100000),
         };
         message = "Email settings saved.";
       } else throw new Error("Unknown setting.");
