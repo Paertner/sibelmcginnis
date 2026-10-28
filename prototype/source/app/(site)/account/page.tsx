@@ -11,7 +11,6 @@ import { CalendarButtons } from "@/components/calendar-buttons";
 import { AnnouncementContent } from "@/components/announcement-content";
 import { announcementVisible } from "@/lib/announcements";
 import { meetingUrl } from "@/lib/site-url";
-import { CopyLink } from "@/components/copy-link";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { BookingForm } from "@/components/consultation-calendar";
 import { ActionForm } from "@/components/action-form";
@@ -352,55 +351,62 @@ export default async function Account({
           {siteText("account.hello")} {user.name.split(" ")[0]} ☕
         </h1>
         {next ? (
-          <div className={`zoomcard ${premium ? "" : "locked"}`}>
-            <p className="eyebrow">
+          <section
+            className={`next-circle member-circle${premium ? "" : " locked"}`}
+            aria-labelledby="member-circle-title"
+          >
+            <p className="next-circle-eyebrow">
               {siteText("account.your-next-saturday-circle")}
             </p>
-            <h2>
-              {fmtDate(next.date)} · {data.settings.meetingTime}
-            </h2>
-            <p>
-              {siteText("account.topic")} <b>{next.topic}</b>
-            </p>
+            <div className="next-circle-row">
+              <span className="date-block" aria-hidden="true">
+                <small>{fmtDate(next.date, { weekday: "short" })}</small>
+                <b>{fmtDate(next.date, { day: "numeric" })}</b>
+                <small>{fmtDate(next.date, { month: "short" })}</small>
+              </span>
+              <div>
+                <h2 id="member-circle-title">{next.topic}</h2>
+                <p>
+                  {fmtDate(next.date)} · {data.settings.meetingTime} ·{" "}
+                  {data.settings.meetingMinutes} min
+                </p>
+              </div>
+            </div>
             {premium ? (
               next.zoom ? (
                 <>
-                  <p className="meeting-link">
-                    {siteText(
-                      "account.this-week-s-meeting-protected-session-access",
-                    )}
-                  </p>
-                  <p className="muted-on-dark">
+                  <div className="next-circle-actions">
+                    <Link className="btn" href={meetingUrl("session", next.id)}>
+                      {siteText("account.open-session")}
+                    </Link>
+                    <CalendarButtons event={sessionEvent(next)} kind="session" />
+                  </div>
+                  <p className="next-circle-note">
                     {siteText(
                       "account.your-premium-membership-is-checked-when-you-open-the-session-even",
                     )}
                   </p>
-                  <div className="hero-btns section-gap">
-                    <Link className="btn" href={meetingUrl("session", next.id)}>
-                      {siteText("account.open-session")}
-                    </Link>
-                    <CopyLink value={meetingUrl("session", next.id)} />
-                  </div>
-                  <CalendarButtons event={sessionEvent(next)} kind="session" />
                 </>
               ) : (
-                <p>
+                <p className="next-circle-note">
                   {siteText("account.your-meeting-link-will-be-added-soon")}
                 </p>
               )
             ) : (
               <>
-                <p>
+                <p className="next-circle-note">
                   {siteText(
                     "account.the-zoom-link-is-available-to-premium-members",
                   )}
                 </p>
-                <Link className="btn" href="/account?tab=membership">
-                  {siteText("account.unlock-my-zoom-link")}
-                </Link>
+                <div className="next-circle-actions">
+                  <Link className="btn" href="/account?tab=membership">
+                    {siteText("account.unlock-my-zoom-link")}
+                  </Link>
+                </div>
               </>
             )}
-          </div>
+          </section>
         ) : (
           <div className="card">
             <h3>{siteText("account.no-saturday-session-scheduled-yet")}</h3>

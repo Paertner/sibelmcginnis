@@ -80,7 +80,7 @@ function createFreshState(): DemoState {
 
 /** Stage-one repository. Replace with Supabase; never use this process-local state for live customers. */
 export function getDemoState() {
-  const state = (globalStore.morningCoffeeDemo ??= createState());
+  const state = (globalStore.morningCoffeeDemo ??= normalize(createState()));
   // Upgrade a running development preview without throwing away its edits.
   if (!state.images) {
     state.images = new Map();
@@ -91,6 +91,12 @@ export function getDemoState() {
           Date.now() + 30 * 86400000,
         ).toISOString();
   }
+  return state;
+}
+// Posts have two access levels now; older "free" posts are open to everyone.
+function normalize(state: DemoState) {
+  for (const post of state.data.posts)
+    if ((post.access as string) === "free") post.access = "public";
   return state;
 }
 export const getStore = () => getDemoState().data;
@@ -140,13 +146,18 @@ export async function hydratePreviewImages() {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
-    for (const {id,...asset} of rows) state.images.set(id,{...asset,bytes:new Uint8Array(asset.bytes)});
+    // Audio shares the media store under an "audio:" key so large files stay out of localStorage.
+    for (const {id,...asset} of rows) {
+      if (id.startsWith("audio:")) state.audio.set(id.slice(6),{type:asset.type,bytes:new Uint8Array(asset.bytes)});
+      else state.images.set(id,{...asset,bytes:new Uint8Array(asset.bytes)});
+    }
   } catch { window.dispatchEvent(new CustomEvent("preview-toast",{detail:"Saved images could not be loaded in this browser."})); }
 }
 export function persistPreview() {
   const state = getDemoState();
   const images = [...state.images].map(([id,asset]) => ({id,...asset}));
-  const snapshot = {data:structuredClone(state.data),emailDrafts:structuredClone(state.emailDrafts),audio:[...state.audio].map(([id,asset])=>[id,{...asset,bytes:[...asset.bytes]}])};
+  const audio = [...state.audio].map(([id,asset]) => ({id:`audio:${id}`,name:"",...asset}));
+  const snapshot = {data:structuredClone(state.data),emailDrafts:structuredClone(state.emailDrafts)};
   const warn = () => window.dispatchEvent(new CustomEvent("preview-toast",{detail:"Browser storage is full. Changes remain available in this tab."}));
   try { localStorage.setItem(PREVIEW_KEY,JSON.stringify({...snapshot,imagesIndexed:true})); } catch {warn();}
   imageWrites = imageWrites.then(async () => {
@@ -154,15 +165,15 @@ export function persistPreview() {
       const db = await imageDatabase();
       await new Promise<void>((resolve,reject) => {
         const transaction = db.transaction("images","readwrite"), store = transaction.objectStore("images");
-        store.clear(); for (const image of images) store.put(image);
+        store.clear(); for (const row of [...images,...audio]) store.put(row);
         transaction.oncomplete = () => resolve();
         transaction.onerror = () => reject(transaction.error);
         transaction.onabort = () => reject(transaction.error);
       });
     } catch {
-      try {localStorage.setItem(PREVIEW_KEY,JSON.stringify({...snapshot,images:images.map(({id,...asset}) => [id,{...asset,bytes:[...asset.bytes]}])}));} catch {warn();}
+      try {localStorage.setItem(PREVIEW_KEY,JSON.stringify({...snapshot,images:images.map(({id,...asset}) => [id,{...asset,bytes:[...asset.bytes]}]),audio:[...state.audio].map(([id,asset])=>[id,{...asset,bytes:[...asset.bytes]}])}));} catch {warn();}
     }
   });
   return imageWrites;
 }
-export function resetPreview() { localStorage.removeItem(PREVIEW_KEY); globalStore.morningCoffeeDemo=createFreshState(); persistPreview(); }
+export function resetPreview() { localStorage.removeItem(PREVIEW_KEY); globalStore.morningCoffeeDemo=normalize(createFreshState()); persistPreview(); }

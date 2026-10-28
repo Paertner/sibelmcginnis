@@ -36,7 +36,6 @@ export default async function Blog({
             {[
               [siteText("blog.all"), siteText("blog.all-posts")],
               ["public", siteText("blog.everyone")],
-              ["free", siteText("blog.free-members")],
               ["premium", siteText("blog.premium")],
             ].map(([key, label]) => (
               <Link

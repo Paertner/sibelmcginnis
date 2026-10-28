@@ -1,4 +1,4 @@
-import { useActionState } from "react";
+import { startTransition, useActionState, useRef } from "react";
 import { useAdminDialog } from "./admin-dialog";
 export type ActionResult = { message: string; ok?: boolean; id?: string };
 export function ActionForm({
@@ -7,26 +7,51 @@ export function ActionForm({
   className,
   submitLabel = "Save changes",
   submitDisabled = false,
+  confirmMessage,
 }: {
   action: (state: ActionResult, data: FormData) => Promise<ActionResult>;
   children: React.ReactNode;
   className?: string;
   submitLabel?: string;
   submitDisabled?: boolean;
+  /** Ask before submitting, for actions that are hard to undo. */
+  confirmMessage?: string;
 }) {
   const closeDialog = useAdminDialog();
+  const form = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(
     async (previous: ActionResult, data: FormData) => {
       const result = await action(previous, data);
-      if (result.ok) closeDialog?.();
+      if (result.ok) {
+        form.current?.reset();
+        closeDialog?.();
+      }
       return result;
     },
     { message: "" },
   );
+  // Submitting manually keeps what people typed when the server returns an error;
+  // React's form action would clear the fields either way.
   return (
-    <form action={formAction} className={className}>
+    <form
+      ref={form}
+      className={className}
+      onSubmit={(event) => {
+        event.preventDefault();
+        const submitter = (event.nativeEvent as SubmitEvent).submitter;
+        const data = new FormData(event.currentTarget, submitter);
+        startTransition(() => formAction(data));
+      }}
+    >
       {children}
-      <button className="btn" disabled={pending || submitDisabled}>
+      <button
+        className="btn"
+        disabled={pending || submitDisabled}
+        onClick={(event) => {
+          if (confirmMessage && !window.confirm(confirmMessage))
+            event.preventDefault();
+        }}
+      >
         {pending ? "Saving…" : submitLabel}
       </button>
       {state.message ? (

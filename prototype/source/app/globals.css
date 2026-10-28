@@ -5692,3 +5692,277 @@ ul.ticks li::before {
   font: 500 0.82rem var(--font-poppins);
   color: var(--ink);
 }
+
+/* Member "next Saturday circle" card, matching the admin Next circle card. */
+.member-circle h2 {
+  color: #fff;
+  font: 400 clamp(1.6rem, 3vw, 2.1rem) / 1.2 var(--font-inter);
+  margin: 0 0 6px;
+}
+.member-circle .next-circle-row p {
+  color: #e5cfc0;
+  font-size: 0.95rem;
+}
+.member-circle .next-circle-actions > .btn {
+  background: #e8c9b4;
+  color: #2d221c;
+}
+.member-circle .next-circle-actions > .btn:hover {
+  background: #f2dccc;
+}
+.member-circle.locked {
+  background:
+    radial-gradient(
+      120% 140% at 100% 0%,
+      rgba(192, 138, 108, 0.22) 0%,
+      transparent 55%
+    ),
+    linear-gradient(140deg, #4a3a31 0%, #5f4a3e 100%);
+}
+
+/* Add to calendar menu. */
+.cal-menu {
+  position: relative;
+  display: inline-block;
+}
+.cal-menu > summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.cal-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.cal-menu-list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 210px;
+  padding: 6px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    0 18px 40px rgba(0, 0, 0, 0.16);
+}
+.cal-menu-list a {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: var(--ink);
+  font: 400 0.88rem var(--font-poppins);
+  text-decoration: none;
+}
+.cal-menu-list a:hover,
+.cal-menu-list a:focus-visible {
+  background: var(--card);
+}
+.next-circle .cal-menu > summary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.next-circle .cal-menu > summary:hover,
+.next-circle .cal-menu[open] > summary {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Register page: photo panel beside a focused form. */
+.join-page {
+  padding-top: 30px;
+  padding-bottom: 70px;
+}
+.join-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
+  max-width: 1080px;
+  margin: 0 auto;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+.join-visual {
+  position: relative;
+  min-height: 560px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+}
+.join-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(23, 23, 23, 0.05) 30%,
+    rgba(23, 23, 23, 0.82) 100%
+  );
+}
+.join-visual-inner {
+  position: relative;
+  padding: 34px;
+  color: #ededed;
+}
+.join-visual .pill {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+.join-quote {
+  font: 400 clamp(1.4rem, 2.4vw, 1.9rem) / 1.25 var(--font-inter);
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin: 0 0 18px;
+  max-width: 420px;
+}
+.join-perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.join-perks li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.join-perks li::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+.join-form {
+  padding: 44px 46px;
+}
+.join-form h1 {
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  margin-bottom: 6px;
+}
+.join-form > .muted {
+  margin-bottom: 22px;
+}
+.plan-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.plan-switch a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--ink);
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.plan-switch a:hover {
+  border-color: var(--accent);
+}
+.plan-switch a[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+.plan-switch b {
+  font: 500 0.95rem var(--font-poppins);
+}
+.plan-switch small {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+.password-input {
+  position: relative;
+}
+.password-input input {
+  padding-right: 72px;
+}
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: var(--card);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font: 500 0.75rem var(--font-poppins);
+  color: var(--ink);
+  cursor: pointer;
+}
+.password-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.password-hint.ok {
+  color: var(--ok);
+}
+.password-hint.warn {
+  color: var(--warn);
+}
+.join-form form > .btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 0.95rem;
+}
+.join-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 4px 0 14px;
+}
+.join-signin {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.join-signin a {
+  color: var(--ink);
+  font-weight: 500;
+}
+@media (max-width: 860px) {
+  .join-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .join-visual {
+    min-height: 260px;
+  }
+  .join-perks {
+    display: none;
+  }
+  .join-form {
+    padding: 30px 22px;
+  }
+}
+
+/* Admin: member names open a prefilled announcement. */
+.member-link {
+  color: inherit;
+  text-decoration: none;
+}
+.member-link:hover {
+  color: var(--ad-accent, var(--accent-d));
+  text-decoration: underline;
+}
+.recipient-options {
+  max-height: 320px;
+  overflow: auto;
+}

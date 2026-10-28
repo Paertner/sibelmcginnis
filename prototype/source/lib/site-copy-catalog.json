@@ -465,6 +465,101 @@
     "text": "for details."
   },
   {
+    "id": "join.create-account",
+    "group": "Join",
+    "text": "Create your account"
+  },
+  {
+    "id": "join.create-account-sub",
+    "group": "Join",
+    "text": "Join Morning Coffee Community: a little space to connect, reflect, and grow."
+  },
+  {
+    "id": "join.free-plan",
+    "group": "Join",
+    "text": "Free"
+  },
+  {
+    "id": "join.premium-plan",
+    "group": "Join",
+    "text": "Premium"
+  },
+  {
+    "id": "join.create-free-account",
+    "group": "Join",
+    "text": "Create free account"
+  },
+  {
+    "id": "join.create-premium-account",
+    "group": "Join",
+    "text": "Create Premium account"
+  },
+  {
+    "id": "join.password",
+    "group": "Join",
+    "text": "Password"
+  },
+  {
+    "id": "join.repeat-password",
+    "group": "Join",
+    "text": "Repeat password"
+  },
+  {
+    "id": "join.password-hint",
+    "group": "Join",
+    "text": "At least 8 characters."
+  },
+  {
+    "id": "join.have-account",
+    "group": "Join",
+    "text": "Already a member?"
+  },
+  {
+    "id": "join.sign-in",
+    "group": "Join",
+    "text": "Sign in"
+  },
+  {
+    "id": "join.visual-label",
+    "group": "Join",
+    "text": "Morning Coffee Community"
+  },
+  {
+    "id": "join.visual-quote",
+    "group": "Join",
+    "text": "Slow down, reflect honestly, and grow alongside women who get it."
+  },
+  {
+    "id": "join.perk-saturday",
+    "group": "Join",
+    "text": "Saturday circles on Zoom"
+  },
+  {
+    "id": "join.perk-consultation",
+    "group": "Join",
+    "text": "A one-on-one consultation every month"
+  },
+  {
+    "id": "join.perk-podcast",
+    "group": "Join",
+    "text": "Session notes and the podcast"
+  },
+  {
+    "id": "join.perk-library",
+    "group": "Join",
+    "text": "Articles and reflections from Sibel"
+  },
+  {
+    "id": "join.perk-events",
+    "group": "Join",
+    "text": "Join community events"
+  },
+  {
+    "id": "join.perk-upgrade",
+    "group": "Join",
+    "text": "Upgrade to Premium whenever you like"
+  },
+  {
     "id": "login.welcome-back",
     "group": "Sign in",
     "text": "Welcome back"
@@ -1777,12 +1872,27 @@
   {
     "id": "calendar-buttons.google-calendar",
     "group": "Calendar buttons",
-    "text": "＋ Google Calendar"
+    "text": "Google Calendar"
   },
   {
     "id": "calendar-buttons.apple-outlook-ics",
     "group": "Calendar buttons",
     "text": "＋ Apple / Outlook (.ics)"
+  },
+  {
+    "id": "calendar-buttons.add-to-calendar",
+    "group": "Calendar buttons",
+    "text": "Add to calendar"
+  },
+  {
+    "id": "calendar-buttons.apple-calendar",
+    "group": "Calendar buttons",
+    "text": "Apple Calendar (.ics)"
+  },
+  {
+    "id": "calendar-buttons.outlook",
+    "group": "Calendar buttons",
+    "text": "Outlook (.ics)"
   },
   {
     "id": "copy-link.copy-link",

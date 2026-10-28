@@ -80,6 +80,12 @@ export async function join(
     const tier = choice(form, "plan", ["free", "premium"]);
     const name = required(form, "name", 120),
       address = email(form);
+    // The prototype checks passwords but never stores them; real accounts arrive with the back end.
+    const password = String(form.get("password") ?? "");
+    if (password.length < 8)
+      throw new Error("Use a password with at least 8 characters.");
+    if (password !== String(form.get("repeatPassword") ?? ""))
+      throw new Error("The two passwords don’t match.");
     if (getStore().members.some((m) => m.email.toLowerCase() === address))
       throw new Error(
         "That email already exists in this review. Use a different address or a sample account.",
@@ -304,7 +310,7 @@ export async function adminMutation(
         category: required(form, "category", 100),
         excerpt: required(form, "excerpt", 500),
         body: required(form, "body"),
-        access: choice(form, "access", ["public", "free", "premium"]),
+        access: choice(form, "access", ["public", "premium"]),
         status: choice(form, "status", ["draft", "published"]),
         cover: number(form, "cover", 0, 2),
       };
@@ -440,9 +446,15 @@ export async function adminMutation(
     } else if (entity === "bookings") {
       const booking = data.bookings.find((b) => b.id === id);
       if (!booking || booking.status !== "pending")
-        throw new Error("Only pending bookings can be confirmed.");
+        throw new Error("Only bookings waiting for approval can be changed.");
+      // A declined request is cancelled, which frees the time for others.
+      if (op === "reject") {
+        booking.status = "cancelled";
+        return success("Booking declined. The time is open again.");
+      }
       booking.status = "confirmed";
       booking.zoom = demoMeeting(booking.id);
+      return success("Booking approved. The member can now join.");
     } else if (entity === "announcements") {
       const count = await publishAnnouncement(form);
       return success(

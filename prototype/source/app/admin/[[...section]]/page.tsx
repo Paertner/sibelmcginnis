@@ -90,14 +90,19 @@ export default async function Admin({
   searchParams,
 }: {
   params: Promise<{ section?: string[] }>;
-  searchParams: Promise<{ q?: string; tier?: string; access?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    tier?: string;
+    access?: string;
+    to?: string;
+  }>;
 }) {
   const user = await requireAdmin();
   const route = (await params).section ?? [],
     section = route[0] ?? "dashboard";
   if (route.length > 1 || !sections.some(([key]) => key === section))
     notFound();
-  await searchParams;
+  const { to } = await searchParams;
   const data = getStore(),
     settings = data.settings;
   const media =
@@ -236,7 +241,7 @@ export default async function Admin({
                           {initials(m.name)}
                         </span>
                         <span>
-                          <b>{m.name}</b>
+                          <MemberLink id={m.id} name={m.name} />
                           {m.note && (
                             <small className="muted person-note">
                               {m.note}
@@ -413,7 +418,7 @@ export default async function Admin({
                         (b) => b.status === "pending" && b.date >= today(),
                       ).length
                     }{" "}
-                    waiting for confirmation ·{" "}
+                    waiting for approval ·{" "}
                     {
                       data.bookings.filter(
                         (b) => b.status !== "cancelled" && b.date >= today(),
@@ -461,7 +466,9 @@ export default async function Admin({
                           </b>{" "}
                           · {b.time}
                         </td>
-                        <td>{name(b.memberId)}</td>
+                        <td>
+                          <MemberLink id={b.memberId} name={name(b.memberId)} />
+                        </td>
                         <td>{b.topic}</td>
                         <td>
                           <Status
@@ -473,22 +480,33 @@ export default async function Admin({
                           />
                         </td>
                         <td className="admin-row-actions">
-                          {b.status === "pending" && (
-                            <ActionForm
-                              action={adminMutation}
-                              submitLabel="Confirm"
-                            >
-                              <EntityFields entity="bookings" id={b.id} />
-                            </ActionForm>
-                          )}
-                          {b.status !== "cancelled" && b.date >= today() && (
+                          {b.status === "pending" ? (
+                            <>
+                              <ActionForm
+                                action={adminMutation}
+                                submitLabel="Approve"
+                                confirmMessage={`Approve ${name(b.memberId)}’s consultation on ${fmtDate(b.date, { month: "short", day: "numeric" })} at ${b.time}?`}
+                              >
+                                <EntityFields entity="bookings" id={b.id} />
+                              </ActionForm>
+                              <ActionForm
+                                action={adminMutation}
+                                submitLabel="Reject"
+                                confirmMessage={`Reject ${name(b.memberId)}’s request? The time becomes available again.`}
+                              >
+                                <EntityFields entity="bookings" id={b.id} />
+                                <input type="hidden" name="op" value="reject" />
+                              </ActionForm>
+                            </>
+                          ) : b.status !== "cancelled" && b.date >= today() ? (
                             <ActionForm
                               action={cancelBooking}
                               submitLabel="Cancel"
+                              confirmMessage={`Cancel ${name(b.memberId)}’s consultation? The time becomes available again.`}
                             >
                               <input name="id" type="hidden" value={b.id} />
                             </ActionForm>
-                          )}
+                          ) : null}
                         </td>
                       </tr>
                     ))}
@@ -584,6 +602,10 @@ export default async function Admin({
         {section === "announce" ? (
           <div className="admin-announcements">
             <AnnouncementComposer
+              key={to ?? ""}
+              initialRecipients={
+                to && data.members.some((member) => member.id === to) ? [to] : []
+              }
               members={data.members.map((member) => ({
                 id: member.id,
                 name: member.name,
@@ -732,7 +754,7 @@ function SessionsPage({
       <section className="panel" aria-labelledby="upcoming-title">
         <header className="card-head">
           <div>
-            <h2 id="upcoming-title">Coming up</h2>
+            <h2 id="upcoming-title">Upcoming sessions</h2>
             <p className="card-sub">
               {upcoming.length
                 ? `${upcoming.length} more Saturday${upcoming.length === 1 ? "" : "s"} planned`
@@ -777,7 +799,7 @@ function SessionsPage({
       <section className="panel" aria-labelledby="past-title">
         <header className="card-head">
           <div>
-            <h2 id="past-title">After the circle</h2>
+            <h2 id="past-title">Previous sessions</h2>
             <p className="card-sub">
               {followUps
                 ? `${followUps} session${followUps === 1 ? "" : "s"} still need notes or a podcast episode`
@@ -821,6 +843,19 @@ function SessionsPage({
         </ul>
       </section>
     </div>
+  );
+}
+
+// Every member name opens a new announcement addressed to that member.
+function MemberLink({ id, name }: { id: string; name: string }) {
+  return (
+    <Link
+      className="member-link"
+      href={`/admin/announce?to=${id}`}
+      title={`Send an announcement to ${name}`}
+    >
+      {name}
+    </Link>
   );
 }
 
