@@ -87,47 +87,27 @@ export default async function Page() {
               )}
             </p>
           </div>
-          <div className="plans">
-            <div className="plan">
-              <span className="name">
-                {siteText("morning-coffee.free-member")}
-              </span>
-              <p className="muted">
-                {siteText("morning-coffee.get-a-taste-of-the-community")}
-              </p>
-              <div className="pricebox">
-                <span className="price">
-                  {siteText("morning-coffee.0")}
-                  <small> {siteText("morning-coffee.month")}</small>
-                </span>
-              </div>
-              <h4>{siteText("morning-coffee.what-s-included")}</h4>
-              <ul className="ticks">
-                <li>{siteText("morning-coffee.public-blog-posts")}</li>
-                <li>{siteText("morning-coffee.free-member-blog-posts")}</li>
-                <li>{siteText("morning-coffee.community-newsletter")}</li>
-              </ul>
-              <Link className="btn btn-dark" href="/join?plan=free">
-                {siteText("morning-coffee.join-for-free")}
-              </Link>
-            </div>
-            <div className="plan featured">
-              <span className="tag">{siteText("morning-coffee.popular")}</span>
+          <div className="plan-solo">
+            <div className="plan-solo-main">
               <span className="name">
                 {siteText("morning-coffee.premium-member")}
               </span>
-              <p className="muted">
+              <p className="plan-solo-sub">
                 {siteText("morning-coffee.the-full-morning-coffee-experience")}
               </p>
-              <div className="pricebox">
+              <div className="plan-solo-price">
                 <span className="price">
                   $<span>{settings.premiumPrice}</span>
-                  <small> {siteText("morning-coffee.month")}</small>
                 </span>
+                <small>{siteText("morning-coffee.month")}</small>
               </div>
+              <Link className="btn" href="/join?plan=premium">
+                {siteText("morning-coffee.join-premium")}
+              </Link>
+            </div>
+            <div className="plan-solo-list">
               <h4>{siteText("morning-coffee.what-s-included")}</h4>
               <ul className="ticks">
-                <li>{siteText("morning-coffee.everything-in-free")}</li>
                 <li>
                   {siteText(
                     "morning-coffee.protected-access-to-every-saturday-session",
@@ -153,9 +133,6 @@ export default async function Page() {
                   {siteText("morning-coffee.session-notes-for-every-saturday")}
                 </li>
               </ul>
-              <Link className="btn" href="/join?plan=premium">
-                {siteText("morning-coffee.join-premium")}
-              </Link>
             </div>
           </div>
         </div>

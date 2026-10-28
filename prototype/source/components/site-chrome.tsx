@@ -35,7 +35,7 @@ export async function Header() {
               <Link className="btn btn-sm btn-ghost" href="/login">
                 {siteText("site-chrome.sign-in")}
               </Link>
-              <Link className="btn btn-sm" href="/morning-coffee#plans">
+              <Link className="btn btn-sm" href="/join">
                 {siteText("site-chrome.join")}
               </Link>
             </>
@@ -54,7 +54,7 @@ export function Footer() {
           <Link className="btn" href="/contact">
             {siteText("site-chrome.send-a-message")}
           </Link>{" "}
-          <Link className="btn btn-ghost on-dark" href="/morning-coffee#plans">
+          <Link className="btn btn-ghost on-dark" href="/join">
             {siteText("site-chrome.join-morning-coffee")}
           </Link>
         </p>

@@ -6,7 +6,9 @@ import { getStore, upcomingSessions } from "@/lib/store";
 import { canView, isPremium } from "@/lib/access";
 import { addDays, fmtDate, today } from "@/lib/dates";
 import { bookingEvent, sessionEvent } from "@/lib/events";
-import { Badge } from "@/components/post-cards";
+import { Badge, PostCards } from "@/components/post-cards";
+import Image from "next/image";
+import { postImageProps } from "@/lib/site-images";
 import { CalendarButtons } from "@/components/calendar-buttons";
 import { AnnouncementContent } from "@/components/announcement-content";
 import { announcementVisible } from "@/lib/announcements";
@@ -94,32 +96,8 @@ export default async function Account({
       return (
         <>
           <h1 className="area-title">{siteText("account.blog-library")}</h1>
-          <div className="card member-library">
-            {posts.map((p) => (
-              <div className="list-item" key={p.id}>
-                <div>
-                  <Link href={`/post/${p.id}`}>
-                    <b>{p.title}</b>
-                  </Link>
-                  <br />
-                  <small className="muted">
-                    {fmtDate(p.date, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}{" "}
-                    · {p.category}
-                  </small>
-                </div>
-                {canView(p.access, user.role) ? (
-                  <Badge access={p.access} />
-                ) : (
-                  <span className="badge b-grey">
-                    {siteText("account.premium")}
-                  </span>
-                )}
-              </div>
-            ))}
+          <div className="grid g3 member-library">
+            <PostCards posts={posts} role={user.role} />
           </div>
         </>
       );
@@ -505,19 +483,39 @@ export default async function Account({
               </>
             )}
           </div>
-          <div className="card">
-            <h3>{siteText("account.latest-for-you")}</h3>
-            {posts
-              .filter((p) => canView(p.access, user.role))
-              .slice(0, 3)
-              .map((p) => (
-                <p key={p.id}>
-                  <Link href={`/post/${p.id}`}>{p.title}</Link>
-                </p>
-              ))}
-            <Link className="btn btn-sm btn-ghost" href="/account?tab=library">
-              {siteText("account.open-library")}
-            </Link>
+          <div className="card latest-card">
+            <div className="latest-head">
+              <h3>{siteText("account.latest-for-you")}</h3>
+              <Link href="/account?tab=library">
+                {siteText("account.open-library")} →
+              </Link>
+            </div>
+            <ul className="latest-list">
+              {posts
+                .filter((p) => canView(p.access, user.role))
+                .slice(0, 3)
+                .map((p) => (
+                  <li key={p.id}>
+                    <Link className="latest-item" href={`/post/${p.id}`}>
+                      <span className="latest-thumb">
+                        <Image
+                          {...postImageProps(p)}
+                          alt=""
+                          fill
+                          sizes="76px"
+                        />
+                      </span>
+                      <span className="latest-text">
+                        <small>
+                          {p.category} ·{" "}
+                          {fmtDate(p.date, { month: "short", day: "numeric" })}
+                        </small>
+                        <b>{p.title}</b>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+            </ul>
           </div>
         </div>
       </>
