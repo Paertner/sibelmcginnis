@@ -662,15 +662,19 @@ export function AnnouncementComposer({
   media,
   templates,
   footer,
+  initialRecipients = [],
 }: {
+  initialRecipients?: string[];
   members: Recipient[];
   media: MediaItem[];
   templates: SavedEmailTemplate[];
   footer: EmailBlock[];
 }) {
   const first = emailTemplates[0];
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]),
+  const [selectedMembers, setSelectedMembers] =
+      useState<string[]>(initialRecipients),
     [groups, setGroups] = useState<string[]>([]);
+  const [listOpen, setListOpen] = useState(false);
   const [query, setQuery] = useState(""),
     [highlight, setHighlight] = useState(0);
   const [subject, setSubject] = useState(first.subject);
@@ -720,7 +724,7 @@ export function AnnouncementComposer({
         !selectedMembers.includes(m.id) &&
         `${m.name} ${m.email}`.toLowerCase().includes(query.toLowerCase()),
     )
-    .slice(0, 6);
+    .slice(0, query ? 8 : 50);
   const count = members.filter(
     (m) =>
       selectedMembers.includes(m.id) ||
@@ -859,18 +863,22 @@ export function AnnouncementComposer({
             role="combobox"
             aria-label="Add registered members"
             aria-controls="recipient-options"
-            aria-expanded={!!query}
+            aria-expanded={listOpen}
             aria-autocomplete="list"
             aria-activedescendant={
-              query && matches[highlight]
+              listOpen && matches[highlight]
                 ? `recipient-${matches[highlight].id}`
                 : undefined
             }
             placeholder="Type a member’s name or email…"
             value={query}
+            onFocus={() => setListOpen(true)}
+            onClick={() => setListOpen(true)}
+            onBlur={() => setListOpen(false)}
             onChange={(e) => {
               setQuery(e.target.value);
               setHighlight(0);
+              setListOpen(true);
             }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
@@ -883,12 +891,15 @@ export function AnnouncementComposer({
               }
               if (e.key === "Enter") {
                 e.preventDefault();
-                if (query && matches[highlight]) add(matches[highlight].id);
+                if (listOpen && matches[highlight]) add(matches[highlight].id);
               }
-              if (e.key === "Escape") setQuery("");
+              if (e.key === "Escape") {
+                setQuery("");
+                setListOpen(false);
+              }
             }}
           />
-          {query ? (
+          {listOpen ? (
             <div
               id="recipient-options"
               role="listbox"
@@ -903,6 +914,8 @@ export function AnnouncementComposer({
                     role="option"
                     aria-selected={index === highlight}
                     key={m.id}
+                    // Keep focus in the search so the list stays open for more picks.
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => add(m.id)}
                   >
                     <span className="avatar">

@@ -41,7 +41,6 @@ export function AdminTable({
                 : [
                     ["all", "All posts"],
                     ["public", "Everyone"],
-                    ["free", "Free members"],
                     ["premium", "Premium only"],
                     ["draft", "Drafts"],
                   ]

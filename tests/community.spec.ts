@@ -88,8 +88,13 @@ test("premium calendars and booking allowance work, then cancellation frees the 
   page,
 }) => {
   await login(page, "Layla");
+  const circle = page.locator(".member-circle");
   await expect(
-    page.getByText("This week’s meeting:", { exact: false }),
+    circle.getByRole("link", { name: "Open session", exact: true }),
+  ).toBeVisible();
+  await circle.getByText("Add to calendar", { exact: true }).click();
+  await expect(
+    circle.getByRole("link", { name: "Google Calendar", exact: true }),
   ).toBeVisible();
   const calendar = await page.request.get("/api/calendar/session/s4");
   expect(calendar.status()).toBe(200);

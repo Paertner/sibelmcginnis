@@ -61,6 +61,9 @@ const globalStore = globalThis as typeof globalThis & {
 
 function createState(): DemoState {
   const data: Store = structuredClone(seed);
+  // Posts have two access levels; earlier "free" posts are open to everyone.
+  for (const post of data.posts)
+    if ((post.access as string) === "free") post.access = "public";
   const anchor = seed.sessions[4].date;
   const dayShift = Math.round(
     (Date.parse(today()) - Date.parse(addDays(seed.posts[0].date, 3))) /

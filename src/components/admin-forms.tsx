@@ -180,7 +180,6 @@ export function PostEditor({
           value={post?.access ?? "public"}
           options={[
             ["public", "Everyone"],
-            ["free", "Free members"],
             ["premium", "Premium members"],
           ]}
         />
@@ -302,7 +301,7 @@ export function EpisodeEditor({ episode }: { episode?: Episode }) {
         <Select
           name="status"
           label="Status"
-          value={episode?.status ?? "draft"}
+          value={episode?.status ?? "published"}
           options={["draft", "published"]}
         />
       </div>
@@ -318,7 +317,7 @@ export function EpisodeEditor({ episode }: { episode?: Episode }) {
         {episode?.audioName
           ? `Current: ${episode.audioName}. `
           : "No audio uploaded. "}
-        Up to 10 MB for local review. Uploads last until the server restarts.
+        Up to 10 MB. Members only see Published episodes; Draft stays hidden.
       </p>
     </Editor>
   );

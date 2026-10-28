@@ -428,7 +428,14 @@ export function AdminDashboard({ data }: { data: Store }) {
                     {fmtDate(b.date, { month: "short" })}
                   </span>
                   <div>
-                    <b>{name(b.memberId)}</b>
+                    <b>
+                      <Link
+                        className="member-link"
+                        href={`/admin/announce?to=${b.memberId}`}
+                      >
+                        {name(b.memberId)}
+                      </Link>
+                    </b>
                     <small>
                       {b.time} · {b.topic}
                     </small>
@@ -465,7 +472,14 @@ export function AdminDashboard({ data }: { data: Store }) {
                     {initials(m.name)}
                   </span>
                   <div>
-                    <b>{m.name}</b>
+                    <b>
+                      <Link
+                        className="member-link"
+                        href={`/admin/announce?to=${m.id}`}
+                      >
+                        {m.name}
+                      </Link>
+                    </b>
                     <small>
                       Joined{" "}
                       {fmtDate(m.joined, { month: "short", day: "numeric" })}
