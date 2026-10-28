@@ -1,0 +1,16 @@
+# Hostinger (Apache) caching for the prototype build.
+# The page and images keep the same names between deploys, so browsers must
+# check for a newer copy; built scripts and styles get new names every build.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(webp|png|jpe?g|svg|ico)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+<IfModule mod_headers.c>
+  <If "%{REQUEST_URI} =~ m#^/assets/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+</IfModule>
