@@ -3,13 +3,17 @@ import { siteText } from "@/lib/site-copy";
 import Link from "next/link";
 import Image from "next/image";
 import { getUser } from "@/lib/auth";
+import { getStore } from "@/lib/store";
 import { Navigation } from "./navigation";
 import { navigation } from "@/lib/navigation";
 export function Brand() {
   return (
     <Link className="brand" href="/">
       <Image {...siteImageProps("shared.logo")} alt={siteImageProps("shared.logo").alt} width={30} height={30} />
-      {siteText("site-chrome.sibel-mcginnis")}
+      <span className="brand-name">
+        {getStore().siteSettings?.siteTitle ||
+          siteText("site-chrome.sibel-mcginnis")}
+      </span>
     </Link>
   );
 }

@@ -462,6 +462,72 @@ export async function adminMutation(
       );
     } else if (entity === "siteImages") {
       return success(await updateSiteImage(form));
+    } else if (entity === "siteSettings") {
+      const link = (key: string, label: string) => {
+        const value = text(form, key, 300);
+        if (value && !/^https:\/\/\S+$/i.test(value))
+          throw new Error(`Enter a full https:// link for ${label}.`);
+        return value;
+      };
+      const contactEmail = text(form, "contactEmail", 254).toLowerCase();
+      if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail))
+        throw new Error("Enter a valid contact email.");
+      const faviconPath = text(form, "faviconPath", 300);
+      if (faviconPath && !/^\/(images|api\/site-image)\/[\w.-]+$/.test(faviconPath))
+        throw new Error("Choose the favicon from the media library.");
+      data.siteSettings = {
+        siteTitle: required(form, "siteTitle", 80),
+        tagline: text(form, "tagline", 160),
+        faviconPath,
+        contactEmail,
+        mailingAddress: text(form, "mailingAddress", 300),
+        facebook: link("facebook", "Facebook"),
+        instagram: link("instagram", "Instagram"),
+        linkedin: link("linkedin", "LinkedIn"),
+      };
+      return success("Site settings saved.");
+    } else if (entity === "integrations") {
+      const integrations = { ...data.integrations },
+        now = new Date().toISOString();
+      let message = "Saved.";
+      if (op === "stripe-connect") {
+        // The live site sends the admin to Stripe to sign in (Stripe Connect); the prototype simulates the result.
+        integrations.stripe = {
+          connected: true,
+          accountName: data.siteSettings?.siteTitle || "Sibel McGinnis",
+          accountId: `acct_test_${uid().replace(/-/g, "").slice(0, 10)}`,
+          connectedAt: now,
+        };
+        message = "Stripe connected in test mode.";
+      } else if (op === "stripe-disconnect") {
+        integrations.stripe = { connected: false };
+        message = "Stripe disconnected.";
+      } else if (op === "zoom") {
+        const secret = text(form, "clientSecret", 200);
+        integrations.zoom = {
+          accountId: text(form, "accountId", 100),
+          clientId: text(form, "clientId", 100),
+          secretTail: secret ? secret.slice(-4) : integrations.zoom?.secretTail,
+          savedAt: now,
+        };
+        message = "Zoom details saved.";
+      } else if (op === "resend") {
+        const key = text(form, "apiKey", 200);
+        if (key && !key.startsWith("re_"))
+          throw new Error("A Resend API key starts with re_.");
+        const fromEmail = text(form, "fromEmail", 254).toLowerCase();
+        if (fromEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fromEmail))
+          throw new Error("Enter a valid sender email.");
+        integrations.resend = {
+          fromName: text(form, "fromName", 80),
+          fromEmail,
+          keyTail: key ? key.slice(-4) : integrations.resend?.keyTail,
+          savedAt: now,
+        };
+        message = "Email settings saved.";
+      } else throw new Error("Unknown setting.");
+      data.integrations = integrations;
+      return success(message);
     } else if (entity === "emailTemplates") {
       if (op === "remove") {
         data.emailTemplates = (data.emailTemplates ?? []).filter(

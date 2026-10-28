@@ -13,6 +13,37 @@ export type Announcement = (typeof seed)["announcements"][number] & {
   imageId?: string;
   emailStatus?: "prepared";
 };
+export type SiteSettings = {
+  siteTitle?: string;
+  tagline?: string;
+  faviconPath?: string;
+  contactEmail?: string;
+  mailingAddress?: string;
+  facebook?: string;
+  instagram?: string;
+  linkedin?: string;
+};
+/** Connection details. Secrets are never kept; only their last four characters. */
+export type Integrations = {
+  stripe?: {
+    connected: boolean;
+    accountName?: string;
+    accountId?: string;
+    connectedAt?: string;
+  };
+  zoom?: {
+    accountId?: string;
+    clientId?: string;
+    secretTail?: string;
+    savedAt?: string;
+  };
+  resend?: {
+    fromName?: string;
+    fromEmail?: string;
+    keyTail?: string;
+    savedAt?: string;
+  };
+};
 export type MediaFile = {
   id: string;
   fileName: string;
@@ -24,6 +55,8 @@ export type Store = Omit<typeof seed, "members" | "announcements"> & {
   siteCopy?: Record<string,string>;
   siteImages?: Record<string, {imageId?:string;builtin?:string;alt?:string;position?:string;fileName?:string}>;
   media?: MediaFile[];
+  siteSettings?: SiteSettings;
+  integrations?: Integrations;
   emailTemplates?: SavedEmailTemplate[];
   emailFooter?: EmailBlock[];
   members: Member[];

@@ -25,7 +25,7 @@ import {sessionEvent,bookingEvent} from "../source/lib/events";
 import {createIcs} from "../source/lib/calendar";
 import {emailDraft} from "../source/lib/announcements";
 import {isPremium,type Role} from "../source/lib/access";
-import {download} from "./assets";
+import {assetUrl,download} from "./assets";
 (globalThis as unknown as {Buffer:typeof Buffer}).Buffer=Buffer;
 
 async function renderRoute(){
@@ -49,6 +49,13 @@ async function renderRoute(){
  return{node:<><a className="skip-link" href="#main-content">Skip to content</a>{await Header()}<main id="main-content">{content}</main><Footer/></>,role:(await getUser())?.role??"visitor"};
 }
 
+function applySiteSettings(){
+ const settings=getStore().siteSettings;
+ document.title=`${settings?.siteTitle||"Sibel McGinnis"} · Interactive prototype`;
+ const icon=document.querySelector<HTMLLinkElement>("link[rel=icon]");
+ if(icon)icon.href=settings?.faviconPath?assetUrl(settings.faviconPath):"/images/brand-cup.svg";
+}
+
 function App(){
  const[revision,setRevision]=useState(0),[view,setView]=useState<ReactNode>(null),[role,setRole]=useState<Role>("visitor"),[toast,setToast]=useState("");
  useEffect(()=>{
@@ -59,7 +66,7 @@ function App(){
  },[]);
  useEffect(()=>{
   let active=true;
-  renderRoute().then(result=>{if(active){setView(result.node);setRole(result.role);const anchor=currentLocation().hash.slice(1);if(anchor)requestAnimationFrame(()=>document.getElementById(anchor)?.scrollIntoView());}}).catch(error=>{
+  renderRoute().then(result=>{if(active){setView(result.node);setRole(result.role);applySiteSettings();const anchor=currentLocation().hash.slice(1);if(anchor)requestAnimationFrame(()=>document.getElementById(anchor)?.scrollIntoView());}}).catch(error=>{
    if(!active)return;
    if(error.previewRedirect){navigate(error.previewRedirect);return;}
    if(error.previewNotFound){setView(<div className="wrap empty-page"><h1>Post not found</h1><a href="#/blog">Back to blog</a></div>);return;}

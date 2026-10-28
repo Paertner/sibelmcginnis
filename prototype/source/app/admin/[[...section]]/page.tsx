@@ -3,6 +3,7 @@ import { AdminDialog } from "@/components/admin-dialog";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { MediaLibrary } from "@/components/media-library";
+import { AdminSettings } from "@/components/admin-settings";
 import { SiteContentEditor } from "@/components/site-content-editor";
 import { SiteContentTabs } from "@/components/site-content-tabs";
 import { mediaLibrary, siteImage, siteImageSlots } from "@/lib/site-images";
@@ -78,6 +79,12 @@ const sections: [string, string, IconName, string][] = [
     "text",
     "Homepage settings and all the wording on the site.",
   ],
+  [
+    "settings",
+    "Settings",
+    "sliders",
+    "Site details, payments and connected services.",
+  ],
 ];
 const initials = (name: string) =>
   name
@@ -106,7 +113,10 @@ export default async function Admin({
   const data = getStore(),
     settings = data.settings;
   const media =
-    section === "posts" || section === "media" || section === "announce"
+    section === "posts" ||
+    section === "media" ||
+    section === "announce" ||
+    section === "settings"
       ? mediaLibrary()
       : [];
   const [, title, , subtitle] = sections.find(([key]) => key === section)!;
@@ -623,6 +633,14 @@ export default async function Admin({
           <MediaLibrary
             media={media}
             slots={siteImageSlots().map((slot) => siteImage(slot.id))}
+          />
+        ) : null}
+        {section === "settings" ? (
+          <AdminSettings
+            settings={data.siteSettings ?? {}}
+            integrations={data.integrations ?? {}}
+            logo={siteImage("shared.logo")}
+            media={media}
           />
         ) : null}
         {section === "content" ? (
