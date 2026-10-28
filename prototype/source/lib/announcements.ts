@@ -11,6 +11,7 @@ import { today } from "./dates";
 import { siteOrigin } from "./site-url";
 import { memberRole } from "./membership";
 import { assertEmailQuota, recordEmails } from "./email-quota";
+import { fillPlaceholders } from "./email-blocks";
 
 export function announcementVisible(
   announcement: Announcement,
@@ -29,9 +30,10 @@ export function personalizedHtml(
     announcement.html ||
     `<p>${escapeHtml(announcement.body).replace(/\n/g, "<br>")}</p>`;
   return safeHtml(
-    html
-      .replaceAll("{{first_name}}", escapeHtml(member.name.split(" ")[0]))
-      .replaceAll("{{account_url}}", `${siteOrigin()}/account`),
+    fillPlaceholders(html, {
+      origin: siteOrigin(),
+      name: escapeHtml(member.name),
+    }),
   );
 }
 

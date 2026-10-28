@@ -8,6 +8,7 @@ import { adminMutation } from "@/lib/actions";
 import { defaultEmailFooter, emailTemplates } from "@/lib/email-templates";
 import {
   blockCatalog,
+  fillPlaceholders,
   renderEmail,
   withNewIds,
   type EmailBlock,
@@ -262,9 +263,7 @@ export function AnnouncementComposer({
   };
   const previewHtml = preview
     ? displayHtml(
-        cleanPreview(html)
-          .replaceAll("{{first_name}}", "Amelia")
-          .replaceAll("{{account_url}}", "/account"),
+        fillPlaceholders(cleanPreview(html), {}),
         media,
       )
     : "";
@@ -666,8 +665,9 @@ export function AnnouncementComposer({
             </button>
           </div>
           <p className="hint">
-            {"{{first_name}}"} personalizes each email; {"{{account_url}}"}{" "}
-            opens the member account. Unsafe code is removed when published.
+            Type {"{{"} in any text, title, button or link to insert a merge
+            field, such as the member’s first name or a link to their account.
+            Unsafe code is removed when published.
           </p>
         </div>
       </section>

@@ -91,13 +91,18 @@ function Editor({
       trigger={id ? "Edit" : title}
       primary={!id && !quiet}
     >
-      <ActionForm action={adminMutation}>
+      <ActionForm
+        action={adminMutation}
+        actions={
+          <>
+            {id ? <ConfirmDelete /> : null}
+            <span className="form-actions-gap" />
+            <AdminCancel />
+          </>
+        }
+      >
         <EntityFields entity={entity} id={id} />
         {children}
-        <div className="editor-delete">
-          {id ? <ConfirmDelete /> : null}
-          <AdminCancel />
-        </div>
       </ActionForm>
     </AdminDialog>
   );
@@ -170,16 +175,20 @@ function WideEditor({
       primary={!id && !quiet}
       wide
     >
-      <ActionForm action={adminMutation} className="wide-editor">
+      <ActionForm
+        action={adminMutation}
+        className="wide-editor"
+        actions={
+          <>
+            {id ? <ConfirmDelete /> : null}
+            <span className="form-actions-gap" />
+            <AdminCancel />
+          </>
+        }
+      >
         <EntityFields entity={entity} id={id} />
         <div className="wide-editor-main">{main}</div>
-        <aside className="wide-editor-side">
-          {side}
-          <div className="editor-delete">
-            {id ? <ConfirmDelete /> : null}
-            <AdminCancel />
-          </div>
-        </aside>
+        <aside className="wide-editor-side">{side}</aside>
       </ActionForm>
     </AdminDialog>
   );

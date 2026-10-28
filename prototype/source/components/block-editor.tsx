@@ -3,10 +3,15 @@ import DOMPurify from "dompurify";
 import { adminMutation } from "@/lib/actions";
 import {
   blockCatalog,
+  blockLook,
   formatHtml,
+  placeholders,
+  styleControls,
   withNewIds,
+  type BlockStyle,
   type BlockType,
   type EmailBlock,
+  type StyleKey,
 } from "@/lib/email-blocks";
 import type { MediaItem } from "@/lib/site-images";
 import { Icon, type IconName } from "./admin-icons";
@@ -74,11 +79,20 @@ export function RichText({
   onChange,
   label,
   className,
+  style,
+  onCaret,
+  onKeyDown,
+  onLeave,
 }: {
   value: string;
   onChange: (html: string) => void;
   label: string;
   className: string;
+  style?: React.CSSProperties;
+  /** Called after typing, so merge-field suggestions can follow the caret. */
+  onCaret?: () => void;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
+  onLeave?: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -99,8 +113,16 @@ export function RichText({
       contentEditable
       suppressContentEditableWarning
       className={`rich ${className}`}
-      onInput={(event) => onChange(event.currentTarget.innerHTML)}
-      onBlur={(event) => onChange(cleanRich(event.currentTarget.innerHTML))}
+      style={style}
+      onInput={(event) => {
+        onChange(event.currentTarget.innerHTML);
+        onCaret?.();
+      }}
+      onKeyDown={onKeyDown}
+      onBlur={(event) => {
+        onChange(cleanRich(event.currentTarget.innerHTML));
+        onLeave?.();
+      }}
       onPaste={(event) => {
         event.preventDefault();
         document.execCommand(
@@ -119,6 +141,163 @@ export function format(command: string, value?: string) {
   document.activeElement?.dispatchEvent(new Event("input", { bubbles: true }));
 }
 export const richTypes: BlockType[] = ["text", "quote", "note"];
+
+const choiceLabels: Partial<Record<StyleKey, [string, string][]>> = {
+  align: [
+    ["left", "Left"],
+    ["center", "Center"],
+    ["right", "Right"],
+  ],
+  fontSize: [
+    ["small", "S"],
+    ["normal", "M"],
+    ["large", "L"],
+  ],
+  space: [
+    ["none", "None"],
+    ["small", "S"],
+    ["medium", "M"],
+    ["large", "L"],
+  ],
+  width: [
+    ["full", "Full"],
+    ["wide", "Wide"],
+    ["half", "Half"],
+  ],
+  shape: [
+    ["rounded", "Rounded"],
+    ["pill", "Pill"],
+    ["square", "Square"],
+  ],
+  thickness: [
+    ["thin", "Thin"],
+    ["medium", "Medium"],
+    ["thick", "Thick"],
+  ],
+};
+function styleLabel(key: StyleKey, type: BlockType) {
+  if (key === "accent")
+    return (
+      { header: "Label color", button: "Button color" } as Record<string, string>
+    )[type] ?? "Line color";
+  return {
+    align: "Alignment",
+    fontSize: "Text size",
+    color: "Text color",
+    background: "Background",
+    space: "Space around",
+    width: "Width",
+    shape: type === "image" ? "Corners" : "Shape",
+    thickness: "Thickness",
+  }[key];
+}
+
+/** Per-block look: shared settings plus the ones only this block type has. */
+function StylePanel({
+  block,
+  onChange,
+}: {
+  block: EmailBlock;
+  onChange: (style: BlockStyle | undefined) => void;
+}) {
+  const look = blockLook(block);
+  const set = (key: StyleKey, value: string | undefined) => {
+    const next = { ...block.style, [key]: value } as Record<string, string>;
+    if (value === undefined) delete next[key];
+    onChange(Object.keys(next).length ? (next as BlockStyle) : undefined);
+  };
+  return (
+    <div className="blk-style" onClick={(event) => event.stopPropagation()}>
+      {styleControls[block.type].map((key) => {
+        const label = styleLabel(key, block.type);
+        if (key === "color" || key === "background" || key === "accent") {
+          const current = (look[key] as string | undefined) ?? "#ffffff";
+          return (
+            <label key={key} className="style-color">
+              <span>{label}</span>
+              <input
+                type="color"
+                value={current}
+                onChange={(event) => set(key, event.target.value)}
+              />
+              {block.style?.[key] ? (
+                <button
+                  type="button"
+                  className="style-reset"
+                  aria-label={`Reset ${label.toLowerCase()}`}
+                  title="Back to default"
+                  onClick={() => set(key, undefined)}
+                >
+                  ×
+                </button>
+              ) : null}
+            </label>
+          );
+        }
+        const options =
+          key === "width" && block.type === "button"
+            ? [
+                ["auto", "Auto"],
+                ["full", "Full width"],
+              ]
+            : (choiceLabels[key] ?? []);
+        const value =
+          key === "width" && block.type === "button"
+            ? block.style?.width === "full"
+              ? "full"
+              : "auto"
+            : (block.style?.[key] ??
+              {
+                align: look.align,
+                fontSize: "normal",
+                space: "medium",
+                width: "full",
+                shape: "rounded",
+                thickness: "thin",
+              }[key as string]);
+        return (
+          <div key={key} className="style-choice">
+            <span>{label}</span>
+            <span className="segmented small" role="group" aria-label={label}>
+              {options.map(([option, text]) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={value === option}
+                  onClick={() => set(key, option === "auto" ? undefined : option)}
+                >
+                  {text}
+                </button>
+              ))}
+            </span>
+          </div>
+        );
+      })}
+      {block.style ? (
+        <button
+          type="button"
+          className="style-reset-all"
+          onClick={() => onChange(undefined)}
+        >
+          Reset style
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+type Suggest = {
+  query: string;
+  index: number;
+  apply: (key: string) => void;
+};
+const mergeMatch = (before: string) => before.match(/\{\{([a-z_]*)$/i);
+const matchingFields = (query: string) =>
+  placeholders.filter(
+    (field) =>
+      field.key.startsWith(query.toLowerCase()) ||
+      field.label.toLowerCase().includes(query.toLowerCase()),
+  );
 
 export function BlockEditor({
   block,
@@ -145,13 +324,97 @@ export function BlockEditor({
   onRemove: () => void;
   onPickImage: () => void;
 }) {
+  const [styling, setStyling] = useState(false);
+  const [suggest, setSuggest] = useState<Suggest | null>(null);
+  const look = blockLook(block);
   const imageSrc =
     media.find((item) => item.path === block.path)?.src ?? block.path;
+  const options = suggest ? matchingFields(suggest.query) : [];
+  const close = () => setSuggest(null);
+
+  // Typing "{{" in a field opens the list of merge fields that can go there.
+  const inputSuggest = (
+    field: "eyebrow" | "title" | "text" | "label" | "href",
+  ) => ({
+    onInput: (
+      event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => {
+      const element = event.currentTarget;
+      const caret = element.selectionStart ?? element.value.length;
+      const match = mergeMatch(element.value.slice(0, caret));
+      if (!match) return close();
+      setSuggest({
+        query: match[1],
+        index: 0,
+        apply: (key) => {
+          const start = caret - match[0].length;
+          const value = `${element.value.slice(0, start)}{{${key}}}${element.value.slice(caret)}`;
+          onChange({ [field]: value });
+          requestAnimationFrame(() => {
+            element.focus();
+            const position = start + key.length + 4;
+            element.setSelectionRange(position, position);
+          });
+        },
+      });
+    },
+    onKeyDown: suggestKeys,
+    onBlur: () => setTimeout(close, 150),
+  });
+  const richSuggest = () => {
+    const selection = window.getSelection();
+    const node = selection?.anchorNode;
+    if (!selection || !node || node.nodeType !== Node.TEXT_NODE) return close();
+    const offset = selection.anchorOffset;
+    const match = mergeMatch((node.textContent ?? "").slice(0, offset));
+    if (!match) return close();
+    setSuggest({
+      query: match[1],
+      index: 0,
+      apply: (key) => {
+        const range = document.createRange();
+        range.setStart(node, offset - match[0].length);
+        range.setEnd(node, offset);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        format("insertText", `{{${key}}}`);
+      },
+    });
+  };
+  function suggestKeys(event: React.KeyboardEvent) {
+    if (!suggest || !options.length) return;
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      setSuggest({
+        ...suggest,
+        index: (suggest.index + step + options.length) % options.length,
+      });
+    } else if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault();
+      suggest.apply(options[Math.min(suggest.index, options.length - 1)].key);
+      close();
+    } else if (event.key === "Escape") close();
+  }
+  const boxed = look.background
+    ? { background: look.background, padding: "14px 18px", borderRadius: 12 }
+    : {};
+
   return (
     <div
       className={`blk blk-${block.type}${selected ? " on" : ""}`}
       onFocusCapture={onSelect}
       onClick={onSelect}
+      style={
+        block.type === "header"
+          ? {
+              background: look.background,
+              textAlign: look.align,
+              paddingTop: look.padding,
+              paddingBottom: look.padding,
+            }
+          : undefined
+      }
     >
       {selected ? (
         <div
@@ -189,7 +452,7 @@ export function BlockEditor({
                 aria-label="Add a link"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => {
-                  const url = window.prompt("Link address (https://…)");
+                  const url = window.prompt("Link address (https://… or {{account_url}})");
                   if (url) format("createLink", url);
                 }}
               >
@@ -197,13 +460,27 @@ export function BlockEditor({
               </button>
               <button
                 type="button"
-                title="Insert the member’s first name"
+                title="Insert a merge field"
+                aria-label="Insert a merge field"
                 onMouseDown={(event) => event.preventDefault()}
-                onClick={() => format("insertText", "{{first_name}}")}
+                onClick={() => {
+                  format("insertText", "{{");
+                  richSuggest();
+                }}
               >
-                First name
+                {"{{ }}"}
               </button>
             </span>
+          ) : null}
+          {styleControls[block.type].length ? (
+            <button
+              type="button"
+              className={`blk-style-toggle${styling ? " on" : ""}`}
+              aria-pressed={styling}
+              onClick={() => setStyling(!styling)}
+            >
+              <Icon name="sliders" size={14} /> Style
+            </button>
           ) : null}
           <span className="blk-actions">
             <button
@@ -244,44 +521,80 @@ export function BlockEditor({
           </span>
         </div>
       ) : null}
+      {selected && styling ? (
+        <StylePanel block={block} onChange={(style) => onChange({ style })} />
+      ) : null}
       {block.type === "header" ? (
         <div className="blk-header-body">
           <input
             className="blk-eyebrow"
             aria-label="Header label"
             value={block.eyebrow ?? ""}
+            style={{ color: look.accent, textAlign: look.align }}
             onChange={(event) => onChange({ eyebrow: event.target.value })}
+            {...inputSuggest("eyebrow")}
           />
           <textarea
             className="blk-title"
             aria-label="Header title"
             rows={2}
             value={block.title ?? ""}
+            style={{ color: look.color, textAlign: look.align }}
             onChange={(event) => onChange({ title: event.target.value })}
+            {...inputSuggest("title")}
           />
         </div>
       ) : null}
       {block.type === "heading" ? (
-        <input
-          className="blk-heading-input"
-          aria-label="Heading"
-          value={block.text ?? ""}
-          onChange={(event) => onChange({ text: event.target.value })}
-        />
+        <div style={{ ...boxed, margin: boxed.background ? "12px 0" : 0 }}>
+          <input
+            className="blk-heading-input"
+            aria-label="Heading"
+            value={block.text ?? ""}
+            style={{
+              color: look.color,
+              fontSize: look.fontSize,
+              textAlign: look.align,
+            }}
+            onChange={(event) => onChange({ text: event.target.value })}
+            {...inputSuggest("text")}
+          />
+        </div>
       ) : null}
       {richTypes.includes(block.type) ? (
         <RichText
           className={`blk-${block.type}-text`}
           label={labelOf(block.type)}
           value={block.html ?? ""}
+          style={{
+            color: look.color,
+            fontSize: look.fontSize,
+            textAlign: look.align,
+            ...(block.type === "quote"
+              ? { background: look.background, borderLeftColor: look.accent }
+              : boxed),
+          }}
           onChange={(html) => onChange({ html })}
+          onCaret={richSuggest}
+          onKeyDown={suggestKeys}
+          onLeave={() => setTimeout(close, 150)}
         />
       ) : null}
       {block.type === "image" ? (
         block.path ? (
           <div className="blk-image-body">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageSrc} alt={block.alt ?? ""} />
+            <div style={{ textAlign: look.align }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageSrc}
+                alt={block.alt ?? ""}
+                style={{
+                  display: "inline-block",
+                  width: `${look.width}%`,
+                  borderRadius: look.radius,
+                }}
+              />
+            </div>
             {selected ? (
               <div className="blk-fields">
                 <label>
@@ -295,8 +608,9 @@ export function BlockEditor({
                   Link (optional)
                   <input
                     value={block.href ?? ""}
-                    placeholder="https://"
+                    placeholder="https:// or {{"
                     onChange={(event) => onChange({ href: event.target.value })}
+                    {...inputSuggest("href")}
                   />
                 </label>
                 <button
@@ -321,12 +635,20 @@ export function BlockEditor({
         )
       ) : null}
       {block.type === "button" ? (
-        <div className="blk-button-body">
+        <div className="blk-button-body" style={{ textAlign: look.align }}>
           <input
             className="blk-button-label"
             aria-label="Button text"
             value={block.label ?? ""}
+            style={{
+              background: look.accent,
+              color: look.color,
+              borderRadius: look.radius,
+              width: look.fullWidth ? "100%" : undefined,
+              textAlign: "center",
+            }}
             onChange={(event) => onChange({ label: event.target.value })}
+            {...inputSuggest("label")}
           />
           {selected ? (
             <label className="blk-inline-field">
@@ -334,13 +656,26 @@ export function BlockEditor({
               <input
                 aria-label="Button link"
                 value={block.href ?? ""}
+                placeholder="https:// or {{"
                 onChange={(event) => onChange({ href: event.target.value })}
+                {...inputSuggest("href")}
               />
             </label>
           ) : null}
         </div>
       ) : null}
-      {block.type === "divider" ? <div className="blk-divider-line" /> : null}
+      {block.type === "divider" ? (
+        <div style={{ textAlign: look.align, margin: "22px 0" }}>
+          <div
+            style={{
+              display: "inline-block",
+              width: `${look.width}%`,
+              height: look.thickness,
+              background: look.accent,
+            }}
+          />
+        </div>
+      ) : null}
       {block.type === "spacer" ? (
         <div className={`blk-spacer-body size-${block.size ?? "medium"}`}>
           {selected ? (
@@ -372,6 +707,27 @@ export function BlockEditor({
           onChange={(event) => onChange({ html: event.target.value })}
           onBlur={(event) => onChange({ html: formatHtml(event.target.value) })}
         />
+      ) : null}
+      {suggest && options.length ? (
+        <ul className="ph-menu" role="listbox" aria-label="Merge fields">
+          {options.map((field, position) => (
+            <li key={field.key}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={position === suggest.index}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  suggest.apply(field.key);
+                  close();
+                }}
+              >
+                <code>{`{{${field.key}}}`}</code>
+                <span>{field.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </div>
   );
