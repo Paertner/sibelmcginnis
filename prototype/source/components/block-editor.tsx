@@ -289,14 +289,17 @@ function StylePanel({
 type Suggest = {
   query: string;
   index: number;
+  /** Link fields offer only address fields; text offers only words such as names. */
+  kind: "link" | "text";
   apply: (key: string) => void;
 };
 const mergeMatch = (before: string) => before.match(/\{\{([a-z_]*)$/i);
-const matchingFields = (query: string) =>
+const matchingFields = (query: string, kind: Suggest["kind"]) =>
   placeholders.filter(
     (field) =>
-      field.key.startsWith(query.toLowerCase()) ||
-      field.label.toLowerCase().includes(query.toLowerCase()),
+      "path" in field === (kind === "link") &&
+      (field.key.startsWith(query.toLowerCase()) ||
+        field.label.toLowerCase().includes(query.toLowerCase())),
   );
 
 export function BlockEditor({
@@ -329,7 +332,7 @@ export function BlockEditor({
   const look = blockLook(block);
   const imageSrc =
     media.find((item) => item.path === block.path)?.src ?? block.path;
-  const options = suggest ? matchingFields(suggest.query) : [];
+  const options = suggest ? matchingFields(suggest.query, suggest.kind) : [];
   const close = () => setSuggest(null);
 
   // Typing "{{" in a field opens the list of merge fields that can go there.
@@ -346,6 +349,7 @@ export function BlockEditor({
       setSuggest({
         query: match[1],
         index: 0,
+        kind: field === "href" ? "link" : "text",
         apply: (key) => {
           const start = caret - match[0].length;
           const value = `${element.value.slice(0, start)}{{${key}}}${element.value.slice(caret)}`;
@@ -371,6 +375,7 @@ export function BlockEditor({
     setSuggest({
       query: match[1],
       index: 0,
+      kind: "text",
       apply: (key) => {
         const range = document.createRange();
         range.setStart(node, offset - match[0].length);
@@ -460,8 +465,8 @@ export function BlockEditor({
               </button>
               <button
                 type="button"
-                title="Insert a merge field"
-                aria-label="Insert a merge field"
+                title="Insert the member’s name"
+                aria-label="Insert the member’s name"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => {
                   format("insertText", "{{");
