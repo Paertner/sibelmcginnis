@@ -7,6 +7,7 @@ import {
   type EmailBlock,
 } from "@/lib/email-blocks";
 import { getStore } from "@/lib/store";
+import { SocialLogo } from "./social-logo";
 
 const escapeText = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -183,7 +184,7 @@ export function BlockContent({ blocks }: { blocks: EmailBlock[] }) {
                     aria-label={network.label}
                     style={{ background: look.accent }}
                   >
-                    {network.badge}
+                    <SocialLogo network={network.key} />
                   </a>
                 ))}
               </p>

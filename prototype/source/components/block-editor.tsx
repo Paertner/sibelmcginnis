@@ -18,6 +18,7 @@ import {
 import type { MediaItem } from "@/lib/site-images";
 import { Icon, type IconName } from "./admin-icons";
 import { MediaPicker } from "./media-library";
+import { SocialLogo } from "./social-logo";
 import type { ActionResult } from "./action-form";
 
 // Block editing shared by announcement emails, blog posts and session notes.
@@ -693,7 +694,7 @@ export function BlockEditor({
               style={{ background: look.accent }}
               title={`${network.label} link from Settings`}
             >
-              {network.badge}
+              <SocialLogo network={network.key} />
             </span>
           ))}
           {selected ? (

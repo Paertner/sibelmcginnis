@@ -298,9 +298,9 @@ const escape = (value = "") =>
 const font = "font-family:Arial,Helvetica,sans-serif";
 /** Networks shown by the Social links block; their links come from Settings. */
 export const socialNetworks = [
-  { key: "facebook", label: "Facebook", badge: "f" },
-  { key: "instagram", label: "Instagram", badge: "ig" },
-  { key: "linkedin", label: "LinkedIn", badge: "in" },
+  { key: "facebook", label: "Facebook" },
+  { key: "instagram", label: "Instagram" },
+  { key: "linkedin", label: "LinkedIn" },
 ] as const;
 const spacer = { small: 12, medium: 24, large: 40 };
 /** Text blocks with a background get inner padding and rounded corners. */
@@ -357,13 +357,14 @@ function blockHtml(block: EmailBlock): string[] {
     case "spacer":
       return [`<div style="height:${spacer[block.size ?? "medium"]}px"></div>`];
     case "social":
-      // Round letter badges work in every mail client, unlike SVG icons.
+      // Mail clients don't show SVG, so emails use PNG copies of the logos on a colored circle.
       return [
         `<p style="${align};margin:${look.margin}">`,
-        ...socialNetworks.map(
-          (network) =>
-            `  <a href="{{${network.key}_url}}" style="${font};display:inline-block;width:38px;height:38px;line-height:38px;border-radius:999px;background-color:${look.accent};color:#ffffff;font-size:15px;font-weight:bold;text-align:center;text-decoration:none;margin:0 6px">${network.badge}</a>`,
-        ),
+        ...socialNetworks.flatMap((network) => [
+          `  <a href="{{${network.key}_url}}" style="display:inline-block;width:38px;height:38px;border-radius:999px;background-color:${look.accent};text-align:center;text-decoration:none;margin:0 6px">`,
+          `    <img src="/images/social/${network.key}.png" alt="${network.label}" width="20" height="20" style="display:inline-block;width:20px;height:20px;margin-top:9px">`,
+          "  </a>",
+        ]),
         "</p>",
       ];
     case "html":
