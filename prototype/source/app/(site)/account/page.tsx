@@ -2,7 +2,7 @@ import { siteText } from "@/lib/site-copy";
 import { PodcastLibrary } from "@/components/podcast-library";
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
-import { getStore, upcomingSessions } from "@/lib/store";
+import { getDemoState, getStore, upcomingSessions } from "@/lib/store";
 import { canView, isPremium } from "@/lib/access";
 import { addDays, fmtDate, today } from "@/lib/dates";
 import { bookingEvent, sessionEvent } from "@/lib/events";
@@ -109,33 +109,44 @@ export default async function Account({
           </h1>
           {premium ? (
             <>
-              <div className="card">
+              <ul className="session-cards">
                 {data.sessions
                   .filter((s) => s.date < today())
                   .toSorted((a, b) => b.date.localeCompare(a.date))
                   .map((s) => (
-                    <div className="list-item" key={s.id}>
-                      <div>
-                        <b>{s.topic}</b>
-                        <br />
-                        <small className="muted">{fmtDate(s.date)}</small>
-                        <p className="preserve-lines member-notes">
-                          {s.notes || siteText("account.notes-coming")}
-                        </p>
-                      </div>
-                      {data.podcasts.some(
-                        (p) => p.id === s.podcast && p.status === "published",
-                      ) ? (
-                        <Link
-                          className="btn btn-sm btn-ghost"
-                          href={`/account?tab=podcast#${s.podcast}`}
-                        >
-                          {siteText("account.listen")}
-                        </Link>
-                      ) : null}
-                    </div>
+                    <li key={s.id}>
+                      <Link className="session-card" href={`/session/${s.id}`}>
+                        <span className="date-chip" aria-hidden="true">
+                          <b>{fmtDate(s.date, { day: "numeric" })}</b>
+                          {fmtDate(s.date, { month: "short" })}
+                        </span>
+                        <span className="session-card-text">
+                          <b>{s.topic}</b>
+                          <small>{fmtDate(s.date)}</small>
+                          <span className="session-card-notes">
+                            {s.notes || siteText("account.notes-coming")}
+                          </span>
+                        </span>
+                        <span className="session-card-meta">
+                          {data.podcasts.some(
+                            (p) =>
+                              p.id === s.podcast &&
+                              p.status === "published" &&
+                              getDemoState().audio.has(p.id),
+                          ) ? (
+                            <span className="session-audio-tag">
+                              <Icon name="headphones" size={14} />
+                              {siteText("account.listen")}
+                            </span>
+                          ) : null}
+                          <span className="session-card-arrow">
+                            {siteText("account.read-notes")} →
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
                   ))}
-              </div>
+              </ul>
               <p className="section-top">
                 <Link className="btn" href="/account?tab=podcast">
                   {siteText("account.open-the-full-podcast")}

@@ -3,7 +3,9 @@ import { siteText } from "@/lib/site-copy";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getStore } from "@/lib/store";
+import { getDemoState, getStore } from "@/lib/store";
+import { BlockContent, textToBlocks } from "@/components/block-content";
+import { assetUrl } from "../../../../../preview/assets";
 import { getUser } from "@/lib/auth";
 import { canView } from "@/lib/access";
 import { fmtDate } from "@/lib/dates";
@@ -32,7 +34,7 @@ export default async function Post({
   const user = await getUser(),
     allowed = canView(post.access, user?.role);
   // Locked bodies remain server-only. Never serialize a protected post into a client component.
-  const paragraphs = allowed ? post.body.split(/\n\n+/) : [post.excerpt];
+  const audio = allowed && getDemoState().audio.has(`post-${post.id}`);
   return (
     <article className="block">
       <div className="wrap narrow">
@@ -54,11 +56,23 @@ export default async function Post({
           height={400}
           sizes="(max-width: 780px) 90vw, 730px"
         />
-        <div className="article">
-          {paragraphs.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
+        {audio ? (
+          <div className="post-audio">
+            <span>{siteText("post.listen-to-this-post")}</span>
+            <audio
+              controls
+              preload="none"
+              src={assetUrl(`/api/audio/post-${post.id}`)}
+            />
+          </div>
+        ) : null}
+        {allowed ? (
+          <BlockContent blocks={post.blocks ?? textToBlocks(post.body)} />
+        ) : (
+          <div className="article">
+            <p>{post.excerpt}</p>
+          </div>
+        )}
         {!allowed ? (
           <div className="paywall">
             <div className="card">

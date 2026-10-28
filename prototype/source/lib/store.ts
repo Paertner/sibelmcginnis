@@ -51,7 +51,17 @@ export type MediaFile = {
   size: number;
   uploadedAt: string;
 };
-export type Store = Omit<typeof seed, "members" | "announcements"> & {
+export type Store = Omit<
+  typeof seed,
+  "members" | "announcements" | "posts" | "sessions"
+> & {
+  posts: ((typeof seed)["posts"][number] & {
+    blocks?: EmailBlock[];
+    audioName?: string;
+  })[];
+  sessions: ((typeof seed)["sessions"][number] & {
+    blocks?: EmailBlock[];
+  })[];
   siteCopy?: Record<string,string>;
   siteImages?: Record<string, {imageId?:string;builtin?:string;alt?:string;position?:string;fileName?:string}>;
   media?: MediaFile[];

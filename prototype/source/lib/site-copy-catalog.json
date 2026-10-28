@@ -1500,6 +1500,11 @@
     "text": "Sign in"
   },
   {
+    "id": "post.listen-to-this-post",
+    "group": "Blog article",
+    "text": "Listen to this post"
+  },
+  {
     "id": "solutions.solutions",
     "group": "Solutions",
     "text": "Solutions"
@@ -1978,6 +1983,26 @@
     "id": "account.premium-access-through",
     "group": "Member panel",
     "text": "Premium access through"
+  },
+  {
+    "id": "account.read-notes",
+    "group": "Member panel",
+    "text": "Read notes"
+  },
+  {
+    "id": "session.all-session-notes",
+    "group": "Member panel",
+    "text": "All session notes"
+  },
+  {
+    "id": "session.saturday-circle",
+    "group": "Member panel",
+    "text": "Saturday circle"
+  },
+  {
+    "id": "session.listen",
+    "group": "Member panel",
+    "text": "Listen"
   },
   {
     "id": "contact.option-membership",

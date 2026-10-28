@@ -6,7 +6,12 @@ import { MediaLibrary } from "@/components/media-library";
 import { AdminSettings } from "@/components/admin-settings";
 import { SiteContentEditor } from "@/components/site-content-editor";
 import { SiteContentTabs } from "@/components/site-content-tabs";
-import { mediaLibrary, siteImage, siteImageSlots } from "@/lib/site-images";
+import {
+  mediaLibrary,
+  siteImage,
+  siteImageSlots,
+  type MediaItem,
+} from "@/lib/site-images";
 import { AdminTable, AdminRow } from "@/components/admin-table";
 import { AnnouncementComposer } from "@/components/announcement-composer";
 import { AnnouncementHistory } from "@/components/announcement-history";
@@ -114,6 +119,7 @@ export default async function Admin({
     settings = data.settings;
   const media =
     section === "posts" ||
+    section === "sessions" ||
     section === "media" ||
     section === "announce" ||
     section === "settings"
@@ -188,7 +194,7 @@ export default async function Admin({
             {section === "podcast" ? <EpisodeEditor /> : null}
             {section === "sessions" ? (
               <>
-                <SessionEditor episodes={data.podcasts} />
+                <SessionEditor episodes={data.podcasts} media={media} />
                 <ActionForm
                   action={adminMutation}
                   submitLabel="+ Add next Saturday"
@@ -341,6 +347,7 @@ export default async function Admin({
             next={next}
             episodes={data.podcasts}
             settings={settings}
+            media={media}
           />
         ) : null}
         {section === "podcast" ? (
@@ -659,7 +666,9 @@ function SessionsPage({
   next,
   episodes,
   settings,
+  media,
 }: {
+  media: MediaItem[];
   sessions: Session[];
   next?: Session;
   episodes: Parameters<typeof SessionEditor>[0]["episodes"];
@@ -706,7 +715,7 @@ function SessionsPage({
               </li>
             </ul>
             <div className="next-circle-actions">
-              <SessionEditor session={next} episodes={episodes} />
+              <SessionEditor session={next} episodes={episodes} media={media} />
               <ActionForm action={adminMutation} submitLabel="New Zoom link">
                 <EntityFields entity="sessions" id={next.id} />
                 <input type="hidden" name="op" value="regenerate" />
@@ -802,7 +811,7 @@ function SessionsPage({
                     <EntityFields entity="sessions" id={s.id} />
                     <input type="hidden" name="op" value="regenerate" />
                   </ActionForm>
-                  <SessionEditor session={s} episodes={episodes} />
+                  <SessionEditor session={s} episodes={episodes} media={media} />
                 </div>
               </li>
             ))}
@@ -851,7 +860,7 @@ function SessionsPage({
                 </ul>
               </div>
               <div className="admin-row-actions">
-                <SessionEditor session={s} episodes={episodes} />
+                <SessionEditor session={s} episodes={episodes} media={media} />
               </div>
             </li>
           ))}

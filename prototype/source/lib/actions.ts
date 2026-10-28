@@ -42,6 +42,38 @@ const email = (f: FormData) => {
   return value;
 };
 const uid = () => randomUUID();
+const audioTypes = [
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/x-m4a",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/ogg",
+];
+/** Validates an optional uploaded audio file (MP3, M4A, WAV or OGG, up to 10 MB). */
+async function readAudio(file: FormDataEntryValue | null) {
+  if (!(file instanceof File) || !file.size) return undefined;
+  if (file.size > 10 * 1024 * 1024 || !audioTypes.includes(file.type))
+    throw new Error("Upload MP3, M4A, WAV or OGG audio, up to 10 MB for review.");
+  return {
+    bytes: new Uint8Array(await file.arrayBuffer()),
+    type: file.type,
+    name: file.name.replace(/[\r\n"\\]/g, "_").slice(0, 100),
+  };
+}
+/** Plain text of blocks, kept as the post body for search, excerpts and emails. */
+const blocksText = (blocks: ReturnType<typeof parseBlocks>) =>
+  blocks
+    .map((block) =>
+      [block.title, block.text, block.html, block.label]
+        .filter(Boolean)
+        .join(" ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .filter(Boolean)
+    .join("\n\n");
 const refresh = () => revalidatePath("/", "layout");
 const errorResult = (error: unknown): ActionResult => ({
   message:
@@ -260,6 +292,7 @@ export async function adminMutation(
           break;
         case "posts":
           data.posts = data.posts.filter((x) => x.id !== id);
+          getDemoState().audio.delete(`post-${id}`);
           break;
         case "sessions":
           data.sessions = data.sessions.filter((x) => x.id !== id);
@@ -305,11 +338,14 @@ export async function adminMutation(
       if (item) Object.assign(item, value);
       else data.members.push({ id: uid(), joined: today(), ...value });
     } else if (entity === "posts") {
+      const blocks = parseBlocks(text(form, "blocks", 400000));
+      if (!blocksText(blocks)) throw new Error("Add some content to the post.");
       const value = {
         title: required(form, "title", 250),
         category: required(form, "category", 100),
         excerpt: required(form, "excerpt", 500),
-        body: required(form, "body"),
+        blocks,
+        body: blocksText(blocks),
         access: choice(form, "access", ["public", "premium"]),
         status: choice(form, "status", ["draft", "published"]),
         cover: number(form, "cover", 0, 2),
@@ -318,6 +354,16 @@ export async function adminMutation(
       const postId = item?.id ?? uid();
       if (item) Object.assign(item, value);
       else data.posts.push({ id: postId, date: today(), ...value });
+      const post = data.posts.find((x) => x.id === postId)!;
+      // Posts can carry an audio version, made elsewhere and uploaded here.
+      const audio = await readAudio(form.get("audio"));
+      if (audio) {
+        getDemoState().audio.set(`post-${postId}`, audio);
+        post.audioName = audio.name;
+      } else if (form.get("removeAudio") === "on") {
+        getDemoState().audio.delete(`post-${postId}`);
+        post.audioName = "";
+      }
       // A cover chosen in the media picker becomes this post's own image.
       const coverMedia = text(form, "coverMedia", 200);
       if (coverMedia) {
@@ -370,17 +416,44 @@ export async function adminMutation(
         const podcast = text(form, "podcast");
         if (podcast && !data.podcasts.some((p) => p.id === podcast))
           throw new Error("Choose an existing episode.");
+        // Notes are written with the block editor; their plain text stays in `notes`.
+        const blocks = parseBlocks(text(form, "blocks", 400000));
+        const topic = required(form, "topic", 250);
         const value = {
           date,
-          topic: required(form, "topic", 250),
+          topic,
           zoom,
           pass: text(form, "pass", 100),
-          notes: text(form, "notes"),
+          notes: blocksText(blocks),
+          blocks,
           podcast,
         };
         const item = data.sessions.find((x) => x.id === id);
+        const sessionId = item?.id ?? uid();
         if (item) Object.assign(item, value);
-        else data.sessions.push({ id: uid(), time: "10:30", ...value });
+        else data.sessions.push({ id: sessionId, time: "10:30", ...value });
+        const session = data.sessions.find((x) => x.id === sessionId)!;
+        // The session's audio is its podcast episode: update the linked one or create it.
+        const audio = await readAudio(form.get("audio"));
+        if (audio) {
+          let episode = data.podcasts.find((p) => p.id === session.podcast);
+          if (!episode) {
+            episode = {
+              id: uid(),
+              num: Math.max(0, ...data.podcasts.map((p) => p.num)) + 1,
+              title: topic,
+              description: `Saturday circle, ${date}.`,
+              date,
+              duration: "30:00",
+              status: "published",
+              audioName: "",
+            };
+            data.podcasts.push(episode);
+            session.podcast = episode.id;
+          }
+          getDemoState().audio.set(episode.id, audio);
+          episode.audioName = audio.name;
+        }
       }
     } else if (entity === "podcasts") {
       const date = required(form, "date"),

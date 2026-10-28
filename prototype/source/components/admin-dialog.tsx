@@ -16,11 +16,14 @@ export function AdminDialog({
   trigger = "Edit",
   children,
   primary = false,
+  wide = false,
 }: {
   title: string;
   trigger?: string;
   children: React.ReactNode;
   primary?: boolean;
+  /** Large editors such as posts and sessions. */
+  wide?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -37,7 +40,7 @@ export function AdminDialog({
       </button>
       <dialog
         ref={dialog}
-        className="admin-dialog"
+        className={`admin-dialog${wide ? " wide" : ""}`}
         aria-labelledby={titleId}
         onClick={(event) => {
           if (event.target === event.currentTarget) close();

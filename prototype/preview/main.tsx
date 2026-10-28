@@ -10,6 +10,7 @@ import Membership from "../source/app/(site)/morning-coffee/page";
 import Solutions from "../source/app/(site)/solutions/page";
 import Blog from "../source/app/(site)/blog/page";
 import Post from "../source/app/(site)/post/[id]/page";
+import SessionNotes from "../source/app/(site)/session/[id]/page";
 import Podcast from "../source/app/(site)/podcast/page";
 import Contact from "../source/app/(site)/contact/page";
 import Login from "../source/app/(site)/login/page";
@@ -43,6 +44,7 @@ async function renderRoute(){
  else if(path==="/login")content=await Login();
  else if(path==="/join")content=await Join(params);
  else if(path==="/account")content=await Account(params);
+ else if(path.startsWith("/session/"))content=await SessionNotes({params:Promise.resolve({id:decodeURIComponent(path.slice(9))})});
  else if(path.startsWith("/post/"))content=await Post({params:Promise.resolve({id:decodeURIComponent(path.slice(6))})});
  else if(path.startsWith("/meetings/")){const [, ,kind,id]=path.split("/");content=await Meeting({params:Promise.resolve({kind,id})});}
  else content=<div className="wrap empty-page"><h1>Page not found</h1><a href="#/">Back home</a></div>;
