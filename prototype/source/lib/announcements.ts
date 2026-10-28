@@ -33,6 +33,7 @@ export function personalizedHtml(
     fillPlaceholders(html, {
       origin: siteOrigin(),
       name: escapeHtml(member.name),
+      settings: getStore().siteSettings,
     }),
   );
 }

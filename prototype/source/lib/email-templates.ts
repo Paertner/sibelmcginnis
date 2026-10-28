@@ -37,6 +37,53 @@ export const defaultEmailFooter: EmailBlock[] = [
     html: 'A little space to connect, reflect, and grow.<br>Morning Coffee Community · <a href="{{account_url}}" style="color:#9b5e41">Your account</a>',
   },
 ];
+const footerText = { color: "#232323", fontSize: "normal" } as const;
+/** Ready-made footers the admin can start from in the footer editor. */
+export const footerTemplates: {
+  id: string;
+  name: string;
+  description: string;
+  blocks: EmailBlock[];
+}[] = [
+  {
+    id: "simple",
+    name: "Simple",
+    description: "A short line with a link to the member’s account.",
+    blocks: defaultEmailFooter,
+  },
+  {
+    id: "newsletter",
+    name: "Newsletter",
+    description:
+      "Social icons, copyright, mailing address and email preference links.",
+    blocks: [
+      {
+        id: "nl-line",
+        type: "divider",
+        style: { accent: "#171717", thickness: "medium" },
+      },
+      { id: "nl-social", type: "social" },
+      {
+        id: "nl-copyright",
+        type: "note",
+        html: "<em>Copyright © {{year}} {{site_title}}. All rights reserved.</em><br>You are receiving this email because you opted in via our website.",
+        style: footerText,
+      },
+      {
+        id: "nl-address",
+        type: "note",
+        html: "<strong>Our mailing address is:</strong><br>{{site_title}} · {{mailing_address}}",
+        style: footerText,
+      },
+      {
+        id: "nl-preferences",
+        type: "note",
+        html: 'Want to change how you receive these emails?<br>You can <a href="{{preferences_url}}">update your preferences</a> or <a href="{{unsubscribe_url}}">unsubscribe</a>.',
+        style: footerText,
+      },
+    ],
+  },
+];
 export const emailTemplates: {
   id: string;
   name: string;

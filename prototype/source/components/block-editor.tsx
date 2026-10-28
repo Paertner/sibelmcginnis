@@ -5,7 +5,9 @@ import {
   blockCatalog,
   blockLook,
   formatHtml,
+  isLinkField,
   placeholders,
+  socialNetworks,
   styleControls,
   withNewIds,
   type BlockStyle,
@@ -29,6 +31,7 @@ export const blockIcons: Record<BlockType, IconName> = {
   divider: "minus",
   spacer: "spacer",
   note: "fine",
+  social: "share",
   html: "code",
 };
 export const labelOf = (type: BlockType) =>
@@ -297,7 +300,7 @@ const mergeMatch = (before: string) => before.match(/\{\{([a-z_]*)$/i);
 const matchingFields = (query: string, kind: Suggest["kind"]) =>
   placeholders.filter(
     (field) =>
-      "path" in field === (kind === "link") &&
+      isLinkField(field) === (kind === "link") &&
       (field.key.startsWith(query.toLowerCase()) ||
         field.label.toLowerCase().includes(query.toLowerCase())),
   );
@@ -679,6 +682,25 @@ export function BlockEditor({
               background: look.accent,
             }}
           />
+        </div>
+      ) : null}
+      {block.type === "social" ? (
+        <div className="blk-social" style={{ textAlign: look.align }}>
+          {socialNetworks.map((network) => (
+            <span
+              key={network.key}
+              className="blk-social-badge"
+              style={{ background: look.accent }}
+              title={`${network.label} link from Settings`}
+            >
+              {network.badge}
+            </span>
+          ))}
+          {selected ? (
+            <small className="blk-social-note">
+              Links come from Settings → Social media.
+            </small>
+          ) : null}
         </div>
       ) : null}
       {block.type === "spacer" ? (

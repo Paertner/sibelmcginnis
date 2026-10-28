@@ -11,6 +11,7 @@ const articleBlocks: BlockType[] = [
   "button",
   "divider",
   "spacer",
+  "social",
   "html",
 ];
 

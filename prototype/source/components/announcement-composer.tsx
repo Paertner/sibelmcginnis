@@ -5,13 +5,14 @@ import {
   useSyncExternalStore,
 } from "react";
 import { adminMutation } from "@/lib/actions";
-import { defaultEmailFooter, emailTemplates } from "@/lib/email-templates";
+import { emailTemplates, footerTemplates } from "@/lib/email-templates";
 import {
   blockCatalog,
   fillPlaceholders,
   renderEmail,
   withNewIds,
   type EmailBlock,
+  type PlaceholderSettings,
   type SavedEmailTemplate,
 } from "@/lib/email-blocks";
 import type { MediaItem } from "@/lib/site-images";
@@ -53,6 +54,7 @@ function FooterEditor({
             types={[
               "text",
               "note",
+              "social",
               "divider",
               "button",
               "image",
@@ -85,14 +87,27 @@ function FooterEditor({
             {feedback.message}
           </p>
         ) : null}
-        <button
-          type="button"
-          className="btn btn-ghost"
-          style={{ marginRight: "auto" }}
-          onClick={() => setBlocks(withNewIds(defaultEmailFooter))}
-        >
-          Use the original footer
-        </button>
+        <span className="footer-templates" role="group" aria-label="Footer templates">
+          <span>Start from:</span>
+          {footerTemplates.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              className="btn btn-sm btn-ghost"
+              title={template.description}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    `Replace this footer with the ${template.name} template?`,
+                  )
+                )
+                  setBlocks(withNewIds(template.blocks));
+              }}
+            >
+              {template.name}
+            </button>
+          ))}
+        </span>
         <button
           type="button"
           className="btn btn-ghost"
@@ -127,10 +142,13 @@ export function AnnouncementComposer({
   footer,
   initialRecipients = [],
   quota,
+  siteSettings,
   draft,
 }: {
   initialRecipients?: string[];
   quota: EmailQuota;
+  /** Site details from Settings, shown in the preview's merge fields. */
+  siteSettings?: PlaceholderSettings;
   /** A ready-made email, e.g. from "Send notification" on a post or episode. */
   draft?: { subject: string; blocks: EmailBlock[]; groups: string[] };
   members: Recipient[];
@@ -263,7 +281,7 @@ export function AnnouncementComposer({
   };
   const previewHtml = preview
     ? displayHtml(
-        fillPlaceholders(cleanPreview(html), {}),
+        fillPlaceholders(cleanPreview(html), { settings: siteSettings }),
         media,
       )
     : "";
@@ -618,7 +636,9 @@ export function AnnouncementComposer({
                     <div
                       dangerouslySetInnerHTML={{
                         __html: displayHtml(
-                          cleanPreview(renderEmail([], footer)),
+                          fillPlaceholders(cleanPreview(renderEmail([], footer)), {
+                            settings: siteSettings,
+                          }),
                           media,
                         ),
                       }}

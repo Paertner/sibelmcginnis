@@ -644,6 +644,7 @@ export default async function Admin({
               key={`${to ?? ""}|${about ?? ""}`}
               quota={emailQuota()}
               draft={notificationDraft(about)}
+              siteSettings={data.siteSettings}
               initialRecipients={
                 to && data.members.some((member) => member.id === to) ? [to] : []
               }

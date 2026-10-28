@@ -7057,3 +7057,34 @@ ul.ticks li::before {
   background: var(--ad-accent);
   color: #fff;
 }
+
+/* Social links block: round badges in the editor and on web pages. */
+.blk-social {
+  margin: 18px 0;
+}
+.blk-social-badge,
+.article-social a {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin: 0 6px;
+  border-radius: 50%;
+  color: #fff;
+  font: 700 0.9rem Arial, Helvetica, sans-serif;
+  text-decoration: none;
+}
+.blk-social-note {
+  display: block;
+  margin-top: 8px;
+  font: 400 0.72rem var(--font-poppins);
+  color: var(--ad-muted);
+}
+.footer-templates {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+  font: 400 0.8rem var(--font-poppins);
+  color: var(--ad-muted);
+}

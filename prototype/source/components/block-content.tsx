@@ -3,8 +3,10 @@ import { safeHtml } from "@/lib/safe-html";
 import {
   blockLook,
   fillPlaceholders,
+  socialNetworks,
   type EmailBlock,
 } from "@/lib/email-blocks";
+import { getStore } from "@/lib/store";
 
 const escapeText = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -21,7 +23,11 @@ export function textToBlocks(text: string): EmailBlock[] {
     }));
 }
 // On the website there is no recipient, so name fields read "friend" and links stay on the site.
-const fill = (value = "") => fillPlaceholders(value, { name: "friend" });
+const fill = (value = "") =>
+  fillPlaceholders(value, {
+    name: "friend",
+    settings: getStore().siteSettings,
+  });
 const html = (value = "") => safeHtml(fill(value));
 
 /** Renders editor blocks as a web article (posts and session notes), with each block's style. */
@@ -160,6 +166,27 @@ export function BlockContent({ blocks }: { blocks: EmailBlock[] }) {
                   }}
                 />
               </div>
+            );
+          case "social":
+            return (
+              <p
+                key={block.id}
+                className="article-social"
+                style={{ textAlign: look.align, margin: look.margin }}
+              >
+                {socialNetworks.map((network) => (
+                  <a
+                    key={network.key}
+                    href={fill(`{{${network.key}_url}}`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={network.label}
+                    style={{ background: look.accent }}
+                  >
+                    {network.badge}
+                  </a>
+                ))}
+              </p>
             );
           case "spacer":
             return (

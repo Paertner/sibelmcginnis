@@ -9,6 +9,7 @@ export const blockTypes = [
   "divider",
   "spacer",
   "note",
+  "social",
   "html",
 ] as const;
 export type BlockType = (typeof blockTypes)[number];
@@ -60,6 +61,7 @@ export const styleControls: Record<BlockType, StyleKey[]> = {
   image: ["align", "width", "shape", "space"],
   button: ["align", "accent", "color", "shape", "width", "space"],
   divider: ["accent", "thickness", "width", "align", "space"],
+  social: ["align", "accent", "space"],
   spacer: [],
   html: [],
 };
@@ -72,6 +74,7 @@ const defaults: Record<BlockType, Required<Pick<BlockStyle, "align">> & BlockSty
   image: { align: "center", width: "full", shape: "rounded" },
   button: { align: "left", accent: "#9b5e41", color: "#ffffff", shape: "rounded" },
   divider: { align: "center", accent: "#f0e4db", thickness: "thin", width: "full" },
+  social: { align: "center", accent: "#171717" },
   spacer: { align: "left" },
   html: { align: "left" },
 };
@@ -89,6 +92,7 @@ const margins: Record<BlockType, string> = {
   image: "16px 0",
   button: "24px 0",
   divider: "24px 0",
+  social: "20px 0",
   spacer: "0",
   html: "0",
 };
@@ -119,10 +123,39 @@ export function blockLook(block: EmailBlock) {
   };
 }
 
-/** Merge fields such as {{first_name}} that are filled in for each recipient. */
-export const placeholders = [
+/** Site details from Settings that some merge fields read. */
+export type PlaceholderSettings = {
+  siteTitle?: string;
+  mailingAddress?: string;
+  facebook?: string;
+  instagram?: string;
+  linkedin?: string;
+};
+type Placeholder = {
+  key: string;
+  label: string;
+  /** Link fields have a path on the site (or a Settings link that replaces it). */
+  path?: string;
+  sample?: string;
+  setting?: keyof PlaceholderSettings;
+};
+/** Merge fields such as {{first_name}}, filled in for each recipient or from Settings. */
+export const placeholders: Placeholder[] = [
   { key: "first_name", label: "Member’s first name", sample: "Amelia" },
   { key: "full_name", label: "Member’s full name", sample: "Amelia Hart" },
+  {
+    key: "site_title",
+    label: "Site title (Settings)",
+    sample: "Sibel McGinnis",
+    setting: "siteTitle",
+  },
+  {
+    key: "mailing_address",
+    label: "Mailing address (Settings)",
+    sample: "Add your mailing address in Settings",
+    setting: "mailingAddress",
+  },
+  { key: "year", label: "Current year" },
   { key: "site_url", label: "Website home page", path: "/" },
   { key: "account_url", label: "Member account", path: "/account" },
   { key: "blog_url", label: "Blog", path: "/blog" },
@@ -132,20 +165,34 @@ export const placeholders = [
   { key: "membership_url", label: "Membership", path: "/account?tab=membership" },
   { key: "preferences_url", label: "Email preferences", path: "/account?tab=membership" },
   { key: "unsubscribe_url", label: "Unsubscribe", path: "/account?tab=membership" },
-] as const;
+  { key: "facebook_url", label: "Facebook page (Settings)", path: "/", setting: "facebook" },
+  { key: "instagram_url", label: "Instagram (Settings)", path: "/", setting: "instagram" },
+  { key: "linkedin_url", label: "LinkedIn (Settings)", path: "/", setting: "linkedin" },
+];
+export const isLinkField = (field: Placeholder) => field.path !== undefined;
 /** Replaces merge fields. Links use `origin` (empty for links within the site). */
 export function fillPlaceholders(
   html: string,
-  { origin = "", name }: { origin?: string; name?: string },
+  {
+    origin = "",
+    name,
+    settings = {},
+  }: { origin?: string; name?: string; settings?: PlaceholderSettings },
 ) {
   let out = html;
   for (const field of placeholders) {
-    const value =
-      "path" in field
-        ? `${origin}${field.path}`
-        : field.key === "first_name"
-          ? (name?.split(" ")[0] ?? field.sample)
-          : (name ?? field.sample);
+    const fromSettings = field.setting ? settings[field.setting] : undefined;
+    const value = fromSettings
+      ? fromSettings
+      : field.key === "year"
+        ? String(new Date().getFullYear())
+        : isLinkField(field)
+          ? `${origin}${field.path}`
+          : field.key === "first_name"
+            ? (name?.split(" ")[0] ?? field.sample ?? "")
+            : field.key === "full_name"
+              ? (name ?? field.sample ?? "")
+              : (field.sample ?? "");
     out = out.replaceAll(`{{${field.key}}}`, value);
   }
   return out;
@@ -227,6 +274,12 @@ export const blockCatalog: {
     create: () => ({ id: newId(), type: "note", html: "Small print" }),
   },
   {
+    type: "social",
+    label: "Social links",
+    hint: "Facebook, Instagram, LinkedIn",
+    create: () => ({ id: newId(), type: "social" }),
+  },
+  {
     type: "html",
     label: "HTML code",
     hint: "Your own markup",
@@ -243,6 +296,12 @@ const escape = (value = "") =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 const font = "font-family:Arial,Helvetica,sans-serif";
+/** Networks shown by the Social links block; their links come from Settings. */
+export const socialNetworks = [
+  { key: "facebook", label: "Facebook", badge: "f" },
+  { key: "instagram", label: "Instagram", badge: "ig" },
+  { key: "linkedin", label: "LinkedIn", badge: "in" },
+] as const;
 const spacer = { small: 12, medium: 24, large: 40 };
 /** Text blocks with a background get inner padding and rounded corners. */
 const boxed = (background?: string, defaultBackground?: string) =>
@@ -297,6 +356,16 @@ function blockHtml(block: EmailBlock): string[] {
       ];
     case "spacer":
       return [`<div style="height:${spacer[block.size ?? "medium"]}px"></div>`];
+    case "social":
+      // Round letter badges work in every mail client, unlike SVG icons.
+      return [
+        `<p style="${align};margin:${look.margin}">`,
+        ...socialNetworks.map(
+          (network) =>
+            `  <a href="{{${network.key}_url}}" style="${font};display:inline-block;width:38px;height:38px;line-height:38px;border-radius:999px;background-color:${look.accent};color:#ffffff;font-size:15px;font-weight:bold;text-align:center;text-decoration:none;margin:0 6px">${network.badge}</a>`,
+        ),
+        "</p>",
+      ];
     case "html":
       return formatHtml(block.html ?? "").split("\n");
     default:
