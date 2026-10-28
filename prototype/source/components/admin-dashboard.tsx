@@ -429,9 +429,17 @@ export function AdminDashboard({ data }: { data: Store }) {
                   </span>
                   <div>
                     <b>
-                      <Link className="member-link" href={`/admin/announce?to=${b.memberId}`}>
+                      <span className="member-name">
                         {name(b.memberId)}
-                      </Link>
+                        <Link
+                          className="mail-link"
+                          href={`/admin/announce?to=${b.memberId}`}
+                          aria-label={`Send an announcement to ${name(b.memberId)}`}
+                          title="Send an announcement"
+                        >
+                          <Icon name="mail" size={14} />
+                        </Link>
+                      </span>
                     </b>
                     <small>
                       {b.time} · {b.topic}
@@ -470,9 +478,17 @@ export function AdminDashboard({ data }: { data: Store }) {
                   </span>
                   <div>
                     <b>
-                      <Link className="member-link" href={`/admin/announce?to=${m.id}`}>
+                      <span className="member-name">
                         {m.name}
-                      </Link>
+                        <Link
+                          className="mail-link"
+                          href={`/admin/announce?to=${m.id}`}
+                          aria-label={`Send an announcement to ${m.name}`}
+                          title="Send an announcement"
+                        >
+                          <Icon name="mail" size={14} />
+                        </Link>
+                      </span>
                     </b>
                     <small>
                       Joined{" "}

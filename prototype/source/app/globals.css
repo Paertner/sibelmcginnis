@@ -6981,3 +6981,79 @@ ul.ticks li::before {
   display: inline-block;
   vertical-align: middle;
 }
+
+/* Wide editors: Save, Cancel and Delete sit at the top of the settings column. */
+.admin-dialog .wide-editor > .form-actions {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  top: -24px;
+  bottom: auto;
+  margin: 0 0 14px;
+  padding: 0 0 12px;
+  border-top: 0;
+  border-bottom: 1px solid var(--ad-line);
+}
+.admin-dialog .wide-editor > .wide-editor-side {
+  grid-row: 2;
+}
+.admin-dialog .wide-editor > .form-feedback {
+  grid-column: 2;
+  grid-row: 3;
+}
+@media (max-width: 960px) {
+  .admin-dialog .wide-editor > .form-actions,
+  .admin-dialog .wide-editor > .wide-editor-side,
+  .admin-dialog .wide-editor > .form-feedback {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* The Style button stands out in the block toolbar. */
+.blk-bar .blk-style-toggle {
+  background: var(--ad-accent);
+  color: #fff;
+  border-radius: 7px;
+  font-weight: 600;
+}
+.blk-bar .blk-style-toggle:hover:not(:disabled),
+.blk-bar .blk-style-toggle.on {
+  background: #c08a6c;
+}
+
+/* Member names: the name opens Edit, the letter icon starts an announcement. */
+.member-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.name-trigger {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: 600 0.9rem var(--font-poppins);
+  color: var(--ad-ink);
+  cursor: pointer;
+  text-align: left;
+}
+.name-trigger:hover {
+  color: var(--ad-accent);
+  text-decoration: underline;
+}
+.mail-link {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 8px;
+  color: var(--ad-accent);
+  background: var(--ad-accent-soft);
+  transition: background 0.15s;
+}
+.mail-link:hover {
+  background: var(--ad-accent);
+  color: #fff;
+}

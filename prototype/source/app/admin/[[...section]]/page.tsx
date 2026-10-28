@@ -260,7 +260,10 @@ export default async function Admin({
                           {initials(m.name)}
                         </span>
                         <span>
-                          <MemberLink id={m.id} name={m.name} />
+                          <span className="member-name">
+                            <MemberEditor member={m} asName />
+                            <MailLink id={m.id} name={m.name} />
+                          </span>
                           {m.note && (
                             <small className="muted person-note">
                               {m.note}
@@ -896,15 +899,25 @@ function SessionsPage({
 }
 
 // Every member name opens a new announcement addressed to that member.
-function MemberLink({ id, name }: { id: string; name: string }) {
+// A member's name with a letter icon that starts an announcement to them.
+function MailLink({ id, name }: { id: string; name: string }) {
   return (
     <Link
-      className="member-link"
+      className="mail-link"
       href={`/admin/announce?to=${id}`}
+      aria-label={`Send an announcement to ${name}`}
       title={`Send an announcement to ${name}`}
     >
-      {name}
+      <Icon name="mail" size={15} />
     </Link>
+  );
+}
+function MemberLink({ id, name }: { id: string; name: string }) {
+  return (
+    <span className="member-name">
+      {name}
+      <MailLink id={id} name={name} />
+    </span>
   );
 }
 

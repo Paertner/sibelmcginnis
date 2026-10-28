@@ -78,18 +78,23 @@ function Editor({
   id,
   children,
   quiet = false,
+  trigger,
 }: {
   title: string;
   entity: string;
   id?: string;
   children: React.ReactNode;
   quiet?: boolean;
+  /** Show this text as a link-style trigger instead of the Edit button. */
+  trigger?: string;
 }) {
   return (
     <AdminDialog
       title={title}
-      trigger={id ? "Edit" : title}
+      trigger={trigger ?? (id ? "Edit" : title)}
       primary={!id && !quiet}
+      triggerClassName={trigger ? "name-trigger" : undefined}
+      triggerLabel={trigger ? `${trigger}, edit member` : undefined}
     >
       <ActionForm
         action={adminMutation}
@@ -107,12 +112,20 @@ function Editor({
     </AdminDialog>
   );
 }
-export function MemberEditor({ member }: { member?: Member }) {
+export function MemberEditor({
+  member,
+  asName = false,
+}: {
+  member?: Member;
+  /** Open the editor from the member's name instead of an Edit button. */
+  asName?: boolean;
+}) {
   return (
     <Editor
       title={member ? `Edit ${member.name}` : "+ Add member"}
       entity="members"
       id={member?.id}
+      trigger={asName ? member?.name : undefined}
     >
       <div className="row">
         <Field name="name" label="Full name" value={member?.name} />

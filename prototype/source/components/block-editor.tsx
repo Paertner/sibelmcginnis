@@ -787,7 +787,7 @@ export function BlockList({
       ))}
       {!blocks.length ? (
         <p className="blk-empty">
-          Add blocks from the list to build this email.
+          Add blocks from the list to start.
         </p>
       ) : null}
       {target ? (
