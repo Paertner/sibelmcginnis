@@ -10,6 +10,7 @@ import { isPremium } from "./access";
 import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
 import { parseBlocks } from "./email-blocks";
+import { emailCategories, type EmailPreferences } from "./email-preferences";
 
 const text = (f: FormData, key: string, max = 20000) =>
   String(f.get(key) ?? "")
@@ -185,6 +186,32 @@ export async function changeTier(
         ? new Date(Date.now() + 30 * 86400000).toISOString()
         : "";
     return success("Review membership updated. No payment was taken.");
+  } catch (error) {
+    return errorResult(error);
+  }
+}
+/** Saves which emails the signed-in member wants (the target of the unsubscribe link). */
+export async function saveEmailPreferences(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    checkDemo();
+    const user = await getUser();
+    if (!user || user.role === "admin")
+      throw new Error("Sign in as a member first.");
+    const member = getStore().members.find((m) => m.id === user.id);
+    if (!member) throw new Error("Member not found.");
+    const unsubscribedAll = form.get("unsubscribeAll") === "on";
+    const next: EmailPreferences = { unsubscribedAll };
+    for (const category of emailCategories)
+      next[category.field] = form.get(category.field) === "on";
+    member.emailPreferences = next;
+    return success(
+      unsubscribedAll
+        ? "You are unsubscribed from all emails. You can turn them back on here at any time."
+        : "Your email preferences are saved.",
+    );
   } catch (error) {
     return errorResult(error);
   }
@@ -529,9 +556,9 @@ export async function adminMutation(
       booking.zoom = demoMeeting(booking.id);
       return success("Booking approved. The member can now join.");
     } else if (entity === "announcements") {
-      const count = await publishAnnouncement(form);
+      const { recipients, emails, skipped } = await publishAnnouncement(form);
       return success(
-        `Published to ${count} member${count === 1 ? "" : "s"} and prepared ${count} individual email${count === 1 ? "" : "s"}. Email delivery is not connected; nothing was sent.`,
+        `Published to ${recipients} member${recipients === 1 ? "" : "s"} and prepared ${emails} individual email${emails === 1 ? "" : "s"}.${skipped ? ` ${skipped} ${skipped === 1 ? "person was" : "people were"} skipped because of their email preferences.` : ""} Email delivery is not connected; nothing was sent.`,
       );
     } else if (entity === "siteImages") {
       return success(await updateSiteImage(form));

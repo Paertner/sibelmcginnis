@@ -5,6 +5,7 @@ import { Icon, type IconName } from "@/components/admin-icons";
 import { MediaLibrary } from "@/components/media-library";
 import { AdminSettings } from "@/components/admin-settings";
 import { emailQuota } from "@/lib/email-quota";
+import { optedOut } from "@/lib/email-preferences";
 import { notificationDraft } from "@/lib/notification-drafts";
 import { SiteContentEditor } from "@/components/site-content-editor";
 import { SiteContentTabs } from "@/components/site-content-tabs";
@@ -653,6 +654,7 @@ export default async function Admin({
                 name: member.name,
                 email: member.email,
                 tier: memberRole(member),
+                optOut: optedOut(member.emailPreferences),
               }))}
               media={media}
               templates={data.emailTemplates ?? []}

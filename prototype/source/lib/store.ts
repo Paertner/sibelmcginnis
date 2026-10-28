@@ -2,11 +2,15 @@ import "server-only";
 import seed from "./seed.json";
 import type { EmailBlock, SavedEmailTemplate } from "./email-blocks";
 import { addDays, nextSaturday, today } from "./dates";
+import type { EmailPreferences } from "./email-preferences";
 
 export type Member = (typeof seed)["members"][number] & {
   premiumUntil?: string;
+  emailPreferences?: EmailPreferences;
 };
 export type Announcement = (typeof seed)["announcements"][number] & {
+  /** What the email is about; members can turn each kind off. */
+  category?: string;
   groups?: string[];
   recipientIds?: string[];
   html?: string;

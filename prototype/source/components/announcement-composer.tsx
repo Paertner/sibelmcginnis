@@ -17,6 +17,7 @@ import {
 } from "@/lib/email-blocks";
 import type { MediaItem } from "@/lib/site-images";
 import type { EmailQuota } from "@/lib/email-quota";
+import { categoryOptions } from "@/lib/email-preferences";
 import { Icon } from "./admin-icons";
 import type { ActionResult } from "./action-form";
 import {
@@ -30,7 +31,14 @@ import {
 } from "./block-editor";
 
 const noSubscribe = () => () => {};
-type Recipient = { id: string; name: string; email: string; tier: string };
+type Recipient = {
+  id: string;
+  name: string;
+  email: string;
+  tier: string;
+  /** Email kinds this member turned off ("all" when unsubscribed). */
+  optOut: string[];
+};
 function FooterEditor({
   footer,
   media,
@@ -150,7 +158,12 @@ export function AnnouncementComposer({
   /** Site details from Settings, shown in the preview's merge fields. */
   siteSettings?: PlaceholderSettings;
   /** A ready-made email, e.g. from "Send notification" on a post or episode. */
-  draft?: { subject: string; blocks: EmailBlock[]; groups: string[] };
+  draft?: {
+    subject: string;
+    blocks: EmailBlock[];
+    groups: string[];
+    category?: string;
+  };
   members: Recipient[];
   media: MediaItem[];
   templates: SavedEmailTemplate[];
@@ -161,6 +174,7 @@ export function AnnouncementComposer({
     : emailTemplates[0];
   const [selectedMembers, setSelectedMembers] = useState<string[]>(initialRecipients),
     [groups, setGroups] = useState<string[]>(draft?.groups ?? []);
+  const [category, setCategory] = useState(draft?.category ?? "announcement");
   const [listOpen, setListOpen] = useState(false);
   const [query, setQuery] = useState(""),
     [highlight, setHighlight] = useState(0);
@@ -212,12 +226,18 @@ export function AnnouncementComposer({
         `${m.name} ${m.email}`.toLowerCase().includes(query.toLowerCase()),
     )
     .slice(0, query ? 8 : 50);
-  const count = members.filter(
+  const chosen = members.filter(
     (m) =>
       selectedMembers.includes(m.id) ||
       groups.includes("all") ||
       groups.includes(m.tier),
+  );
+  const count = chosen.length;
+  // Members who turned this kind of email off get no email and do not use the daily limit.
+  const skipped = chosen.filter(
+    (m) => m.optOut.includes("all") || m.optOut.includes(category),
   ).length;
+  const emails = count - skipped;
   const add = (id: string) => {
     setSelectedMembers((previous) => [...new Set([...previous, id])]);
     setQuery("");
@@ -449,7 +469,7 @@ export function AnnouncementComposer({
           </span>
         </div>
         <div
-          className={`quota-meter${count > quota.left ? " over" : ""}`}
+          className={`quota-meter${emails > quota.left ? " over" : ""}`}
           aria-live="polite"
         >
           <span className="quota-bar" aria-hidden="true">
@@ -461,7 +481,7 @@ export function AnnouncementComposer({
             <i
               className="quota-pending"
               style={{
-                width: `${Math.min(100 - Math.min(100, (quota.sent / quota.limit) * 100), (count / quota.limit) * 100)}%`,
+                width: `${Math.min(100 - Math.min(100, (quota.sent / quota.limit) * 100), (emails / quota.limit) * 100)}%`,
               }}
             />
           </span>
@@ -471,19 +491,49 @@ export function AnnouncementComposer({
             </b>{" "}
             emails sent today · {quota.left} left
           </span>
-          {count > quota.left ? (
+          {emails > quota.left ? (
             <span className="quota-error" role="alert">
-              This email would go to {count} people, but only {quota.left} of
+              This email would go to {emails} people, but only {quota.left} of
               today’s {quota.limit} emails are left. Choose fewer recipients or
               send the rest tomorrow.
             </span>
           ) : null}
         </div>
+        {skipped ? (
+          <p className="skipped-note" role="status">
+            <Icon name="mail" size={15} />
+            <span>
+              <b>
+                {skipped} {skipped === 1 ? "person" : "people"}
+              </b>{" "}
+              will not get this email because of their email preferences.{" "}
+              {emails} will get it and count against today’s limit.
+              {skipped ? " They still see it in their account." : ""}
+            </span>
+          </p>
+        ) : null}
         <p className="hint">
           Registered members only. A person selected individually and through a
           group receives one message.
         </p>
       </fieldset>
+      <label className="field">
+        Category
+        <select
+          name="category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          {categoryOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <small className="field-hint">
+          Members can turn each kind of email off in their account.
+        </small>
+      </label>
       <label className="field">
         Subject
         <input
@@ -703,7 +753,7 @@ export function AnnouncementComposer({
       <div className="composer-actions">
         <button
           className="btn"
-          disabled={pending || !count || count > quota.left}
+          disabled={pending || !count || emails > quota.left}
         >
           {pending ? "Preparing…" : "Publish & prepare email"}
         </button>

@@ -12,6 +12,7 @@ import { siteOrigin } from "./site-url";
 import { memberRole } from "./membership";
 import { assertEmailQuota, recordEmails } from "./email-quota";
 import { fillPlaceholders } from "./email-blocks";
+import { isEmailCategory, wantsEmail } from "./email-preferences";
 
 export function announcementVisible(
   announcement: Announcement,
@@ -69,7 +70,14 @@ export async function publishAnnouncement(form: FormData) {
   );
   if (!recipients.length)
     throw new Error("Choose at least one member or group.");
-  assertEmailQuota(recipients.length);
+  const category = String(form.get("category") || "announcement");
+  if (!isEmailCategory(category))
+    throw new Error("Choose a valid email category.");
+  // Members who turned this kind of email off still see the message in their account, but get no email.
+  const emailed = recipients.filter((m) =>
+    wantsEmail(m.emailPreferences, category),
+  );
+  assertEmailQuota(emailed.length);
   const file = form.get("image");
   let upload: { bytes: Uint8Array; type: string; name: string } | undefined;
   if (file instanceof File && file.size) {
@@ -105,6 +113,7 @@ export async function publishAnnouncement(form: FormData) {
     body,
     html,
     audience: "selected",
+    category,
     groups,
     recipientIds: recipients.map((m) => m.id),
     date: today(),
@@ -112,7 +121,7 @@ export async function publishAnnouncement(form: FormData) {
     emailStatus: "prepared",
   });
   if (upload) state.images.set(id, upload);
-  for (const member of recipients)
+  for (const member of emailed)
     state.emailDrafts.push({
       id: randomUUID(),
       announcementId: id,
@@ -121,8 +130,12 @@ export async function publishAnnouncement(form: FormData) {
       name: member.name,
       subject,
     });
-  recordEmails(recipients.length);
-  return recipients.length;
+  recordEmails(emailed.length);
+  return {
+    recipients: recipients.length,
+    emails: emailed.length,
+    skipped: recipients.length - emailed.length,
+  };
 }
 
 /** RFC 5322/MIME draft with an inline CID image; never reports delivery without an email provider. */

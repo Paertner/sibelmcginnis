@@ -7088,3 +7088,104 @@ ul.ticks li::before {
   font: 400 0.8rem var(--font-poppins);
   color: var(--ad-muted);
 }
+
+/* Member email preferences and the composer's skipped-recipients note. */
+.email-prefs .pref-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ad-line);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.pref-row.off {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.pref-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.pref-text b {
+  font: 600 0.95rem var(--font-poppins);
+  color: var(--ad-ink);
+}
+.pref-text small {
+  font: 400 0.82rem var(--font-poppins);
+  color: var(--ad-muted);
+}
+.pref-unsubscribe {
+  border-bottom: 0;
+  margin-bottom: 12px;
+}
+.pref-switch {
+  appearance: none;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background: #d8cabf;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pref-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(45 34 28 / 0.3);
+  transition: transform 0.15s;
+}
+.pref-switch:checked {
+  background: var(--ad-accent);
+}
+.pref-switch:checked::after {
+  transform: translateX(18px);
+}
+.pref-switch:focus-visible {
+  outline: 2px solid var(--ad-accent);
+  outline-offset: 2px;
+}
+.email-prefs-banner {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--ad-warn-soft);
+  color: var(--ad-warn);
+  font: 500 0.88rem var(--font-poppins);
+}
+.skipped-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--ad-warn-soft);
+  color: var(--ad-warn);
+  font: 400 0.84rem/1.45 var(--font-poppins);
+}
+.skipped-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  font: 400 0.78rem var(--font-poppins);
+  color: var(--ad-muted);
+}

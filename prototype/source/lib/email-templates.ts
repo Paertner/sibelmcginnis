@@ -201,4 +201,71 @@ export const emailTemplates: {
       ],
     ),
   },
+  {
+    id: "newsletter",
+    name: "Newsletter",
+    description:
+      "Title, quote, image, bullet list, meeting details, signature and a button.",
+    subject: "Join us this Saturday at Morning Coffee",
+    footer: true,
+    blocks: [
+      {
+        id: "nl-browser",
+        type: "note",
+        html: '<a href="{{site_url}}" style="color:#8d7a6d">View this email in your browser</a>',
+      },
+      {
+        id: "nl-title",
+        type: "text",
+        html: "<strong>[Your newsletter title]</strong>",
+        style: { align: "center", fontSize: "large", color: "#171717" },
+      },
+      {
+        id: "nl-quote",
+        type: "text",
+        html: "<em>“[A short quote or thought for this week.]”</em>",
+        style: { align: "center" },
+      },
+      { id: "nl-image", type: "image", path: "", alt: "", style: { width: "full" } },
+      { id: "nl-hello", type: "text", html: "Ladies,<br><br>Hello {{first_name}}," },
+      {
+        id: "nl-intro",
+        type: "text",
+        html: "[Write a short, warm introduction to this week’s meeting.]",
+      },
+      {
+        id: "nl-explore",
+        type: "text",
+        html: "<strong>In this meeting, we’ll explore:</strong><ul><li>[First topic]</li><li>[Second topic]</li><li>[Third topic]</li></ul>",
+      },
+      {
+        id: "nl-details",
+        type: "text",
+        html: "<strong>Meeting Details:</strong><br><strong>Date:</strong> [Saturday, date]<br><strong>Time:</strong> 10:30 AM<br><strong>Location:</strong> [Zoom or place]",
+      },
+      {
+        id: "nl-closing",
+        type: "text",
+        html: "[Closing words: come as you are, bring your coffee, and we’ll make room for you.]",
+      },
+      {
+        id: "nl-signature",
+        type: "text",
+        html: "Warm Regards,<br><strong>Sibel McGinnis</strong> 🌻<br>Founder | Morning Coffee Community",
+      },
+      {
+        id: "nl-tags",
+        type: "text",
+        html: "#MorningCoffeeCommunity #WomenSupportingWomen #SaturdayCircle",
+        style: { color: "#9b5e41" },
+      },
+      {
+        id: "nl-button",
+        type: "button",
+        label: "JOIN US THIS SATURDAY",
+        href: "{{account_url}}",
+        style: { accent: "#171717", shape: "square", align: "center" },
+      },
+    ],
+  },
 ];

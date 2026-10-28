@@ -33,6 +33,7 @@ export function notificationDraft(about?: string) {
       mediaLibrary().find((item) => item.id === cover.mediaId)?.path ?? "";
     return {
       subject: `New on the blog: ${post.title}`,
+      category: "post",
       groups: [post.access === "premium" ? "premium" : "all"],
       blocks: [
         {
@@ -63,6 +64,7 @@ export function notificationDraft(about?: string) {
     if (!episode) return undefined;
     return {
       subject: `New episode: ${episode.title}`,
+      category: "podcast",
       groups: ["premium"],
       blocks: [
         {

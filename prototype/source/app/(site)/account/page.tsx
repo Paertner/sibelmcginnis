@@ -16,6 +16,7 @@ import { meetingUrl } from "@/lib/site-url";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { BookingForm } from "@/components/consultation-calendar";
 import { ActionForm } from "@/components/action-form";
+import { EmailPreferencesForm } from "@/components/email-preferences-form";
 import { cancelBooking, changeTier, signOut } from "@/lib/actions";
 export const metadata = { title: "My account" };
 const tabs: [string, string, IconName][] = [
@@ -25,6 +26,7 @@ const tabs: [string, string, IconName][] = [
   ["book", "Book a consultation", "calendar"],
   ["podcast", "Podcast", "headphones"],
   ["membership", "Membership", "star"],
+  ["emails", "Email preferences", "mail"],
 ];
 const premiumTabs = ["sessions", "book", "podcast"];
 function PremiumGate({ title }: { title: string }) {
@@ -45,12 +47,13 @@ function PremiumGate({ title }: { title: string }) {
 export default async function Account({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; unsubscribe?: string }>;
 }) {
   const user = await requireMember(),
     data = getStore(),
     premium = isPremium(user.role);
-  const tab = (await searchParams).tab ?? "overview";
+  const query = await searchParams;
+  const tab = query.tab ?? "overview";
   const bookings = data.bookings
     .filter((b) => b.memberId === user.id)
     .toSorted((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
@@ -270,6 +273,31 @@ export default async function Account({
         </>
       );
     }
+    if (tab === "emails")
+      return (
+        <>
+          <h1 className="area-title">Email preferences</h1>
+          <div className="card">
+            {member ? (
+              <>
+                <p className="muted">
+                  Choose which emails you receive at <b>{member.email}</b>.
+                  Messages from Sibel always stay in your account.
+                </p>
+                <EmailPreferencesForm
+                  preferences={member.emailPreferences}
+                  preselectUnsubscribe={query.unsubscribe === "1"}
+                />
+              </>
+            ) : (
+              <p className="muted">
+                The admin account does not receive member emails, so there is
+                nothing to set here.
+              </p>
+            )}
+          </div>
+        </>
+      );
     if (tab === "membership")
       return (
         <>
