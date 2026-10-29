@@ -23,3 +23,21 @@ export function addDays(date: string, count: number) {
     new Date(new Date(date + "T12:00:00Z").getTime() + count * 86400000),
   );
 }
+/** Whole days from today to a date (0 = today, negative = past). */
+export function daysUntil(date: string) {
+  return Math.round(
+    (Date.parse(date + "T12:00:00Z") - Date.parse(today() + "T12:00:00Z")) /
+      86400000,
+  );
+}
+/** "Today", "Tomorrow", "In 5 days"; empty for dates in the past. */
+export function daysLeftLabel(date: string) {
+  const days = daysUntil(date);
+  return days < 0
+    ? ""
+    : days === 0
+      ? "Today"
+      : days === 1
+        ? "Tomorrow"
+        : `In ${days} days`;
+}

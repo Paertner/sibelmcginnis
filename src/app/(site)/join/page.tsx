@@ -9,9 +9,12 @@ export const metadata = { title: "Join the community" };
 export default async function Join({
   searchParams,
 }: {
-  searchParams: Promise<{ plan?: string }>;
+  searchParams: Promise<{ plan?: string; next?: string }>;
 }) {
-  const premium = (await searchParams).plan === "premium";
+  const query = await searchParams;
+  const premium = query.plan === "premium";
+  const next = query.next ?? "";
+  const back = next.startsWith("/") && !next.startsWith("//") ? next : "";
   const price = getStore().settings.premiumPrice;
   const perks = premium
     ? [
@@ -44,14 +47,14 @@ export default async function Join({
           <p className="muted">{siteText("join.create-account-sub")}</p>
           <div className="plan-switch" role="group" aria-label="Membership">
             <Link
-              href="/join?plan=free"
+              href={`/join?plan=free${back ? `&next=${back}` : ""}`}
               aria-current={!premium ? "page" : undefined}
             >
               <b>{siteText("join.free-plan")}</b>
               <small>$0</small>
             </Link>
             <Link
-              href="/join?plan=premium"
+              href={`/join?plan=premium${back ? `&next=${back}` : ""}`}
               aria-current={premium ? "page" : undefined}
             >
               <b>{siteText("join.premium-plan")}</b>
@@ -67,6 +70,7 @@ export default async function Join({
                   : siteText("join.create-free-account")
               }
             >
+              <input type="hidden" name="next" value={back} />
               <input
                 type="hidden"
                 name="plan"
@@ -112,7 +116,9 @@ export default async function Join({
           )}
           <p className="join-signin">
             {siteText("join.have-account")}{" "}
-            <Link href="/login">{siteText("join.sign-in")}</Link>
+            <Link href={back ? `/login?next=${back}` : "/login"}>
+              {siteText("join.sign-in")}
+            </Link>
           </p>
         </section>
       </div>

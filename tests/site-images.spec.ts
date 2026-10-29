@@ -224,13 +224,11 @@ test("a post's cover is chosen from the media picker inside the post editor", as
   await editor.getByRole("button", { name: "Select media" }).click();
   const picker = page.getByRole("dialog", { name: "Choose an image" });
   await picker.getByRole("tab", { name: "Upload files" }).click();
-  await picker
-    .locator('input[type="file"]')
-    .setInputFiles({
-      name: "cover-pick.png",
-      mimeType: "image/png",
-      buffer: png,
-    });
+  await picker.locator('input[type="file"]').setInputFiles({
+    name: "cover-pick.png",
+    mimeType: "image/png",
+    buffer: png,
+  });
   await expect(picker.locator(".media-picker-selection")).toHaveText(
     "cover-pick.png",
   );

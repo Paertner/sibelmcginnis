@@ -17,11 +17,20 @@ export function AdminDialog({
   trigger = "Edit",
   children,
   primary = false,
+  wide = false,
+  triggerClassName,
+  triggerLabel,
 }: {
   title: string;
   trigger?: string;
   children: React.ReactNode;
   primary?: boolean;
+  /** Large editors such as posts and sessions. */
+  wide?: boolean;
+  /** Replaces the default small button look, e.g. a member's name as a link. */
+  triggerClassName?: string;
+  /** Accessible name of the trigger; defaults to the dialog title. */
+  triggerLabel?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -30,15 +39,17 @@ export function AdminDialog({
     <>
       <button
         type="button"
-        className={`btn btn-sm${primary ? "" : " btn-ghost"}`}
-        aria-label={title}
+        className={
+          triggerClassName ?? `btn btn-sm${primary ? "" : " btn-ghost"}`
+        }
+        aria-label={triggerLabel ?? title}
         onClick={() => dialog.current?.showModal()}
       >
         {trigger}
       </button>
       <dialog
         ref={dialog}
-        className="admin-dialog"
+        className={`admin-dialog${wide ? " wide" : ""}`}
         aria-labelledby={titleId}
         onClick={(event) => {
           if (event.target === event.currentTarget) close();

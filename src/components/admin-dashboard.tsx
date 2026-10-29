@@ -2,6 +2,10 @@ import Link from "next/link";
 import { Icon, type IconName } from "./admin-icons";
 import { fmtDate, today } from "@/lib/dates";
 import { upcomingSessions, type Store } from "@/lib/store";
+import { fmtTime } from "@/lib/event-posts";
+import { ActionForm } from "./action-form";
+import { adminMutation } from "@/lib/actions";
+import { bookingName } from "@/lib/company-links";
 
 type Point = { key: string; label: string; value: number };
 
@@ -258,11 +262,51 @@ export function AdminDashboard({ data }: { data: Store }) {
     .toSorted((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   const pending = bookings.filter((b) => b.status === "pending").length;
   const next = upcomingSessions()[0];
-  const name = (id: string) =>
-    data.members.find((m) => m.id === id)?.name ?? "Removed member";
+  const events = (data.events ?? [])
+    .filter((e) => e.status === "published" && e.date >= today())
+    .toSorted((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+  const notices = (data.notices ?? [])
+    .filter((n) => !n.seen)
+    .map((n) => ({
+      notice: n,
+      booking: data.bookings.find((b) => b.id === n.bookingId),
+    }))
+    .filter((n) => n.booking)
+    .toSorted((a, b) => b.notice.createdAt.localeCompare(a.notice.createdAt));
   const revenueMax = Math.max(price, ...revenue.map((r) => r.value));
   return (
     <div className="dash">
+      {notices.length ? (
+        <section className="dash-notices" aria-label="New company bookings">
+          {notices.map(({ notice, booking }) => (
+            <div className="dash-notice" role="status" key={notice.id}>
+              <span className="dash-notice-icon" aria-hidden="true">
+                <Icon name="calendar" size={18} />
+              </span>
+              <div>
+                <b>New company booking</b>
+                <span>
+                  {booking!.company} ({booking!.contact}) booked{" "}
+                  {fmtDate(booking!.date, {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}{" "}
+                  at {booking!.time}. Nothing was emailed.
+                </span>
+              </div>
+              <Link className="btn btn-sm btn-ghost" href="/admin/consults">
+                View
+              </Link>
+              <ActionForm action={adminMutation} submitLabel="Dismiss">
+                <input name="entity" type="hidden" value="notices" />
+                <input name="id" type="hidden" value={notice.id} />
+                <input name="op" type="hidden" value="dismiss" />
+              </ActionForm>
+            </div>
+          ))}
+        </section>
+      ) : null}
       <section className="kpis" aria-label="Key figures">
         <Kpi icon="users" label="Active members" value={active.length}>
           <span className="kpi-note">
@@ -429,12 +473,24 @@ export function AdminDashboard({ data }: { data: Store }) {
                   </span>
                   <div>
                     <b>
-                      <Link
-                        className="member-link"
-                        href={`/admin/announce?to=${b.memberId}`}
-                      >
-                        {name(b.memberId)}
-                      </Link>
+                      {b.source === "company" ? (
+                        <span className="member-name">
+                          {bookingName(b)}{" "}
+                          <span className="badge b-grey">Company</span>
+                        </span>
+                      ) : (
+                        <span className="member-name">
+                          {bookingName(b)}
+                          <Link
+                            className="mail-link"
+                            href={`/admin/announce?to=${b.memberId}`}
+                            aria-label={`Send an announcement to ${bookingName(b)}`}
+                            title="Send an announcement"
+                          >
+                            <Icon name="mail" size={14} />
+                          </Link>
+                        </span>
+                      )}
                     </b>
                     <small>
                       {b.time} · {b.topic}
@@ -473,12 +529,17 @@ export function AdminDashboard({ data }: { data: Store }) {
                   </span>
                   <div>
                     <b>
-                      <Link
-                        className="member-link"
-                        href={`/admin/announce?to=${m.id}`}
-                      >
+                      <span className="member-name">
                         {m.name}
-                      </Link>
+                        <Link
+                          className="mail-link"
+                          href={`/admin/announce?to=${m.id}`}
+                          aria-label={`Send an announcement to ${m.name}`}
+                          title="Send an announcement"
+                        >
+                          <Icon name="mail" size={14} />
+                        </Link>
+                      </span>
                     </b>
                     <small>
                       Joined{" "}
@@ -489,6 +550,44 @@ export function AdminDashboard({ data }: { data: Store }) {
                 </li>
               ))}
           </ul>
+        </section>
+      </div>
+
+      <div className="dash-row">
+        <section className="card-soft" aria-labelledby="events-title">
+          <header className="card-head">
+            <h2 id="events-title">Upcoming events</h2>
+            <Link className="card-link" href="/admin/events">
+              See all
+            </Link>
+          </header>
+          {events.length ? (
+            <ul className="mini-list">
+              {events.slice(0, 4).map((e) => (
+                <li key={e.id}>
+                  <span className="date-chip">
+                    <b>{fmtDate(e.date, { day: "numeric" })}</b>
+                    {fmtDate(e.date, { month: "short" })}
+                  </span>
+                  <div>
+                    <b>{e.title}</b>
+                    <small>
+                      {fmtTime(e.start)} · {e.venue}
+                    </small>
+                  </div>
+                  <span
+                    className={`badge b-${e.attendees.length >= e.seats ? "warn" : "ok"}`}
+                  >
+                    {e.attendees.length} / {e.seats} seats
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-note">
+              No upcoming events. Add one from Events.
+            </p>
+          )}
         </section>
       </div>
     </div>

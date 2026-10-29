@@ -3,9 +3,18 @@ import { ActionForm, ConfirmDelete } from "./action-form";
 import { AdminDialog, AdminCancel } from "./admin-dialog";
 import { adminMutation } from "@/lib/actions";
 import { CoverField } from "./media-library";
+import { BlocksField } from "./blocks-field";
+import { textToBlocks } from "./block-content";
 import type { MediaItem, SiteImage } from "@/lib/site-images";
 import { fmtDate, today, nextSaturday } from "@/lib/dates";
-import type { Episode, Member, Post, Session, Store } from "@/lib/store";
+import type {
+  Episode,
+  EventItem,
+  Member,
+  Post,
+  Session,
+  Store,
+} from "@/lib/store";
 type InputProps = {
   name: string;
   label: string;
@@ -76,36 +85,54 @@ function Editor({
   id,
   children,
   quiet = false,
+  trigger,
 }: {
   title: string;
   entity: string;
   id?: string;
   children: React.ReactNode;
   quiet?: boolean;
+  /** Show this text as a link-style trigger instead of the Edit button. */
+  trigger?: string;
 }) {
   return (
     <AdminDialog
       title={title}
-      trigger={id ? "Edit" : title}
+      trigger={trigger ?? (id ? "Edit" : title)}
       primary={!id && !quiet}
+      triggerClassName={trigger ? "name-trigger" : undefined}
+      triggerLabel={trigger ? `${trigger}, edit member` : undefined}
     >
-      <ActionForm action={adminMutation}>
+      <ActionForm
+        action={adminMutation}
+        actions={
+          <>
+            {id ? <ConfirmDelete /> : null}
+            <span className="form-actions-gap" />
+            <AdminCancel />
+          </>
+        }
+      >
         <EntityFields entity={entity} id={id} />
         {children}
-        <div className="editor-delete">
-          {id ? <ConfirmDelete /> : null}
-          <AdminCancel />
-        </div>
       </ActionForm>
     </AdminDialog>
   );
 }
-export function MemberEditor({ member }: { member?: Member }) {
+export function MemberEditor({
+  member,
+  asName = false,
+}: {
+  member?: Member;
+  /** Open the editor from the member's name instead of an Edit button. */
+  asName?: boolean;
+}) {
   return (
     <Editor
       title={member ? `Edit ${member.name}` : "+ Add member"}
       entity="members"
       id={member?.id}
+      trigger={asName ? member?.name : undefined}
     >
       <div className="row">
         <Field name="name" label="Full name" value={member?.name} />
@@ -146,6 +173,72 @@ export function MemberEditor({ member }: { member?: Member }) {
     </Editor>
   );
 }
+function WideEditor({
+  title,
+  entity,
+  id,
+  quiet = false,
+  main,
+  side,
+}: {
+  title: string;
+  entity: string;
+  id?: string;
+  quiet?: boolean;
+  main: React.ReactNode;
+  side: React.ReactNode;
+}) {
+  return (
+    <AdminDialog
+      title={title}
+      trigger={id ? "Edit" : title}
+      primary={!id && !quiet}
+      wide
+    >
+      <ActionForm
+        action={adminMutation}
+        className="wide-editor"
+        actions={
+          <>
+            {id ? <ConfirmDelete /> : null}
+            <span className="form-actions-gap" />
+            <AdminCancel />
+          </>
+        }
+      >
+        <EntityFields entity={entity} id={id} />
+        <div className="wide-editor-main">{main}</div>
+        <aside className="wide-editor-side">{side}</aside>
+      </ActionForm>
+    </AdminDialog>
+  );
+}
+function AudioField({
+  current,
+  label,
+  hint,
+}: {
+  current?: string;
+  label: string;
+  hint: string;
+}) {
+  return (
+    <div className="field audio-field">
+      <label>
+        {label}
+        <input
+          type="file"
+          name="audio"
+          accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/x-wav,audio/ogg"
+        />
+      </label>
+      <small className="setting-hint">
+        {current ? `Current: ${current}. ` : ""}
+        {hint}
+      </small>
+    </div>
+  );
+}
 export function PostEditor({
   post,
   cover,
@@ -156,68 +249,200 @@ export function PostEditor({
   media: MediaItem[];
 }) {
   return (
-    <Editor
+    <WideEditor
       title={post ? `Edit: ${post.title}` : "+ New blog post"}
       entity="posts"
       id={post?.id}
-    >
-      <Field name="title" label="Title" value={post?.title} />
-      <div className="row">
-        <Field
-          name="category"
-          label="Category"
-          value={post?.category ?? "Mindset"}
-        />
-        <Select
-          name="status"
-          label="Status"
-          value={post?.status ?? "draft"}
-          options={["draft", "published"]}
-        />
-        <Select
-          name="access"
-          label="Who can read this post?"
-          value={post?.access ?? "public"}
-          options={[
-            ["public", "Everyone"],
-            ["premium", "Premium members"],
-          ]}
-        />
-      </div>
-      <input type="hidden" name="cover" value={post?.cover ?? 0} />
-      <CoverField
-        key={`${cover.mediaId}|${cover.alt}|${cover.position}`}
-        cover={{
-          ...cover,
-          group: "Blog post",
-          label: post?.title ?? "New post",
-        }}
-        media={media}
-      />
-      <Field
-        name="excerpt"
-        label="Short excerpt"
-        value={post?.excerpt}
-        multiline
-      />
-      <Field
-        name="body"
-        label="Post (separate paragraphs with a blank line)"
-        value={post?.body}
-        multiline
-      />
-    </Editor>
+      main={
+        <>
+          <input
+            className="wide-editor-title"
+            name="title"
+            defaultValue={post?.title}
+            placeholder="Post title"
+            aria-label="Title"
+            required
+            maxLength={250}
+          />
+          <BlocksField
+            label="Post content"
+            initial={post ? (post.blocks ?? textToBlocks(post.body)) : []}
+            media={media}
+          />
+        </>
+      }
+      side={
+        <>
+          <Select
+            name="status"
+            label="Status"
+            value={post?.status ?? "draft"}
+            options={["draft", "published"]}
+          />
+          <Select
+            name="access"
+            label="Who can read this post?"
+            value={post?.access ?? "public"}
+            options={[
+              ["public", "Everyone"],
+              ["premium", "Premium members"],
+            ]}
+          />
+          <Field
+            name="category"
+            label="Category"
+            value={post?.category ?? "Mindset"}
+          />
+          <input type="hidden" name="cover" value={post?.cover ?? 0} />
+          <CoverField
+            key={`${cover.mediaId}|${cover.alt}|${cover.position}`}
+            cover={{
+              ...cover,
+              group: "Blog post",
+              label: post?.title ?? "New post",
+            }}
+            media={media}
+          />
+          <Field
+            name="excerpt"
+            label="Short excerpt"
+            value={post?.excerpt}
+            multiline
+          />
+          <AudioField
+            label="Audio version (optional)"
+            current={post?.audioName}
+            hint="MP3, M4A, WAV or OGG up to 10 MB. Only readers of this post can play it."
+          />
+          {post?.audioName ? (
+            <label className="checkbox-field">
+              <input type="checkbox" name="removeAudio" /> Remove the audio
+            </label>
+          ) : null}
+        </>
+      }
+    />
+  );
+}
+export function EventEditor({
+  event,
+  cover,
+  media,
+}: {
+  event?: EventItem;
+  cover: SiteImage;
+  media: MediaItem[];
+}) {
+  return (
+    <WideEditor
+      title={event ? `Edit: ${event.title}` : "+ New event"}
+      entity="events"
+      id={event?.id}
+      main={
+        <>
+          <input
+            className="wide-editor-title"
+            name="title"
+            defaultValue={event?.title}
+            placeholder="Event title"
+            aria-label="Title"
+            required
+            maxLength={250}
+          />
+          <BlocksField
+            label="Event description"
+            initial={event?.blocks ?? []}
+            media={media}
+          />
+        </>
+      }
+      side={
+        <>
+          <Select
+            name="status"
+            label="Status"
+            value={event?.status ?? "draft"}
+            options={["draft", "published"]}
+          />
+          <Field
+            name="date"
+            label="Date"
+            type="date"
+            value={event?.date ?? today()}
+          />
+          <div className="row">
+            <Field
+              name="start"
+              label="Starts"
+              type="time"
+              value={event?.start ?? "10:00"}
+            />
+            <Field
+              name="end"
+              label="Ends"
+              type="time"
+              value={event?.end ?? "12:00"}
+            />
+          </div>
+          <Field name="venue" label="Venue name" value={event?.venue} />
+          <Field name="address" label="Address" value={event?.address} />
+          <Field
+            name="mapUrl"
+            label="Map link (optional)"
+            type="url"
+            value={event?.mapUrl}
+            required={false}
+          />
+          <div className="row">
+            <Field
+              name="seats"
+              label="Seat limit"
+              type="number"
+              value={event?.seats ?? 20}
+            />
+            <Field
+              name="price"
+              label="Price"
+              value={event?.price ?? "Free"}
+              required={false}
+            />
+          </div>
+          <small className="setting-hint">
+            Paid events show the price and a “Payment comes later” note. No
+            payment is taken yet.
+          </small>
+          <CoverField
+            key={`${cover.mediaId}|${cover.alt}|${cover.position}`}
+            cover={{
+              ...cover,
+              group: "Events",
+              label: event?.title ?? "New event",
+            }}
+            media={media}
+          />
+          <Field
+            name="summary"
+            label="Short summary"
+            value={event?.summary}
+            multiline
+          />
+        </>
+      }
+    />
   );
 }
 export function SessionEditor({
   session,
   episodes,
+  media = [],
 }: {
   session?: Session;
   episodes: Episode[];
+  media?: MediaItem[];
 }) {
+  const episode = episodes.find((ep) => ep.id === session?.podcast);
   return (
-    <Editor
+    <WideEditor
       title={
         session
           ? `Edit ${fmtDate(session.date, { month: "short", day: "numeric" })}: ${session.topic}`
@@ -226,48 +451,66 @@ export function SessionEditor({
       entity="sessions"
       id={session?.id}
       quiet
-    >
-      <div className="row">
-        <Field
-          name="date"
-          label="Saturday date"
-          value={session?.date ?? nextSaturday()}
-          type="date"
-        />
-        <Field name="topic" label="Topic" value={session?.topic} />
-      </div>
-      <Field
-        name="zoom"
-        label="Zoom meeting link (HTTPS)"
-        value={session?.zoom}
-        required={false}
-        type="url"
-      />
-      <Field
-        name="pass"
-        label="Passcode"
-        value={session?.pass}
-        required={false}
-      />
-      <Field
-        name="notes"
-        label="Post-meeting notes"
-        value={session?.notes}
-        multiline
-        required={false}
-      />
-      <Select
-        name="podcast"
-        label="Podcast episode"
-        value={session?.podcast ?? ""}
-        options={[
-          ["", "None"],
-          ...episodes.map(
-            (ep) => [ep.id, `#${ep.num} ${ep.title}`] as [string, string],
-          ),
-        ]}
-      />
-    </Editor>
+      main={
+        <>
+          <input
+            className="wide-editor-title"
+            name="topic"
+            defaultValue={session?.topic}
+            placeholder="Session topic"
+            aria-label="Topic"
+            required
+            maxLength={250}
+          />
+          <BlocksField
+            label="Session notes"
+            initial={
+              session ? (session.blocks ?? textToBlocks(session.notes)) : []
+            }
+            media={media}
+          />
+        </>
+      }
+      side={
+        <>
+          <Field
+            name="date"
+            label="Saturday date"
+            value={session?.date ?? nextSaturday()}
+            type="date"
+          />
+          <Field
+            name="zoom"
+            label="Zoom meeting link (HTTPS)"
+            value={session?.zoom}
+            required={false}
+            type="url"
+          />
+          <Field
+            name="pass"
+            label="Passcode"
+            value={session?.pass}
+            required={false}
+          />
+          <Select
+            name="podcast"
+            label="Podcast episode"
+            value={session?.podcast ?? ""}
+            options={[
+              ["", "None"],
+              ...episodes.map(
+                (ep) => [ep.id, `#${ep.num} ${ep.title}`] as [string, string],
+              ),
+            ]}
+          />
+          <AudioField
+            label="Session audio"
+            current={episode?.audioName}
+            hint="Upload the audio of these notes. It becomes this session’s podcast episode (created if none is linked)."
+          />
+        </>
+      }
+    />
   );
 }
 export function EpisodeEditor({ episode }: { episode?: Episode }) {

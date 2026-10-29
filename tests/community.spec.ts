@@ -118,7 +118,7 @@ test("premium calendars and booking allowance work, then cancellation frees the 
   const topic = `Planning my next chapter ${Date.now()}`;
   await page.getByLabel("What would you like to talk about?").fill(topic);
   await page
-    .getByRole("button", { name: "Confirm booking", exact: true })
+    .getByRole("button", { name: "Request consultation", exact: true })
     .click();
   await expect(page.getByText(topic, { exact: true })).toBeVisible();
   // No further dates in the same month should be offered after using that month's allowance.
@@ -152,6 +152,8 @@ test("admin can publish gated content, upload protected audio and edit site copy
     "consults",
     "announce",
     "media",
+    "events",
+    "settings",
     "content",
   ]) {
     await page.goto(`/admin/${route}`);
@@ -168,8 +170,9 @@ test("admin can publish gated content, upload protected audio and edit site copy
   const title = `Review post ${Date.now()}`;
   await editor.getByLabel("Title", { exact: true }).fill(title);
   await editor.getByLabel("Short excerpt").fill("A short public introduction.");
+  await editor.getByRole("button", { name: "Text", exact: true }).click();
   await editor
-    .getByLabel("Post (separate paragraphs with a blank line)")
+    .getByRole("textbox", { name: "Text", exact: true })
     .fill("Protected review text should never reach visitors.");
   await editor
     .getByRole("combobox", { name: "Who can read this post?" })

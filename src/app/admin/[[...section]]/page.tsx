@@ -2,13 +2,24 @@ import { AdminDialog } from "@/components/admin-dialog";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { MediaLibrary } from "@/components/media-library";
+import { AdminSettings } from "@/components/admin-settings";
+import { emailQuota } from "@/lib/email-quota";
+import { optedOut } from "@/lib/email-preferences";
+import { notificationDraft } from "@/lib/notification-drafts";
 import { SiteContentEditor } from "@/components/site-content-editor";
 import { SiteContentTabs } from "@/components/site-content-tabs";
-import { mediaLibrary, siteImage, siteImageSlots } from "@/lib/site-images";
+import {
+  mediaLibrary,
+  siteImage,
+  siteImageSlots,
+  type MediaItem,
+} from "@/lib/site-images";
 import { AdminTable, AdminRow } from "@/components/admin-table";
 import { AnnouncementComposer } from "@/components/announcement-composer";
 import { AnnouncementHistory } from "@/components/announcement-history";
 import { CopyLink } from "@/components/copy-link";
+import { CompanyLinks } from "@/components/company-links";
+import { bookingName } from "@/lib/company-links";
 import { memberRole } from "@/lib/membership";
 import { defaultEmailFooter } from "@/lib/email-templates";
 import { meetingUrl } from "@/lib/site-url";
@@ -16,13 +27,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { getStore, upcomingSessions, type Session } from "@/lib/store";
-import { fmtDate, today } from "@/lib/dates";
+import { daysLeftLabel, fmtDate, today } from "@/lib/dates";
+import { fmtTime, isPast } from "@/lib/event-posts";
 import { adminMutation, cancelBooking, signOut } from "@/lib/actions";
 import { ActionForm } from "@/components/action-form";
 import {
   ContentForm,
   EntityFields,
   EpisodeEditor,
+  EventEditor,
   Field,
   MemberEditor,
   PostEditor,
@@ -45,6 +58,12 @@ const sections: [string, string, IconName, string][] = [
     "Blog posts",
     "pen",
     "Write posts and choose who can read each one.",
+  ],
+  [
+    "events",
+    "Events",
+    "ticket",
+    "In-person gatherings: seats, reminders and who joined.",
   ],
   [
     "sessions",
@@ -77,6 +96,12 @@ const sections: [string, string, IconName, string][] = [
     "text",
     "Homepage settings and all the wording on the site.",
   ],
+  [
+    "settings",
+    "Settings",
+    "sliders",
+    "Site details, payments and connected services.",
+  ],
 ];
 const initials = (name: string) =>
   name
@@ -94,6 +119,7 @@ export default async function Admin({
     tier?: string;
     access?: string;
     to?: string;
+    about?: string;
   }>;
 }) {
   const user = await requireAdmin();
@@ -101,17 +127,24 @@ export default async function Admin({
     section = route[0] ?? "dashboard";
   if (route.length > 1 || !sections.some(([key]) => key === section))
     notFound();
-  const { to } = await searchParams;
+  const { to, about } = await searchParams;
+  const draft = notificationDraft(about);
   const data = getStore(),
     settings = data.settings;
   const media =
-    section === "posts" || section === "media" || section === "announce"
+    section === "posts" ||
+    section === "events" ||
+    section === "sessions" ||
+    section === "media" ||
+    section === "announce" ||
+    section === "settings"
       ? mediaLibrary()
       : [];
   const [, title, , subtitle] = sections.find(([key]) => key === section)!;
   const next = upcomingSessions()[0];
   const name = (id: string) =>
     data.members.find((m) => m.id === id)?.name ?? "Removed member";
+  const unseen = (data.notices ?? []).filter((n) => !n.seen).length;
   return (
     <div className="ad">
       <aside className="ad-side">
@@ -134,6 +167,14 @@ export default async function Admin({
             >
               <Icon name={icon} />
               {label}
+              {key === "consults" && unseen ? (
+                <span
+                  className="nav-badge"
+                  aria-label={`${unseen} new company booking${unseen === 1 ? "" : "s"}`}
+                >
+                  {unseen}
+                </span>
+              ) : null}
             </Link>
           ))}
         </nav>
@@ -175,9 +216,12 @@ export default async function Admin({
               <PostEditor cover={siteImage("blog.cover-0")} media={media} />
             ) : null}
             {section === "podcast" ? <EpisodeEditor /> : null}
+            {section === "events" ? (
+              <EventEditor cover={siteImage("blog.cover-0")} media={media} />
+            ) : null}
             {section === "sessions" ? (
               <>
-                <SessionEditor episodes={data.podcasts} />
+                <SessionEditor episodes={data.podcasts} media={media} />
                 <ActionForm
                   action={adminMutation}
                   submitLabel="+ Add next Saturday"
@@ -240,7 +284,10 @@ export default async function Admin({
                           {initials(m.name)}
                         </span>
                         <span>
-                          <MemberLink id={m.id} name={m.name} />
+                          <span className="member-name">
+                            <MemberEditor member={m} asName />
+                            <MailLink id={m.id} name={m.name} />
+                          </span>
                           {m.note && (
                             <small className="muted person-note">
                               {m.note}
@@ -317,9 +364,139 @@ export default async function Admin({
                         >
                           View
                         </Link>
+                        {p.status === "published" ? (
+                          <Link
+                            className="btn btn-sm btn-ghost notify-link"
+                            href={`/admin/announce?about=post:${p.id}`}
+                          >
+                            Send notification
+                          </Link>
+                        ) : null}
                       </td>
                     </AdminRow>
                   ))}
+              </tbody>
+            </table>
+          </AdminTable>
+        ) : null}
+        {section === "events" ? (
+          <AdminTable>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Event</th>
+                  <th>Seats</th>
+                  <th>Status</th>
+                  <th aria-label="Actions" />
+                </tr>
+              </thead>
+              <tbody>
+                {(data.events ?? [])
+                  .toSorted(
+                    (a, b) =>
+                      Number(isPast(a)) - Number(isPast(b)) ||
+                      (isPast(a)
+                        ? (b.date + b.start).localeCompare(a.date + a.start)
+                        : (a.date + a.start).localeCompare(b.date + b.start)),
+                  )
+                  .map((e) => (
+                    <tr key={e.id} className={isPast(e) ? "is-past" : ""}>
+                      <td className="nowrap">
+                        <b>
+                          {fmtDate(e.date, {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </b>
+                        <br />
+                        <small className="muted">
+                          {fmtTime(e.start)} – {fmtTime(e.end)}
+                        </small>
+                      </td>
+                      <td>
+                        <b>{e.title}</b>
+                        <br />
+                        <small className="muted">{e.venue}</small>
+                      </td>
+                      <td>
+                        {e.attendees.length} / {e.seats}
+                        {e.attendees.length >= e.seats ? (
+                          <small className="muted"> · full</small>
+                        ) : null}
+                      </td>
+                      <td>
+                        <Status value={e.status} />
+                      </td>
+                      <td className="admin-row-actions">
+                        <EventEditor
+                          event={e}
+                          cover={siteImage(`event.${e.id}`)}
+                          media={media}
+                        />{" "}
+                        <Link
+                          className="btn btn-sm btn-ghost"
+                          href={`/event/${e.id}`}
+                        >
+                          View
+                        </Link>
+                        <AdminDialog
+                          title={`Attendees: ${e.title}`}
+                          trigger={`Attendees (${e.attendees.length})`}
+                        >
+                          {e.attendees.length ? (
+                            <ul className="attendee-list">
+                              {e.attendees.map((id) => (
+                                <li key={id}>
+                                  <span
+                                    className="avatar-soft"
+                                    aria-hidden="true"
+                                  >
+                                    {initials(name(id))}
+                                  </span>
+                                  <span>
+                                    <MemberLink id={id} name={name(id)} />
+                                    <small className="muted">
+                                      {data.members.find((m) => m.id === id)
+                                        ?.email ?? ""}
+                                    </small>
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="muted">Nobody has joined yet.</p>
+                          )}
+                        </AdminDialog>
+                        {e.status === "published" ? (
+                          <>
+                            <Link
+                              className="btn btn-sm btn-ghost notify-link"
+                              href={`/admin/announce?about=event:${e.id}`}
+                            >
+                              Send notification
+                            </Link>
+                            {!isPast(e) && e.attendees.length ? (
+                              <Link
+                                className="btn btn-sm btn-ghost notify-link"
+                                href={`/admin/announce?about=eventreminder:${e.id}`}
+                              >
+                                Send reminder
+                              </Link>
+                            ) : null}
+                          </>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                {!(data.events ?? []).length && (
+                  <tr>
+                    <td colSpan={5} className="muted">
+                      No events yet. Add one with + New event.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </AdminTable>
@@ -330,6 +507,7 @@ export default async function Admin({
             next={next}
             episodes={data.podcasts}
             settings={settings}
+            media={media}
           />
         ) : null}
         {section === "podcast" ? (
@@ -376,6 +554,14 @@ export default async function Admin({
                       </td>
                       <td className="admin-row-actions">
                         <EpisodeEditor episode={ep} />
+                        {ep.status === "published" ? (
+                          <Link
+                            className="btn btn-sm btn-ghost notify-link"
+                            href={`/admin/announce?about=podcast:${ep.id}`}
+                          >
+                            Send notification
+                          </Link>
+                        ) : null}
                         {ep.audioName && (
                           <>
                             {" "}
@@ -407,6 +593,27 @@ export default async function Admin({
         ) : null}
         {section === "consults" ? (
           <>
+            {unseen ? (
+              <div className="dash-notice" role="status">
+                <span className="dash-notice-icon" aria-hidden="true">
+                  <Icon name="calendar" size={18} />
+                </span>
+                <div>
+                  <b>
+                    {unseen} new company booking{unseen === 1 ? "" : "s"}
+                  </b>
+                  <span>See them marked “Company” in the table below.</span>
+                </div>
+                <ActionForm action={adminMutation} submitLabel="Mark as seen">
+                  <EntityFields entity="notices" />
+                  <input type="hidden" name="op" value="dismissAll" />
+                </ActionForm>
+              </div>
+            ) : null}
+            <CompanyLinks
+              links={data.companyLinks ?? []}
+              bookings={data.bookings}
+            />
             <section className="panel" aria-labelledby="bookings-title">
               <header className="card-head">
                 <div>
@@ -466,7 +673,17 @@ export default async function Admin({
                           · {b.time}
                         </td>
                         <td>
-                          <MemberLink id={b.memberId} name={name(b.memberId)} />
+                          {b.source === "company" ? (
+                            <div className="company-cell">
+                              <b>{b.company}</b>{" "}
+                              <span className="badge b-grey">Company</span>
+                              <small>
+                                {b.contact} · {b.email} · {b.phone}
+                              </small>
+                            </div>
+                          ) : (
+                            <MemberLink id={b.memberId} name={bookingName(b)} />
+                          )}
                         </td>
                         <td>{b.topic}</td>
                         <td>
@@ -484,14 +701,14 @@ export default async function Admin({
                               <ActionForm
                                 action={adminMutation}
                                 submitLabel="Approve"
-                                confirmMessage={`Approve ${name(b.memberId)}’s consultation on ${fmtDate(b.date, { month: "short", day: "numeric" })} at ${b.time}?`}
+                                confirmMessage={`Approve ${bookingName(b)}’s consultation on ${fmtDate(b.date, { month: "short", day: "numeric" })} at ${b.time}?`}
                               >
                                 <EntityFields entity="bookings" id={b.id} />
                               </ActionForm>
                               <ActionForm
                                 action={adminMutation}
-                                submitLabel="Reject"
-                                confirmMessage={`Reject ${name(b.memberId)}’s request? The time becomes available again.`}
+                                submitLabel="Cancel"
+                                confirmMessage={`Cancel ${bookingName(b)}’s request? The time becomes available again.`}
                               >
                                 <EntityFields entity="bookings" id={b.id} />
                                 <input type="hidden" name="op" value="reject" />
@@ -501,7 +718,7 @@ export default async function Admin({
                             <ActionForm
                               action={cancelBooking}
                               submitLabel="Cancel"
-                              confirmMessage={`Cancel ${name(b.memberId)}’s consultation? The time becomes available again.`}
+                              confirmMessage={`Cancel ${bookingName(b)}’s consultation? The time becomes available again.`}
                             >
                               <input name="id" type="hidden" value={b.id} />
                             </ActionForm>
@@ -586,14 +803,10 @@ export default async function Admin({
                     type="number"
                   />
                 </div>
-                <label className="checkbox-field">
-                  <input
-                    name="autoConfirm"
-                    type="checkbox"
-                    defaultChecked={settings.autoConfirm}
-                  />{" "}
-                  Confirm automatically and create a placeholder meeting
-                </label>
+                <p className="hint">
+                  Member requests wait for your approval. The member gets the
+                  meeting link after you press Approve.
+                </p>
               </div>
             </ActionForm>
           </>
@@ -601,17 +814,19 @@ export default async function Admin({
         {section === "announce" ? (
           <div className="admin-announcements">
             <AnnouncementComposer
-              key={to ?? ""}
-              initialRecipients={
-                to && data.members.some((member) => member.id === to)
-                  ? [to]
-                  : []
-              }
+              key={`${to ?? ""}|${about ?? ""}`}
+              quota={emailQuota()}
+              draft={draft}
+              siteSettings={data.siteSettings}
+              initialRecipients={(
+                draft?.recipientIds ?? (to ? [to] : [])
+              ).filter((id) => data.members.some((member) => member.id === id))}
               members={data.members.map((member) => ({
                 id: member.id,
                 name: member.name,
                 email: member.email,
                 tier: memberRole(member),
+                optOut: optedOut(member.emailPreferences),
               }))}
               media={media}
               templates={data.emailTemplates ?? []}
@@ -624,6 +839,15 @@ export default async function Admin({
           <MediaLibrary
             media={media}
             slots={siteImageSlots().map((slot) => siteImage(slot.id))}
+          />
+        ) : null}
+        {section === "settings" ? (
+          <AdminSettings
+            settings={data.siteSettings ?? {}}
+            integrations={data.integrations ?? {}}
+            quota={emailQuota()}
+            logo={siteImage("shared.logo")}
+            media={media}
           />
         ) : null}
         {section === "content" ? (
@@ -642,7 +866,9 @@ function SessionsPage({
   next,
   episodes,
   settings,
+  media,
 }: {
+  media: MediaItem[];
   sessions: Session[];
   next?: Session;
   episodes: Parameters<typeof SessionEditor>[0]["episodes"];
@@ -664,6 +890,11 @@ function SessionsPage({
         {next ? (
           <section className="next-circle" aria-labelledby="next-circle-title">
             <p className="next-circle-eyebrow">Next circle</p>
+            {daysLeftLabel(next.date) ? (
+              <span className="days-left" role="status">
+                {daysLeftLabel(next.date)}
+              </span>
+            ) : null}
             <div className="next-circle-row">
               <span className="date-block" aria-hidden="true">
                 <small>{fmtDate(next.date, { weekday: "short" })}</small>
@@ -689,7 +920,7 @@ function SessionsPage({
               </li>
             </ul>
             <div className="next-circle-actions">
-              <SessionEditor session={next} episodes={episodes} />
+              <SessionEditor session={next} episodes={episodes} media={media} />
               <ActionForm action={adminMutation} submitLabel="New Zoom link">
                 <EntityFields entity="sessions" id={next.id} />
                 <input type="hidden" name="op" value="regenerate" />
@@ -785,7 +1016,11 @@ function SessionsPage({
                     <EntityFields entity="sessions" id={s.id} />
                     <input type="hidden" name="op" value="regenerate" />
                   </ActionForm>
-                  <SessionEditor session={s} episodes={episodes} />
+                  <SessionEditor
+                    session={s}
+                    episodes={episodes}
+                    media={media}
+                  />
                 </div>
               </li>
             ))}
@@ -834,7 +1069,7 @@ function SessionsPage({
                 </ul>
               </div>
               <div className="admin-row-actions">
-                <SessionEditor session={s} episodes={episodes} />
+                <SessionEditor session={s} episodes={episodes} media={media} />
               </div>
             </li>
           ))}
@@ -848,15 +1083,25 @@ function SessionsPage({
 }
 
 // Every member name opens a new announcement addressed to that member.
-function MemberLink({ id, name }: { id: string; name: string }) {
+// A member's name with a letter icon that starts an announcement to them.
+function MailLink({ id, name }: { id: string; name: string }) {
   return (
     <Link
-      className="member-link"
+      className="mail-link"
       href={`/admin/announce?to=${id}`}
+      aria-label={`Send an announcement to ${name}`}
       title={`Send an announcement to ${name}`}
     >
-      {name}
+      <Icon name="mail" size={15} />
     </Link>
+  );
+}
+function MemberLink({ id, name }: { id: string; name: string }) {
+  return (
+    <span className="member-name">
+      {name}
+      <MailLink id={id} name={name} />
+    </span>
   );
 }
 

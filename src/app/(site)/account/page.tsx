@@ -2,13 +2,14 @@ import { siteText } from "@/lib/site-copy";
 import { PodcastLibrary } from "@/components/podcast-library";
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
-import { getStore, upcomingSessions } from "@/lib/store";
+import { getDemoState, getStore, upcomingSessions } from "@/lib/store";
 import { canView, isPremium } from "@/lib/access";
-import { addDays, fmtDate, today } from "@/lib/dates";
-import { bookingEvent, sessionEvent } from "@/lib/events";
+import { addDays, daysLeftLabel, fmtDate, today } from "@/lib/dates";
+import { bookingEvent, eventCalendarEvent, sessionEvent } from "@/lib/events";
 import { Badge, PostCards } from "@/components/post-cards";
 import Image from "next/image";
 import { postImageProps } from "@/lib/site-images";
+import { fmtTime, upcomingEvents } from "@/lib/event-posts";
 import { CalendarButtons } from "@/components/calendar-buttons";
 import { AnnouncementContent } from "@/components/announcement-content";
 import { announcementVisible } from "@/lib/announcements";
@@ -16,6 +17,7 @@ import { meetingUrl } from "@/lib/site-url";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { BookingForm } from "@/components/consultation-calendar";
 import { ActionForm } from "@/components/action-form";
+import { EmailPreferencesForm } from "@/components/email-preferences-form";
 import { cancelBooking, changeTier, signOut } from "@/lib/actions";
 export const metadata = { title: "My account" };
 const tabs: [string, string, IconName][] = [
@@ -25,6 +27,7 @@ const tabs: [string, string, IconName][] = [
   ["book", "Book a consultation", "calendar"],
   ["podcast", "Podcast", "headphones"],
   ["membership", "Membership", "star"],
+  ["emails", "Email preferences", "mail"],
 ];
 const premiumTabs = ["sessions", "book", "podcast"];
 function PremiumGate({ title }: { title: string }) {
@@ -45,12 +48,13 @@ function PremiumGate({ title }: { title: string }) {
 export default async function Account({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; unsubscribe?: string }>;
 }) {
   const user = await requireMember(),
     data = getStore(),
     premium = isPremium(user.role);
-  const tab = (await searchParams).tab ?? "overview";
+  const query = await searchParams;
+  const tab = query.tab ?? "overview";
   const bookings = data.bookings
     .filter((b) => b.memberId === user.id)
     .toSorted((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
@@ -67,6 +71,9 @@ export default async function Account({
     announcementVisible(a, user.id, user.role),
   );
   const member = data.members.find((m) => m.id === user.id);
+  const myEvents = upcomingEvents().filter((e) =>
+    e.attendees.includes(user.id),
+  );
   const upcomingBookings = bookings.filter(
     (b) => b.status !== "cancelled" && b.date >= today(),
   );
@@ -109,33 +116,44 @@ export default async function Account({
           </h1>
           {premium ? (
             <>
-              <div className="card">
+              <ul className="session-cards">
                 {data.sessions
                   .filter((s) => s.date < today())
                   .toSorted((a, b) => b.date.localeCompare(a.date))
                   .map((s) => (
-                    <div className="list-item" key={s.id}>
-                      <div>
-                        <b>{s.topic}</b>
-                        <br />
-                        <small className="muted">{fmtDate(s.date)}</small>
-                        <p className="preserve-lines member-notes">
-                          {s.notes || siteText("account.notes-coming")}
-                        </p>
-                      </div>
-                      {data.podcasts.some(
-                        (p) => p.id === s.podcast && p.status === "published",
-                      ) ? (
-                        <Link
-                          className="btn btn-sm btn-ghost"
-                          href={`/account?tab=podcast#${s.podcast}`}
-                        >
-                          {siteText("account.listen")}
-                        </Link>
-                      ) : null}
-                    </div>
+                    <li key={s.id}>
+                      <Link className="session-card" href={`/session/${s.id}`}>
+                        <span className="date-chip" aria-hidden="true">
+                          <b>{fmtDate(s.date, { day: "numeric" })}</b>
+                          {fmtDate(s.date, { month: "short" })}
+                        </span>
+                        <span className="session-card-text">
+                          <b>{s.topic}</b>
+                          <small>{fmtDate(s.date)}</small>
+                          <span className="session-card-notes">
+                            {s.notes || siteText("account.notes-coming")}
+                          </span>
+                        </span>
+                        <span className="session-card-meta">
+                          {data.podcasts.some(
+                            (p) =>
+                              p.id === s.podcast &&
+                              p.status === "published" &&
+                              getDemoState().audio.has(p.id),
+                          ) ? (
+                            <span className="session-audio-tag">
+                              <Icon name="headphones" size={14} />
+                              {siteText("account.listen")}
+                            </span>
+                          ) : null}
+                          <span className="session-card-arrow">
+                            {siteText("account.read-notes")} →
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
                   ))}
-              </div>
+              </ul>
               <p className="section-top">
                 <Link className="btn" href="/account?tab=podcast">
                   {siteText("account.open-the-full-podcast")}
@@ -218,7 +236,9 @@ export default async function Account({
                         <span
                           className={`badge b-${b.status === "confirmed" ? "ok" : b.status === "pending" ? "warn" : "bad"}`}
                         >
-                          {b.status}
+                          {b.status === "pending"
+                            ? "awaiting approval"
+                            : b.status}
                         </span>
                         {b.status === "confirmed" ? (
                           <>
@@ -259,6 +279,31 @@ export default async function Account({
         </>
       );
     }
+    if (tab === "emails")
+      return (
+        <>
+          <h1 className="area-title">Email preferences</h1>
+          <div className="card">
+            {member ? (
+              <>
+                <p className="muted">
+                  Choose which emails you receive at <b>{member.email}</b>.
+                  Messages from Sibel always stay in your account.
+                </p>
+                <EmailPreferencesForm
+                  preferences={member.emailPreferences}
+                  preselectUnsubscribe={query.unsubscribe === "1"}
+                />
+              </>
+            ) : (
+              <p className="muted">
+                The admin account does not receive member emails, so there is
+                nothing to set here.
+              </p>
+            )}
+          </div>
+        </>
+      );
     if (tab === "membership")
       return (
         <>
@@ -336,6 +381,11 @@ export default async function Account({
             <p className="next-circle-eyebrow">
               {siteText("account.your-next-saturday-circle")}
             </p>
+            {daysLeftLabel(next.date) ? (
+              <span className="days-left" role="status">
+                {daysLeftLabel(next.date)}
+              </span>
+            ) : null}
             <div className="next-circle-row">
               <span className="date-block" aria-hidden="true">
                 <small>{fmtDate(next.date, { weekday: "short" })}</small>
@@ -394,6 +444,38 @@ export default async function Account({
             <p>{siteText("account.check-back-soon-for-your-next-circle")}</p>
           </div>
         )}
+        <section
+          className="card section-top my-events"
+          aria-labelledby="my-events-title"
+        >
+          <div className="latest-head">
+            <h3 id="my-events-title">{siteText("events.my-events")}</h3>
+            <Link href="/events">{siteText("events.browse")} →</Link>
+          </div>
+          {myEvents.length ? (
+            <ul className="my-events-list">
+              {myEvents.map((e) => (
+                <li key={e.id}>
+                  <Link href={`/event/${e.id}`}>
+                    <span className="date-chip" aria-hidden="true">
+                      <b>{fmtDate(e.date, { day: "numeric" })}</b>
+                      {fmtDate(e.date, { month: "short" })}
+                    </span>
+                    <span>
+                      <b>{e.title}</b>
+                      <small>
+                        {fmtDate(e.date)} · {fmtTime(e.start)} · {e.venue}
+                      </small>
+                    </span>
+                  </Link>
+                  <CalendarButtons event={eventCalendarEvent(e)} kind="event" />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">{siteText("events.my-none")}</p>
+          )}
+        </section>
         {messages.length ? (
           <section
             className="member-messages section-top"
@@ -436,42 +518,62 @@ export default async function Account({
           </div>
         ) : null}
         <div className="grid g2 section-top">
-          <div className="card">
+          <div className="card consult-card">
             <h3>{siteText("account.1-1-consultation")}</h3>
             {premium ? (
               <>
                 {upcomingBookings.length ? (
-                  upcomingBookings.map((b) => (
-                    <div key={b.id}>
-                      <b>
-                        {fmtDate(b.date)} {siteText("account.at")} {b.time}
-                      </b>
-                      <p>
-                        {b.topic}{" "}
-                        <span
-                          className={`badge b-${b.status === "confirmed" ? "ok" : "warn"}`}
-                        >
-                          {b.status}
+                  <ul className="consult-list">
+                    {upcomingBookings.map((b) => (
+                      <li key={b.id}>
+                        <span className="date-chip" aria-hidden="true">
+                          <b>{fmtDate(b.date, { day: "numeric" })}</b>
+                          {fmtDate(b.date, { month: "short" })}
                         </span>
-                      </p>
-                      {b.status === "confirmed" ? (
-                        <CalendarButtons
-                          event={bookingEvent(b)}
-                          kind="booking"
-                        />
-                      ) : null}
-                    </div>
-                  ))
+                        <div className="consult-info">
+                          <b>
+                            {fmtDate(b.date)} {siteText("account.at")} {b.time}
+                          </b>
+                          <span className="consult-topic">{b.topic}</span>
+                          <span
+                            className={`badge b-${b.status === "confirmed" ? "ok" : "warn"}`}
+                          >
+                            {b.status === "pending"
+                              ? "awaiting approval"
+                              : b.status}
+                          </span>
+                          {b.status === "confirmed" ? (
+                            <div className="consult-actions">
+                              <CalendarButtons
+                                event={bookingEvent(b)}
+                                kind="booking"
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 ) : (
-                  <p>
+                  <p className="muted">
                     {siteText("account.no-consultation-booked-yet-you-have")}{" "}
                     {Math.max(0, data.settings.consultsPerMonth - used)}{" "}
                     {siteText("account.left-this-month")}
                   </p>
                 )}
-                <Link className="btn btn-sm" href="/account?tab=book">
-                  {siteText("account.book-a-time")}
-                </Link>
+                <div className="consult-footer">
+                  {upcomingBookings.length ? (
+                    <span className="muted">
+                      {Math.max(0, data.settings.consultsPerMonth - used)}{" "}
+                      {siteText("account.left-this-month")}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <Link className="btn btn-sm" href="/account?tab=book">
+                    {siteText("account.book-a-time")}
+                  </Link>
+                </div>
               </>
             ) : (
               <>
@@ -480,9 +582,11 @@ export default async function Account({
                     "account.one-on-one-time-with-sibel-is-a-premium-perk",
                   )}
                 </p>
-                <Link className="btn btn-sm" href="/account?tab=membership">
-                  {siteText("account.see-premium")}
-                </Link>
+                <div className="consult-footer">
+                  <Link className="btn btn-sm" href="/account?tab=membership">
+                    {siteText("account.see-premium")}
+                  </Link>
+                </div>
               </>
             )}
           </div>

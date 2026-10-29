@@ -1500,6 +1500,11 @@
     "text": "Sign in"
   },
   {
+    "id": "post.listen-to-this-post",
+    "group": "Blog article",
+    "text": "Listen to this post"
+  },
+  {
     "id": "solutions.solutions",
     "group": "Solutions",
     "text": "Solutions"
@@ -1980,6 +1985,26 @@
     "text": "Premium access through"
   },
   {
+    "id": "account.read-notes",
+    "group": "Member panel",
+    "text": "Read notes"
+  },
+  {
+    "id": "session.all-session-notes",
+    "group": "Member panel",
+    "text": "All session notes"
+  },
+  {
+    "id": "session.saturday-circle",
+    "group": "Member panel",
+    "text": "Saturday circle"
+  },
+  {
+    "id": "session.listen",
+    "group": "Member panel",
+    "text": "Listen"
+  },
+  {
     "id": "contact.option-membership",
     "group": "Contact",
     "text": "Morning Coffee membership"
@@ -2008,5 +2033,240 @@
     "id": "contact.preferred-time-hint",
     "group": "Contact",
     "text": "Pick a time that suits you and Sibel will confirm by email."
+  },
+  {
+    "id": "navigation./events",
+    "group": "Navigation",
+    "text": "Events"
+  },
+  {
+    "id": "events.eyebrow",
+    "group": "Events",
+    "text": "Events"
+  },
+  {
+    "id": "events.title",
+    "group": "Events",
+    "text": "Meet us in person"
+  },
+  {
+    "id": "events.sub",
+    "group": "Events",
+    "text": "Warm, small gatherings with Sibel and the community. Everyone can look; members join with one click."
+  },
+  {
+    "id": "events.upcoming",
+    "group": "Events",
+    "text": "Upcoming events"
+  },
+  {
+    "id": "events.past",
+    "group": "Events",
+    "text": "Past events"
+  },
+  {
+    "id": "events.none",
+    "group": "Events",
+    "text": "No upcoming events right now. Please check back soon."
+  },
+  {
+    "id": "events.seats-left",
+    "group": "Events",
+    "text": "seats left"
+  },
+  {
+    "id": "events.no-seats",
+    "group": "Events",
+    "text": "No seats left"
+  },
+  {
+    "id": "events.join",
+    "group": "Events",
+    "text": "Join"
+  },
+  {
+    "id": "events.leave",
+    "group": "Events",
+    "text": "Leave"
+  },
+  {
+    "id": "events.joined",
+    "group": "Events",
+    "text": "You are going"
+  },
+  {
+    "id": "events.sign-in-to-join",
+    "group": "Events",
+    "text": "Sign in or register to join this event."
+  },
+  {
+    "id": "events.register",
+    "group": "Events",
+    "text": "Register"
+  },
+  {
+    "id": "events.admin-note",
+    "group": "Events",
+    "text": "You are signed in as the administrator. Manage this event from the Events page in the admin panel."
+  },
+  {
+    "id": "events.back",
+    "group": "Events",
+    "text": "All events"
+  },
+  {
+    "id": "events.details",
+    "group": "Events",
+    "text": "Event details"
+  },
+  {
+    "id": "events.map",
+    "group": "Events",
+    "text": "View map"
+  },
+  {
+    "id": "events.free",
+    "group": "Events",
+    "text": "Free"
+  },
+  {
+    "id": "events.payment-later",
+    "group": "Events",
+    "text": "Payment comes later. Nothing is charged when you join."
+  },
+  {
+    "id": "events.past-notice",
+    "group": "Events",
+    "text": "This event has already taken place."
+  },
+  {
+    "id": "events.past-label",
+    "group": "Events",
+    "text": "Event finished"
+  },
+  {
+    "id": "events.my-events",
+    "group": "Events",
+    "text": "My events"
+  },
+  {
+    "id": "events.my-none",
+    "group": "Events",
+    "text": "You have not joined any upcoming events yet."
+  },
+  {
+    "id": "events.browse",
+    "group": "Events",
+    "text": "Browse events"
+  },
+  {
+    "id": "company.eyebrow",
+    "group": "Company booking",
+    "text": "Company consultation"
+  },
+  {
+    "id": "company.title",
+    "group": "Company booking",
+    "text": "Book your consultation with Sibel"
+  },
+  {
+    "id": "company.intro",
+    "group": "Company booking",
+    "text": "This private link is for one booking. Choose a time that suits you and tell us a little about your company."
+  },
+  {
+    "id": "company.perk",
+    "group": "Company booking",
+    "text": "Booked through your private company link."
+  },
+  {
+    "id": "company.company-name",
+    "group": "Company booking",
+    "text": "Company name"
+  },
+  {
+    "id": "company.contact-person",
+    "group": "Company booking",
+    "text": "Contact person"
+  },
+  {
+    "id": "company.email",
+    "group": "Company booking",
+    "text": "Email"
+  },
+  {
+    "id": "company.phone",
+    "group": "Company booking",
+    "text": "Phone"
+  },
+  {
+    "id": "company.topic",
+    "group": "Company booking",
+    "text": "What would you like to discuss?"
+  },
+  {
+    "id": "company.used-title",
+    "group": "Company booking",
+    "text": "This link has already been used"
+  },
+  {
+    "id": "company.used-text",
+    "group": "Company booking",
+    "text": "A consultation was already booked with this link. Each link works for one booking only. Please contact Sibel if you need another."
+  },
+  {
+    "id": "company.expired-title",
+    "group": "Company booking",
+    "text": "This link has expired"
+  },
+  {
+    "id": "company.expired-text",
+    "group": "Company booking",
+    "text": "Company links work for one week. Please contact Sibel and ask for a new link."
+  },
+  {
+    "id": "company.revoked-title",
+    "group": "Company booking",
+    "text": "This link is no longer active"
+  },
+  {
+    "id": "company.revoked-text",
+    "group": "Company booking",
+    "text": "This link was withdrawn. Please contact Sibel if you think this is a mistake."
+  },
+  {
+    "id": "company.unknown-title",
+    "group": "Company booking",
+    "text": "We could not find this link"
+  },
+  {
+    "id": "company.unknown-text",
+    "group": "Company booking",
+    "text": "Check that you copied the whole address from your message, or contact Sibel for a new link."
+  },
+  {
+    "id": "company.confirmed-title",
+    "group": "Company booking",
+    "text": "Your consultation is booked"
+  },
+  {
+    "id": "company.confirmed-text",
+    "group": "Company booking",
+    "text": "Thank you. Your time is confirmed and no further approval is needed. Keep this page for your details."
+  },
+  {
+    "id": "company.meeting-link",
+    "group": "Company booking",
+    "text": "Meeting link"
+  },
+  {
+    "id": "company.meeting-note",
+    "group": "Company booking",
+    "text": "This is a placeholder link in the review version."
+  },
+  {
+    "id": "company.contact-us",
+    "group": "Company booking",
+    "text": "Contact Sibel"
   }
 ]

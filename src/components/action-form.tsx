@@ -9,6 +9,7 @@ export function ActionForm({
   submitLabel = "Save changes",
   submitDisabled = false,
   confirmMessage,
+  actions,
 }: {
   action: (state: ActionResult, data: FormData) => Promise<ActionResult>;
   children: React.ReactNode;
@@ -17,6 +18,8 @@ export function ActionForm({
   submitDisabled?: boolean;
   /** Ask before submitting, for actions that are hard to undo. */
   confirmMessage?: string;
+  /** Buttons shown in one row with the submit button, e.g. Delete and Cancel. */
+  actions?: React.ReactNode;
 }) {
   const closeDialog = useAdminDialog();
   const form = useRef<HTMLFormElement>(null);
@@ -30,6 +33,18 @@ export function ActionForm({
       return result;
     },
     { message: "" },
+  );
+  const submit = (
+    <button
+      className="btn"
+      disabled={pending || submitDisabled}
+      onClick={(event) => {
+        if (confirmMessage && !window.confirm(confirmMessage))
+          event.preventDefault();
+      }}
+    >
+      {pending ? "Saving…" : submitLabel}
+    </button>
   );
   // Submitting manually keeps what people typed when the server returns an error;
   // React's form action would clear the fields either way.
@@ -45,16 +60,14 @@ export function ActionForm({
       }}
     >
       {children}
-      <button
-        className="btn"
-        disabled={pending || submitDisabled}
-        onClick={(event) => {
-          if (confirmMessage && !window.confirm(confirmMessage))
-            event.preventDefault();
-        }}
-      >
-        {pending ? "Saving…" : submitLabel}
-      </button>
+      {actions ? (
+        <div className="form-actions">
+          {actions}
+          {submit}
+        </div>
+      ) : (
+        submit
+      )}
       {state.message ? (
         <p
           className={`form-feedback ${state.ok ? "success" : "error"}`}

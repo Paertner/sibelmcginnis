@@ -20,15 +20,23 @@ const poppins = localFont({
 });
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Morning Coffee Community | Sibel McGinnis",
-    template: "%s | Morning Coffee Community",
-  },
-  description:
-    "A warm, supportive space for women to connect, reflect and grow. Weekly Saturday circles and personal coaching with Sibel McGinnis.",
-  robots: { index: false, follow: false },
-};
+// The tab title and icon follow Settings, so the admin can rename the site without a developer.
+export function generateMetadata(): Metadata {
+  const settings = getStore().siteSettings;
+  const title = settings?.siteTitle
+    ? `${settings.siteTitle} | Morning Coffee Community`
+    : "Morning Coffee Community | Sibel McGinnis";
+  return {
+    title: {
+      default: title,
+      template: `%s | ${settings?.siteTitle || "Morning Coffee Community"}`,
+    },
+    description:
+      "A warm, supportive space for women to connect, reflect and grow. Weekly Saturday circles and personal coaching with Sibel McGinnis.",
+    robots: { index: false, follow: false },
+    ...(settings?.faviconPath ? { icons: { icon: settings.faviconPath } } : {}),
+  };
+}
 
 export default function RootLayout({
   children,

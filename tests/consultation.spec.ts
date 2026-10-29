@@ -13,14 +13,14 @@ test("consultation scheduling uses an accessible monthly calendar and responsive
     page.getByRole("table", { name: "Choose a consultation date" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Confirm booking", exact: true }),
+    page.getByRole("button", { name: "Request consultation", exact: true }),
   ).toBeDisabled();
   const day = page.getByRole("button", { name: /^Choose / }).first();
   await day.click();
   await expect(day).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("radio").first().check();
   await expect(
-    page.getByRole("button", { name: "Confirm booking", exact: true }),
+    page.getByRole("button", { name: "Request consultation", exact: true }),
   ).toBeEnabled();
   await expect(
     page.getByLabel("What would you like to talk about?"),
@@ -29,7 +29,7 @@ test("consultation scheduling uses an accessible monthly calendar and responsive
   if (await next.isEnabled()) {
     await next.click();
     await expect(
-      page.getByRole("button", { name: "Confirm booking", exact: true }),
+      page.getByRole("button", { name: "Request consultation", exact: true }),
     ).toBeDisabled();
     await page
       .getByRole("button", { name: "Previous month", exact: true })

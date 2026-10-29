@@ -18,6 +18,16 @@ export function siteImageSlots(): ImageSlot[] {
       position: "center",
       postId: post.id,
     })),
+    ...(getStore().events ?? []).map((event, index) => ({
+      id: `event.${event.id}`,
+      group: "Events",
+      label: event.title,
+      src: siteImageCatalog.find(
+        (slot) => slot.id === `blog.cover-${index % 3}`,
+      )!.src,
+      alt: event.title,
+      position: "center",
+    })),
   ];
 }
 export type SiteImage = ImageSlot & {
@@ -270,3 +280,7 @@ export async function updateSiteImage(form: FormData) {
   state.data.siteImages = next;
   return "Page image saved.";
 }
+
+/** Props for an event cover image (its own cover, or a default one). */
+export const eventImageProps = (eventId: string) =>
+  siteImageProps(`event.${eventId}`);

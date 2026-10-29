@@ -7,7 +7,7 @@ export function CalendarButtons({
   kind,
 }: {
   event: CalendarEvent;
-  kind: "session" | "booking";
+  kind: "session" | "booking" | "event";
 }) {
   const ics = `/api/calendar/${kind}/${event.id}`;
   return (

@@ -192,7 +192,7 @@ test("calendar invitations contain protected entry links and saved links deny ex
   await signIn(admin, "Sibel");
   await admin.goto("/admin/members");
   await admin
-    .getByRole("button", { name: "Edit Layla Demir", exact: true })
+    .getByRole("button", { name: "Layla Demir, edit member", exact: true })
     .click();
   const editor = admin.getByRole("dialog", {
     name: "Edit Layla Demir",
@@ -217,7 +217,7 @@ test("calendar invitations contain protected entry links and saved links deny ex
   );
   expect((await page.request.get("/api/audio/pc0")).status()).toBe(403);
   await admin
-    .getByRole("button", { name: "Edit Layla Demir", exact: true })
+    .getByRole("button", { name: "Layla Demir, edit member", exact: true })
     .click();
   await editor.getByLabel("Premium access ends (UTC)").fill(original);
   await editor
@@ -278,7 +278,8 @@ test("emails are built from blocks, saved as reusable templates and share a comm
   );
   await page.getByRole("button", { name: "Edit footer" }).click();
   footer = page.getByRole("dialog", { name: "Common email footer" });
-  await footer.getByRole("button", { name: "Use the original footer" }).click();
+  page.once("dialog", (dialog) => dialog.accept());
+  await footer.getByRole("button", { name: "Simple", exact: true }).click();
   await footer.getByRole("button", { name: "Save footer" }).click();
   await expect(page.locator(".email-footer-preview")).toContainText(
     "A little space to connect",

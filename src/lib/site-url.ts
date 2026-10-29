@@ -13,3 +13,7 @@ export const meetingPath = (kind: "session" | "booking", id: string) =>
   `/meetings/${kind}/${encodeURIComponent(id)}`;
 export const meetingUrl = (kind: "session" | "booking", id: string) =>
   `${siteOrigin()}${meetingPath(kind, id)}`;
+export const eventUrl = (id: string) =>
+  `${siteOrigin()}/event/${encodeURIComponent(id)}`;
+export const companyUrl = (token: string) =>
+  `${siteOrigin()}/company/${encodeURIComponent(token)}`;

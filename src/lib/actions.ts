@@ -5,12 +5,21 @@ import { redirect } from "next/navigation";
 import { clearSession, getUser, setDemoSession } from "./auth";
 import { demoEnabled, demoMeeting, getDemoState, getStore } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
+import { isPast } from "./event-posts";
 import { isPremium } from "./access";
 import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
 import { parseBlocks } from "./email-blocks";
 import copyCatalog from "./site-copy-catalog.json";
 import { deleteMedia, updateSiteImage, uploadMedia } from "./site-images";
+import { emailCategories, type EmailPreferences } from "./email-preferences";
+import {
+  LINK_DAYS,
+  findLink,
+  linkStatus,
+  slotOffered,
+  slotTaken,
+} from "./company-links";
 
 const text = (f: FormData, key: string, max = 20000) =>
   String(f.get(key) ?? "")
@@ -43,6 +52,40 @@ const email = (f: FormData) => {
   return value;
 };
 const uid = () => randomUUID();
+const audioTypes = [
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/x-m4a",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/ogg",
+];
+/** Validates an optional uploaded audio file (MP3, M4A, WAV or OGG, up to 10 MB). */
+async function readAudio(file: FormDataEntryValue | null) {
+  if (!(file instanceof File) || !file.size) return undefined;
+  if (file.size > 10 * 1024 * 1024 || !audioTypes.includes(file.type))
+    throw new Error(
+      "Upload MP3, M4A, WAV or OGG audio, up to 10 MB for review.",
+    );
+  return {
+    bytes: new Uint8Array(await file.arrayBuffer()),
+    type: file.type,
+    name: file.name.replace(/[\r\n"\\]/g, "_").slice(0, 100),
+  };
+}
+/** Plain text of blocks, kept as the post body for search, excerpts and emails. */
+const blocksText = (blocks: ReturnType<typeof parseBlocks>) =>
+  blocks
+    .map((block) =>
+      [block.title, block.text, block.html, block.label]
+        .filter(Boolean)
+        .join(" ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .filter(Boolean)
+    .join("\n\n");
 const refresh = () => revalidatePath("/", "layout");
 const errorResult = (error: unknown): ActionResult => ({
   message:
@@ -65,7 +108,15 @@ export async function demoLogin(form: FormData) {
   checkDemo();
   const id = choice(form, "account", ["m0", "m1", "admin"]);
   await setDemoSession(id);
-  redirect(id === "admin" ? "/admin" : "/account");
+  // Visitors sent here from an event come back to it.
+  const back = text(form, "next", 200);
+  redirect(
+    back.startsWith("/") && !back.startsWith("//")
+      ? back
+      : id === "admin"
+        ? "/admin"
+        : "/account",
+  );
 }
 export async function signOut() {
   await clearSession();
@@ -75,7 +126,8 @@ export async function join(
   _state: ActionResult,
   form: FormData,
 ): Promise<ActionResult> {
-  let id: string;
+  let id: string,
+    destination = "/account";
   try {
     checkDemo();
     const tier = choice(form, "plan", ["free", "premium"]);
@@ -106,10 +158,13 @@ export async function join(
           : "",
     });
     await setDemoSession(id);
+    const back = text(form, "next", 200);
+    // Visitors sent here from an event come back to it. Redirecting throws, so it happens after the try block.
+    if (back.startsWith("/") && !back.startsWith("//")) destination = back;
   } catch (error) {
     return errorResult(error);
   }
-  redirect("/account");
+  redirect(destination);
 }
 export async function contact(
   _state: ActionResult,
@@ -158,6 +213,79 @@ export async function changeTier(
     return errorResult(error);
   }
 }
+/** Saves which emails the signed-in member wants (the target of the unsubscribe link). */
+export async function saveEmailPreferences(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    checkDemo();
+    const user = await getUser();
+    if (!user || user.role === "admin")
+      throw new Error("Sign in as a member first.");
+    const member = getStore().members.find((m) => m.id === user.id);
+    if (!member) throw new Error("Member not found.");
+    const unsubscribedAll = form.get("unsubscribeAll") === "on";
+    const next: EmailPreferences = { unsubscribedAll };
+    for (const category of emailCategories)
+      next[category.field] = form.get(category.field) === "on";
+    member.emailPreferences = next;
+    return success(
+      unsubscribedAll
+        ? "You are unsubscribed from all emails. You can turn them back on here at any time."
+        : "Your email preferences are saved.",
+    );
+  } catch (error) {
+    return errorResult(error);
+  }
+}
+
+/** A signed-in member takes a seat at an event. */
+export async function joinEvent(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    checkDemo();
+    const user = await getUser();
+    if (!user || user.role === "admin")
+      throw new Error("Sign in as a member to join an event.");
+    const event = (getStore().events ?? []).find(
+      (e) => e.id === text(form, "id") && e.status === "published",
+    );
+    if (!event) throw new Error("This event is no longer available.");
+    if (isPast(event)) throw new Error("This event has already taken place.");
+    if (event.attendees.includes(user.id))
+      throw new Error("You have already joined this event.");
+    if (event.attendees.length >= event.seats)
+      throw new Error("No seats left for this event.");
+    event.attendees.push(user.id);
+    return success("You’re in! Your seat is saved.");
+  } catch (error) {
+    return errorResult(error);
+  }
+}
+/** A member gives their seat back. */
+export async function leaveEvent(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    checkDemo();
+    const user = await getUser();
+    if (!user) throw new Error("Sign in first.");
+    const event = (getStore().events ?? []).find(
+      (e) => e.id === text(form, "id"),
+    );
+    if (!event || !event.attendees.includes(user.id))
+      throw new Error("You have not joined this event.");
+    if (isPast(event)) throw new Error("This event has already taken place.");
+    event.attendees = event.attendees.filter((m) => m !== user.id);
+    return success("You left the event. Your seat is free again.");
+  } catch (error) {
+    return errorResult(error);
+  }
+}
 
 export async function bookConsultation(
   _state: ActionResult,
@@ -199,25 +327,101 @@ export async function bookConsultation(
       )
     )
       throw new Error("That time has just been booked. Please choose another.");
-    const id = uid(),
-      confirmed = data.settings.autoConfirm;
+    // Member requests always wait for the admin to approve them.
     data.bookings.push({
-      id,
+      id: uid(),
       memberId: user.id,
       date,
       time,
       topic: text(form, "topic", 1000) || "General conversation",
-      status: confirmed ? "confirmed" : "pending",
-      zoom: confirmed ? demoMeeting(id) : "",
+      status: "pending",
+      zoom: "",
     });
     return success(
-      confirmed
-        ? "Consultation confirmed for review. The meeting link is a placeholder."
-        : "Request saved, awaiting admin confirmation.",
+      "Request sent. Sibel will confirm it soon; the meeting link appears here after she approves.",
     );
   } catch (error) {
     return errorResult(error);
   }
+}
+/**
+ * A company books through its link. Nobody is signed in, so everything is
+ * checked again here: the link, the time and every field. Checking and saving
+ * happen in one step, so a link can only ever make one booking.
+ */
+export async function bookCompany(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  let destination = "/";
+  try {
+    checkDemo();
+    const data = getStore(),
+      token = text(form, "token", 100),
+      link = findLink(token);
+    if (!link) throw new Error("This booking link is not valid.");
+    const status = linkStatus(link);
+    if (status === "used")
+      throw new Error("This link has already been used for a booking.");
+    if (status === "expired") throw new Error("This link has expired.");
+    if (status === "revoked") throw new Error("This link is no longer active.");
+    const date = text(form, "date", 10),
+      time = text(form, "time", 5);
+    if (!slotOffered(date, time))
+      throw new Error("Choose one of the available times.");
+    const company = text(form, "company", 120),
+      contact = text(form, "contact", 120),
+      address = text(form, "email", 254).toLowerCase(),
+      phone = text(form, "phone", 40),
+      topic = text(form, "topic", 1000);
+    if (company.length < 2) throw new Error("Enter your company name.");
+    if (contact.length < 2)
+      throw new Error("Enter the name of the contact person.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address))
+      throw new Error("Enter a valid email address.");
+    if (
+      !/^\+?[\d\s().-]{7,25}$/.test(phone) ||
+      phone.replace(/\D/g, "").length < 7
+    )
+      throw new Error(
+        "Enter a valid phone number, for example +1 512 555 0148.",
+      );
+    if (topic.length < 5)
+      throw new Error("Tell us briefly what you would like to discuss.");
+    if (slotTaken(date, time))
+      throw new Error("That time has just been booked. Please choose another.");
+    const id = uid();
+    data.bookings.push({
+      id,
+      memberId: "",
+      date,
+      time,
+      topic,
+      status: "confirmed",
+      zoom: demoMeeting(id),
+      source: "company",
+      company,
+      contact,
+      email: address,
+      phone,
+      linkId: link.id,
+      createdAt: new Date().toISOString(),
+    });
+    link.bookingId = id;
+    (data.notices ??= []).push({
+      id: uid(),
+      kind: "company-booking",
+      bookingId: id,
+      createdAt: new Date().toISOString(),
+      seen: false,
+    });
+    success("Your consultation is booked.");
+    // Redirecting throws, so it happens after the try block.
+    destination = `/company/${token}?booked=${id}`;
+  } catch (error) {
+    return errorResult(error);
+  }
+  redirect(destination);
 }
 export async function cancelBooking(
   _state: ActionResult,
@@ -261,6 +465,7 @@ export async function adminMutation(
           break;
         case "posts":
           data.posts = data.posts.filter((x) => x.id !== id);
+          getDemoState().audio.delete(`post-${id}`);
           break;
         case "sessions":
           data.sessions = data.sessions.filter((x) => x.id !== id);
@@ -268,6 +473,9 @@ export async function adminMutation(
         case "podcasts":
           data.podcasts = data.podcasts.filter((x) => x.id !== id);
           getDemoState().audio.delete(id);
+          break;
+        case "events":
+          data.events = (data.events ?? []).filter((x) => x.id !== id);
           break;
         default:
           throw new Error("Unknown item.");
@@ -306,11 +514,14 @@ export async function adminMutation(
       if (item) Object.assign(item, value);
       else data.members.push({ id: uid(), joined: today(), ...value });
     } else if (entity === "posts") {
+      const blocks = parseBlocks(text(form, "blocks", 400000));
+      if (!blocksText(blocks)) throw new Error("Add some content to the post.");
       const value = {
         title: required(form, "title", 250),
         category: required(form, "category", 100),
         excerpt: required(form, "excerpt", 500),
-        body: required(form, "body"),
+        blocks,
+        body: blocksText(blocks),
         access: choice(form, "access", ["public", "premium"]),
         status: choice(form, "status", ["draft", "published"]),
         cover: number(form, "cover", 0, 2),
@@ -319,11 +530,73 @@ export async function adminMutation(
       const postId = item?.id ?? uid();
       if (item) Object.assign(item, value);
       else data.posts.push({ id: postId, date: today(), ...value });
+      const post = data.posts.find((x) => x.id === postId)!;
+      // Posts can carry an audio version, made elsewhere and uploaded here.
+      const audio = await readAudio(form.get("audio"));
+      if (audio) {
+        getDemoState().audio.set(`post-${postId}`, audio);
+        post.audioName = audio.name;
+      } else if (form.get("removeAudio") === "on") {
+        getDemoState().audio.delete(`post-${postId}`);
+        post.audioName = "";
+      }
       // A cover chosen in the media picker becomes this post's own image.
       const coverMedia = text(form, "coverMedia", 200);
       if (coverMedia) {
         const cover = new FormData();
         cover.set("slot", `post.${postId}`);
+        cover.set("media", coverMedia);
+        cover.set("alt", text(form, "coverAlt", 300));
+        cover.set("position", text(form, "coverPosition", 40) || "center");
+        await updateSiteImage(cover);
+      }
+    } else if (entity === "events") {
+      const blocks = parseBlocks(text(form, "blocks", 400000));
+      if (!blocksText(blocks))
+        throw new Error("Add a description to the event.");
+      const date = required(form, "date"),
+        start = required(form, "start", 5),
+        end = required(form, "end", 5),
+        seats = Number(text(form, "seats", 6)),
+        mapUrl = text(form, "mapUrl", 500),
+        timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+      if (!Number.isInteger(seats) || seats < 1 || seats > 10000)
+        throw new Error("The seat limit must be a whole number, at least 1.");
+      if (!validDate(date)) throw new Error("Choose a valid event date.");
+      if (!timePattern.test(start) || !timePattern.test(end))
+        throw new Error("Enter the start and end time.");
+      if (end <= start) throw new Error("The event must end after it starts.");
+      if (mapUrl && !/^https:\/\/\S+$/i.test(mapUrl))
+        throw new Error("Enter a full https:// link for the map.");
+      const list = (data.events ??= []);
+      const item = list.find((x) => x.id === id);
+      if (item && seats < item.attendees.length)
+        throw new Error(
+          `${item.attendees.length} ${item.attendees.length === 1 ? "person has" : "people have"} already joined, so the seat limit cannot be lower than ${item.attendees.length}.`,
+        );
+      const value = {
+        title: required(form, "title", 250),
+        status: choice(form, "status", ["draft", "published"]) as
+          "draft" | "published",
+        date,
+        start,
+        end,
+        venue: required(form, "venue", 200),
+        address: required(form, "address", 300),
+        mapUrl,
+        seats,
+        price: text(form, "price", 40) || "Free",
+        summary: required(form, "summary", 500),
+        blocks,
+      };
+      const eventId = item?.id ?? uid();
+      if (item) Object.assign(item, value);
+      else list.push({ id: eventId, attendees: [], ...value });
+      // A cover chosen in the media picker becomes this event's own image.
+      const coverMedia = text(form, "coverMedia", 200);
+      if (coverMedia) {
+        const cover = new FormData();
+        cover.set("slot", `event.${eventId}`);
         cover.set("media", coverMedia);
         cover.set("alt", text(form, "coverAlt", 300));
         cover.set("position", text(form, "coverPosition", 40) || "center");
@@ -371,17 +644,44 @@ export async function adminMutation(
         const podcast = text(form, "podcast");
         if (podcast && !data.podcasts.some((p) => p.id === podcast))
           throw new Error("Choose an existing episode.");
+        // Notes are written with the block editor; their plain text stays in `notes`.
+        const blocks = parseBlocks(text(form, "blocks", 400000));
+        const topic = required(form, "topic", 250);
         const value = {
           date,
-          topic: required(form, "topic", 250),
+          topic,
           zoom,
           pass: text(form, "pass", 100),
-          notes: text(form, "notes"),
+          notes: blocksText(blocks),
+          blocks,
           podcast,
         };
         const item = data.sessions.find((x) => x.id === id);
+        const sessionId = item?.id ?? uid();
         if (item) Object.assign(item, value);
-        else data.sessions.push({ id: uid(), time: "10:30", ...value });
+        else data.sessions.push({ id: sessionId, time: "10:30", ...value });
+        const session = data.sessions.find((x) => x.id === sessionId)!;
+        // The session's audio is its podcast episode: update the linked one or create it.
+        const audio = await readAudio(form.get("audio"));
+        if (audio) {
+          let episode = data.podcasts.find((p) => p.id === session.podcast);
+          if (!episode) {
+            episode = {
+              id: uid(),
+              num: Math.max(0, ...data.podcasts.map((p) => p.num)) + 1,
+              title: topic,
+              description: `Saturday circle, ${date}.`,
+              date,
+              duration: "30:00",
+              status: "published",
+              audioName: "",
+            };
+            data.podcasts.push(episode);
+            session.podcast = episode.id;
+          }
+          getDemoState().audio.set(episode.id, audio);
+          episode.audioName = audio.name;
+        }
       }
     } else if (entity === "podcasts") {
       const date = required(form, "date"),
@@ -443,7 +743,52 @@ export async function adminMutation(
       data.availability = availability as typeof data.availability;
       data.settings.consultsPerMonth = count;
       data.settings.consultMinutes = duration;
-      data.settings.autoConfirm = form.has("autoConfirm");
+    } else if (entity === "companyLinks") {
+      const links = (data.companyLinks ??= []);
+      if (op === "create") {
+        const label = text(form, "label", 80);
+        const bytes = crypto.getRandomValues(new Uint8Array(24));
+        const token = Array.from(
+          bytes,
+          (b) =>
+            "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 56],
+        ).join("");
+        links.push({
+          id: uid(),
+          token,
+          label,
+          createdAt: today(),
+          expiresAt: addDays(today(), LINK_DAYS),
+        });
+        return success(
+          `Link created. It works for ${LINK_DAYS} days. Copy it from the list.`,
+        );
+      }
+      const link = links.find((l) => l.id === id);
+      if (!link) throw new Error("Link not found.");
+      const status = linkStatus(link);
+      if (op === "extend") {
+        if (status === "used")
+          throw new Error("This link has already been used.");
+        if (status === "revoked")
+          throw new Error(
+            "A revoked link cannot be extended. Create a new one.",
+          );
+        const from = link.expiresAt > today() ? link.expiresAt : today();
+        link.expiresAt = addDays(from, LINK_DAYS);
+        return success(`Link extended by ${LINK_DAYS} days.`);
+      }
+      if (op === "revoke") {
+        if (status === "used")
+          throw new Error("This link has already been used.");
+        link.revoked = true;
+        return success("Link revoked. It no longer opens the calendar.");
+      }
+      throw new Error("Unknown action.");
+    } else if (entity === "notices") {
+      for (const notice of data.notices ?? [])
+        if (op === "dismissAll" || notice.id === id) notice.seen = true;
+      return success("Notice dismissed.");
     } else if (entity === "bookings") {
       const booking = data.bookings.find((b) => b.id === id);
       if (!booking || booking.status !== "pending")
@@ -457,12 +802,82 @@ export async function adminMutation(
       booking.zoom = demoMeeting(booking.id);
       return success("Booking approved. The member can now join.");
     } else if (entity === "announcements") {
-      const count = await publishAnnouncement(form);
+      const { recipients, emails, skipped } = await publishAnnouncement(form);
       return success(
-        `Published to ${count} member${count === 1 ? "" : "s"} and prepared ${count} individual email${count === 1 ? "" : "s"}. Email delivery is not connected; nothing was sent.`,
+        `Published to ${recipients} member${recipients === 1 ? "" : "s"} and prepared ${emails} individual email${emails === 1 ? "" : "s"}.${skipped ? ` ${skipped} ${skipped === 1 ? "person was" : "people were"} skipped because of their email preferences.` : ""} Email delivery is not connected; nothing was sent.`,
       );
     } else if (entity === "siteImages") {
       return success(await updateSiteImage(form));
+    } else if (entity === "siteSettings") {
+      const link = (key: string, label: string) => {
+        const value = text(form, key, 300);
+        if (value && !/^https:\/\/\S+$/i.test(value))
+          throw new Error(`Enter a full https:// link for ${label}.`);
+        return value;
+      };
+      const contactEmail = text(form, "contactEmail", 254).toLowerCase();
+      if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail))
+        throw new Error("Enter a valid contact email.");
+      const faviconPath = text(form, "faviconPath", 300);
+      if (
+        faviconPath &&
+        !/^\/(images|api\/site-image)\/[\w.-]+$/.test(faviconPath)
+      )
+        throw new Error("Choose the favicon from the media library.");
+      data.siteSettings = {
+        siteTitle: required(form, "siteTitle", 80),
+        tagline: text(form, "tagline", 160),
+        faviconPath,
+        contactEmail,
+        mailingAddress: text(form, "mailingAddress", 300),
+        facebook: link("facebook", "Facebook"),
+        instagram: link("instagram", "Instagram"),
+        linkedin: link("linkedin", "LinkedIn"),
+      };
+      return success("Site settings saved.");
+    } else if (entity === "integrations") {
+      const integrations = { ...data.integrations },
+        now = new Date().toISOString();
+      let message = "Saved.";
+      if (op === "stripe-connect") {
+        // The live site sends the admin to Stripe to sign in (Stripe Connect); the prototype simulates the result.
+        integrations.stripe = {
+          connected: true,
+          accountName: data.siteSettings?.siteTitle || "Sibel McGinnis",
+          accountId: `acct_test_${uid().replace(/-/g, "").slice(0, 10)}`,
+          connectedAt: now,
+        };
+        message = "Stripe connected in test mode.";
+      } else if (op === "stripe-disconnect") {
+        integrations.stripe = { connected: false };
+        message = "Stripe disconnected.";
+      } else if (op === "zoom") {
+        const secret = text(form, "clientSecret", 200);
+        integrations.zoom = {
+          accountId: text(form, "accountId", 100),
+          clientId: text(form, "clientId", 100),
+          secretTail: secret ? secret.slice(-4) : integrations.zoom?.secretTail,
+          savedAt: now,
+        };
+        message = "Zoom details saved.";
+      } else if (op === "resend") {
+        const key = text(form, "apiKey", 200);
+        if (key && !key.startsWith("re_"))
+          throw new Error("A Resend API key starts with re_.");
+        const fromEmail = text(form, "fromEmail", 254).toLowerCase();
+        if (fromEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fromEmail))
+          throw new Error("Enter a valid sender email.");
+        integrations.resend = {
+          fromName: text(form, "fromName", 80),
+          fromEmail,
+          keyTail: key ? key.slice(-4) : integrations.resend?.keyTail,
+          savedAt: now,
+          dailyLimit: number(form, "dailyLimit", 1, 100000),
+        };
+        message = "Email settings saved.";
+      } else throw new Error("Unknown setting.");
+      data.integrations = integrations;
+      return success(message);
     } else if (entity === "emailTemplates") {
       if (op === "remove") {
         data.emailTemplates = (data.emailTemplates ?? []).filter(

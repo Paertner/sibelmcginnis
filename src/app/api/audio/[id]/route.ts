@@ -1,5 +1,5 @@
 import { getUser } from "@/lib/auth";
-import { isPremium } from "@/lib/access";
+import { canView, isPremium } from "@/lib/access";
 import { getDemoState, getStore } from "@/lib/store";
 export async function GET(
   request: Request,
@@ -10,16 +10,29 @@ export async function GET(
     "Cache-Control": "private, no-store",
     "X-Content-Type-Options": "nosniff",
   };
-  if (!user || !isPremium(user.role))
+  const { id } = await params;
+  // A post's audio follows the post's own access: Everyone posts are open to visitors too.
+  const post = id.startsWith("post-")
+    ? getStore().posts.find((p) => p.id === id.slice(5))
+    : undefined;
+  if (post) {
+    const readable =
+      user?.role === "admin" ||
+      (post.status === "published" && canView(post.access, user?.role));
+    if (!readable)
+      return new Response("Not available", { status: 403, headers });
+  } else if (!user || !isPremium(user.role))
     return new Response("Premium membership required", {
       status: 403,
       headers,
     });
-  const { id } = await params;
-  const episode = getStore().podcasts.find(
-    (p) => p.id === id && (p.status === "published" || user.role === "admin"),
-  );
-  const audio = episode && getDemoState().audio.get(id);
+  const episode = post
+    ? undefined
+    : getStore().podcasts.find(
+        (p) =>
+          p.id === id && (p.status === "published" || user?.role === "admin"),
+      );
+  const audio = (post || episode) && getDemoState().audio.get(id);
   if (!audio)
     return new Response("Audio not uploaded", { status: 404, headers });
   Object.assign(headers, {

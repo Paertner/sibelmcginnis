@@ -3,16 +3,19 @@ import { SiteText } from "@/components/site-copy";
 
 import { useState } from "react";
 import { ActionForm } from "./action-form";
-import { bookConsultation } from "@/lib/actions";
+import { bookCompany, bookConsultation } from "@/lib/actions";
 import { fmtDate } from "@/lib/dates";
 
 type AvailableDay = { date: string; label: string; times: string[] };
 export function BookingForm({
   days,
   minutes = 45,
+  company,
 }: {
   days: AvailableDay[];
   minutes?: number;
+  /** A company booking through its link: asks for company details instead of using a membership. */
+  company?: { token: string };
 }) {
   const [month, setMonth] = useState(days[0]?.date.slice(0, 7) ?? "");
   const [selection, setSelection] = useState({
@@ -51,7 +54,7 @@ export function BookingForm({
   );
   const monthIndex = months.indexOf(visibleMonth);
   return (
-    <div className="booking-widget">
+    <div className={`booking-widget ${company ? "is-company" : ""}`}>
       <aside className="booking-summary">
         <div className="coach-monogram" aria-hidden="true">
           <SiteText id="consultation-calendar.sm" />
@@ -76,7 +79,11 @@ export function BookingForm({
           <SiteText id="consultation-calendar.a-little-time-set-aside-for-your-questions-your-growth-and-your-n" />
         </p>
         <p className="booking-perk">
-          <SiteText id="consultation-calendar.included-with-your-premium-membership" />
+          {company ? (
+            <SiteText id="company.perk" />
+          ) : (
+            <SiteText id="consultation-calendar.included-with-your-premium-membership" />
+          )}
         </p>
         <p className="booking-schedule-note">
           <SiteText id="consultation-calendar.times-are-shown-as-scheduled-by-sibel-the-meeting-timezone-will-b" />
@@ -167,12 +174,15 @@ export function BookingForm({
         </p>
       </div>
       <ActionForm
-        action={bookConsultation}
-        className="booking-times"
-        submitLabel="Confirm booking"
+        action={company ? bookCompany : bookConsultation}
+        className={`booking-times ${company ? "company-times" : ""}`}
+        submitLabel={company ? "Confirm booking" : "Request consultation"}
         submitDisabled={!time}
       >
         <input name="date" type="hidden" value={activeDay.date} />
+        {company ? (
+          <input name="token" type="hidden" value={company.token} />
+        ) : null}
         <h3>
           {fmtDate(activeDay.date, {
             weekday: "long",
@@ -204,7 +214,74 @@ export function BookingForm({
             </label>
           ))}
         </fieldset>
-        {time ? (
+        {company ? (
+          <div className="booking-confirmation company-details">
+            <p>
+              {time ? (
+                <>
+                  <b>
+                    {fmtDate(activeDay.date, { month: "long", day: "numeric" })}{" "}
+                    <SiteText id="consultation-calendar.at" /> {time}
+                  </b>
+                  <br />
+                  <small>
+                    {minutes}{" "}
+                    <SiteText id="consultation-calendar.minutes-zoom" />
+                  </small>
+                </>
+              ) : (
+                <SiteText id="consultation-calendar.choose-a-time-to-continue" />
+              )}
+            </p>
+            <label className="field">
+              <SiteText id="company.company-name" />
+              <input
+                name="company"
+                maxLength={120}
+                autoComplete="organization"
+                required
+              />
+            </label>
+            <label className="field">
+              <SiteText id="company.contact-person" />
+              <input
+                name="contact"
+                maxLength={120}
+                autoComplete="name"
+                required
+              />
+            </label>
+            <label className="field">
+              <SiteText id="company.email" />
+              <input
+                name="email"
+                type="email"
+                maxLength={254}
+                autoComplete="email"
+                required
+              />
+            </label>
+            <label className="field">
+              <SiteText id="company.phone" />
+              <input
+                name="phone"
+                type="tel"
+                maxLength={40}
+                autoComplete="tel"
+                required
+              />
+            </label>
+            <label className="field">
+              <SiteText id="company.topic" />
+              <textarea
+                name="topic"
+                placeholder="A few words help Sibel prepare"
+                maxLength={1000}
+                required
+              />
+            </label>
+          </div>
+        ) : time ? (
           <div className="booking-confirmation">
             <p>
               <b>
