@@ -315,67 +315,63 @@ export default async function Page() {
         </div>
       </section>
 
-      <section className="block">
+      <section className="block" id="plans">
         <div className="wrap">
-          <div className="shead">
-            <div>
-              <span className="pill">{siteText("home.membership")}</span>
-            </div>
-            <h2>{siteText("home.choose-how-you-d-like-to-join")}</h2>
-            <p>
+          <div className="center" style={{ marginBottom: "40px" }}>
+            <p className="eyebrow">{siteText("morning-coffee.membership")}</p>
+            <h2>{siteText("morning-coffee.choose-how-you-d-like-to-join")}</h2>
+            <p className="muted">
               {siteText(
-                "home.flexible-membership-upgrade-pause-or-cancel-anytime",
+                "morning-coffee.flexible-membership-upgrade-pause-or-cancel-anytime",
               )}
             </p>
           </div>
-          <div className="plans">
-            <div className="plan">
-              <span className="name" style={{ alignSelf: "center" }}>
-                {siteText("home.free-member")}
+          <div className="plan-solo">
+            <div className="plan-solo-main">
+              <span className="name">
+                {siteText("morning-coffee.premium-member")}
               </span>
-              <p className="muted">
-                {siteText("home.get-a-taste-of-the-community")}
+              <p className="plan-solo-sub">
+                {siteText("morning-coffee.the-full-morning-coffee-experience")}
               </p>
-              <div className="pricebox">
-                <span className="price">
-                  {siteText("home.0")}
-                  <small> {siteText("home.month")}</small>
-                </span>
-              </div>
-              <h4>{siteText("home.what-s-included")}</h4>
-              <ul className="ticks">
-                <li>{siteText("home.public-blog-posts")}</li>
-                <li>{siteText("home.free-member-blog-posts")}</li>
-                <li>{siteText("home.community-newsletter")}</li>
-              </ul>
-              <Link className="btn" href="/morning-coffee#plans">
-                {siteText("home.join-for-free")}
-              </Link>
-            </div>
-            <div className="plan featured">
-              <span className="tag">{siteText("home.popular")}</span>
-              <span className="name">{siteText("home.premium-member")}</span>
-              <p className="muted">
-                {siteText("home.the-full-morning-coffee-experience")}
-              </p>
-              <div className="pricebox">
+              <div className="plan-solo-price">
                 <span className="price">
                   $<span>{settings.premiumPrice}</span>
-                  <small> {siteText("home.month")}</small>
                 </span>
+                <small>{siteText("morning-coffee.month")}</small>
               </div>
-              <h4>{siteText("home.what-s-included")}</h4>
+              <Link className="btn" href="/join?plan=premium">
+                {siteText("morning-coffee.join-premium")}
+              </Link>
+            </div>
+            <div className="plan-solo-list">
+              <h4>{siteText("morning-coffee.what-s-included")}</h4>
               <ul className="ticks">
                 <li>
-                  {siteText("home.protected-access-to-every-saturday-circle")}
+                  {siteText(
+                    "morning-coffee.protected-access-to-every-saturday-session",
+                  )}
                 </li>
-                <li>{siteText("home.one-on-one-consultation-each-month")}</li>
-                <li>{siteText("home.premium-posts-and-workbooks")}</li>
-                <li>{siteText("home.podcast-audio-and-session-notes")}</li>
+                <li>
+                  <span>{settings.consultsPerMonth}</span>{" "}
+                  {siteText(
+                    "morning-coffee.one-on-one-consultation-with-sibel-month",
+                  )}
+                </li>
+                <li>
+                  {siteText(
+                    "morning-coffee.premium-posts-quarterly-themes-workbooks",
+                  )}
+                </li>
+                <li>
+                  {siteText(
+                    "morning-coffee.full-access-to-the-morning-coffee-podcast-audio",
+                  )}
+                </li>
+                <li>
+                  {siteText("morning-coffee.session-notes-for-every-saturday")}
+                </li>
               </ul>
-              <Link className="btn" href="/morning-coffee#plans">
-                {siteText("home.join-premium")}
-              </Link>
             </div>
           </div>
         </div>
