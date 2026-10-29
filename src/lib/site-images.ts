@@ -98,6 +98,10 @@ export function postImageProps(post: Post) {
   );
 }
 
+/** Disk-backed files know their size without being read. */
+const imageSize = (file: { bytes: Uint8Array }) =>
+  (file as { size?: number }).size ?? file.bytes.length;
+
 export type MediaItem = {
   id: string;
   src: string;
@@ -126,7 +130,7 @@ export function mediaLibrary(): MediaItem[] {
         id: saved.imageId,
         fileName: saved.fileName || "Uploaded image",
         type: state.images.get(saved.imageId)!.type,
-        size: state.images.get(saved.imageId)!.bytes.length,
+        size: imageSize(state.images.get(saved.imageId)!),
         uploadedAt: "",
       });
   const slots = siteImageSlots().map((slot) => siteImage(slot.id));

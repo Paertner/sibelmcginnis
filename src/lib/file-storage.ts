@@ -1,17 +1,34 @@
 import "server-only";
-import { createReadStream } from "node:fs";
-import { mkdir, rm, stat, writeFile } from "node:fs/promises";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
 /**
  * Uploaded audio and images live on the hosting disk, in a folder that is NOT part of the
  * deployed app, so a new deploy never replaces them. Set UPLOADS_DIR to a folder outside the
- * app (for example /home/<user>/mcc-uploads). The database keeps only the name, size and path.
+ * app (for example /home/<user>/mcc-uploads).
+ *
+ * DiskMap has the same shape as the in-memory Map the demo uses (has / get / set / delete),
+ * so the rest of the app does not need to know where files are kept.
  */
-export type Bucket = "audio" | "images";
+export type Upload = { bytes: Uint8Array; type: string; name: string };
+type Entry = { file: string; type: string; name: string };
+/** What get() returns: bytes are read from disk only when they are used. */
+export type StoredUpload = {
+  type: string;
+  name: string;
+  size: number;
+  readonly bytes: Uint8Array;
+};
 
-function root() {
+export function uploadsRoot() {
   const app = process.cwd();
   const dir = path.resolve(
     process.env.UPLOADS_DIR || path.join(app, ".uploads"),
@@ -27,47 +44,75 @@ function root() {
   return dir;
 }
 
-/** Paths are stored relative to the bucket, like "3f2a....mp3". Never trust one from a request. */
-function resolve(bucket: Bucket, key: string) {
-  const base = path.join(root(), bucket);
-  const full = path.resolve(base, key);
-  if (!full.startsWith(base + path.sep)) throw new Error("Invalid file path.");
-  return full;
-}
-
 const extension = (name: string) => {
   const ext = path.extname(name).toLowerCase();
   return /^\.[a-z0-9]{1,8}$/.test(ext) ? ext : "";
 };
 
-/** Saves the bytes under a new random name and returns that name (the "key"). */
-export async function saveFile(
-  bucket: Bucket,
-  bytes: Uint8Array,
-  originalName: string,
-) {
-  const key = `${randomUUID()}${extension(originalName)}`;
-  const full = resolve(bucket, key);
-  await mkdir(path.dirname(full), { recursive: true });
-  await writeFile(full, bytes);
-  return key;
-}
-
-export async function deleteFile(bucket: Bucket, key: string) {
-  await rm(resolve(bucket, key), { force: true });
-}
-
-/** Size, plus a stream for the whole file or a byte range (for seeking in audio). */
-export async function openFile(
-  bucket: Bucket,
-  key: string,
-  range?: { start: number; end: number },
-) {
-  const full = resolve(bucket, key);
-  const info = await stat(full).catch(() => null);
-  if (!info?.isFile()) return null;
-  return {
-    size: info.size,
-    stream: createReadStream(full, range),
-  };
+export class DiskMap extends Map<string, Upload> {
+  private index: Record<string, Entry> | undefined;
+  constructor(private bucket: "audio" | "images") {
+    super();
+  }
+  private dir() {
+    return path.join(uploadsRoot(), this.bucket);
+  }
+  private indexFile() {
+    return path.join(this.dir(), "index.json");
+  }
+  private load() {
+    if (!this.index)
+      this.index = existsSync(this.indexFile())
+        ? JSON.parse(readFileSync(this.indexFile(), "utf8"))
+        : {};
+    return this.index!;
+  }
+  private save() {
+    mkdirSync(this.dir(), { recursive: true });
+    writeFileSync(this.indexFile(), JSON.stringify(this.index, null, 1));
+  }
+  /** A stored file's path; never trusts the name to stay inside the folder. */
+  private filePath(entry: Entry) {
+    const full = path.resolve(this.dir(), entry.file);
+    if (!full.startsWith(this.dir() + path.sep))
+      throw new Error("Invalid file path.");
+    return full;
+  }
+  override has(id: string) {
+    return !!this.load()[id];
+  }
+  override get(id: string): StoredUpload | undefined {
+    const entry = this.load()[id];
+    if (!entry) return undefined;
+    const full = this.filePath(entry);
+    if (!existsSync(full)) return undefined;
+    return {
+      type: entry.type,
+      name: entry.name,
+      size: statSync(full).size,
+      get bytes() {
+        return readFileSync(full);
+      },
+    };
+  }
+  override set(id: string, upload: Upload) {
+    const index = this.load();
+    const previous = index[id];
+    const file = `${randomUUID()}${extension(upload.name)}`;
+    mkdirSync(this.dir(), { recursive: true });
+    writeFileSync(path.join(this.dir(), file), upload.bytes);
+    index[id] = { file, type: upload.type, name: upload.name };
+    this.save();
+    if (previous) rmSync(this.filePath(previous), { force: true });
+    return this;
+  }
+  override delete(id: string) {
+    const index = this.load();
+    const entry = index[id];
+    if (!entry) return false;
+    rmSync(this.filePath(entry), { force: true });
+    delete index[id];
+    this.save();
+    return true;
+  }
 }

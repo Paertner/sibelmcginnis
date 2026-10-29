@@ -4,6 +4,7 @@ import type { EmailBlock, SavedEmailTemplate } from "./email-blocks";
 import { addDays, nextSaturday, today } from "./dates";
 import type { EmailPreferences } from "./email-preferences";
 import { emptyStore } from "./db";
+import { DiskMap } from "./file-storage";
 import { supabaseConfigured } from "./supabase";
 
 export type Member = (typeof seed)["members"][number] & {
@@ -261,8 +262,9 @@ function createState(): DemoState {
   if (usesDatabase())
     return {
       data: emptyStore(),
-      audio: new Map(),
-      images: new Map(),
+      // Files live on the hosting disk, outside the deployed app.
+      audio: new DiskMap("audio") as unknown as DemoState["audio"],
+      images: new DiskMap("images") as unknown as DemoState["images"],
       emailDrafts: [],
     };
   const data: Store = structuredClone(seed);
