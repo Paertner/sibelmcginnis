@@ -39,6 +39,8 @@ export type Integrations = {
     accountId?: string;
     connectedAt?: string;
     mode?: "test" | "live";
+    /** The webhook signing secret has been saved. */
+    webhookSaved?: boolean;
   };
   zoom?: {
     accountId?: string;
@@ -144,6 +146,8 @@ export type Store = Omit<
   media?: MediaFile[];
   siteSettings?: SiteSettings;
   integrations?: Integrations;
+  /** Encrypted keys typed into Settings. Never sent to the browser. */
+  secretsVault?: Record<string, string>;
   /** Emails sent on one UTC day, for the daily sending limit. */
   emailUsage?: { date: string; sent: number };
   emailTemplates?: SavedEmailTemplate[];

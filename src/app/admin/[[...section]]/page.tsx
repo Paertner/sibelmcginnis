@@ -22,11 +22,16 @@ import { CompanyLinks } from "@/components/company-links";
 import { bookingName } from "@/lib/company-links";
 import { memberRole } from "@/lib/membership";
 import { defaultEmailFooter } from "@/lib/email-templates";
-import { meetingUrl } from "@/lib/site-url";
+import { meetingUrl, siteOrigin } from "@/lib/site-url";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import { getStore, upcomingSessions, type Session } from "@/lib/store";
+import {
+  getStore,
+  upcomingSessions,
+  usesDatabase,
+  type Session,
+} from "@/lib/store";
 import { daysLeftLabel, fmtDate, today } from "@/lib/dates";
 import { fmtTime, isPast } from "@/lib/event-posts";
 import { adminMutation, cancelBooking, signOut } from "@/lib/actions";
@@ -843,6 +848,8 @@ export default async function Admin({
         ) : null}
         {section === "settings" ? (
           <AdminSettings
+            live={usesDatabase()}
+            webhookUrl={`${siteOrigin()}/api/stripe/webhook`}
             settings={data.siteSettings ?? {}}
             integrations={data.integrations ?? {}}
             quota={emailQuota()}

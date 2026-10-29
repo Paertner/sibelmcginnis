@@ -209,7 +209,15 @@ function General({
   );
 }
 
-function Payments({ stripe }: { stripe: Integrations["stripe"] }) {
+function Payments({
+  stripe,
+  live,
+  webhookUrl,
+}: {
+  stripe: Integrations["stripe"];
+  live: boolean;
+  webhookUrl: string;
+}) {
   return (
     <section className="panel settings-stripe">
       <div className="stripe-head">
@@ -246,7 +254,23 @@ function Payments({ stripe }: { stripe: Integrations["stripe"] }) {
               <dt>Connected</dt>
               <dd>{shortDate(stripe.connectedAt)}</dd>
             </div>
+            {live ? (
+              <div>
+                <dt>Webhook</dt>
+                <dd>
+                  {stripe.webhookSaved
+                    ? "Signing secret saved"
+                    : "Not set up yet"}
+                </dd>
+              </div>
+            ) : null}
           </dl>
+          {live ? (
+            <WebhookForm
+              webhookUrl={webhookUrl}
+              saved={!!stripe.webhookSaved}
+            />
+          ) : null}
           <div className="settings-actions">
             <a
               className="btn btn-ghost"
@@ -265,6 +289,30 @@ function Payments({ stripe }: { stripe: Integrations["stripe"] }) {
               <input type="hidden" name="op" value="stripe-disconnect" />
             </ActionForm>
           </div>
+        </>
+      ) : live ? (
+        <>
+          <ol className="stripe-steps">
+            <li>
+              In Stripe, open Developers → API keys and copy the{" "}
+              <b>Secret key</b>.
+            </li>
+            <li>Paste it below and press Connect. It is stored encrypted.</li>
+            <li>Then add the webhook (shown after connecting).</li>
+          </ol>
+          <ActionForm
+            action={adminMutation}
+            className="settings-form"
+            submitLabel="Connect to Stripe"
+          >
+            <input type="hidden" name="entity" value="integrations" />
+            <input type="hidden" name="op" value="stripe-connect" />
+            <Secret
+              name="secretKey"
+              label="Secret key"
+              placeholder="sk_live_… or sk_test_…"
+            />
+          </ActionForm>
         </>
       ) : (
         <>
@@ -288,6 +336,47 @@ function Payments({ stripe }: { stripe: Integrations["stripe"] }) {
         </>
       )}
     </section>
+  );
+}
+
+function WebhookForm({
+  webhookUrl,
+  saved,
+}: {
+  webhookUrl: string;
+  saved: boolean;
+}) {
+  return (
+    <div className="settings-webhook">
+      <h4>Webhook</h4>
+      <p className="muted">
+        Stripe tells the site when a payment succeeds or a subscription ends. In
+        Stripe go to Developers → Webhooks → Add endpoint, use this address and
+        select the events <code>customer.subscription.created</code>,{" "}
+        <code>customer.subscription.updated</code>,{" "}
+        <code>customer.subscription.deleted</code> and{" "}
+        <code>checkout.session.completed</code>:
+      </p>
+      <p>
+        <code>{webhookUrl}</code>
+      </p>
+      <ActionForm
+        action={adminMutation}
+        className="settings-form"
+        submitLabel="Save webhook secret"
+      >
+        <input type="hidden" name="entity" value="integrations" />
+        <input type="hidden" name="op" value="stripe-connect" />
+        <Text
+          name="webhookSecret"
+          label="Signing secret"
+          type="password"
+          placeholder={
+            saved ? "Saved. Paste a new one to replace it." : "whsec_…"
+          }
+        />
+      </ActionForm>
+    </div>
   );
 }
 
@@ -317,17 +406,20 @@ function Secret({
 function IntegrationsTab({
   integrations,
   quota,
+  live,
 }: {
   integrations: Integrations;
   quota: EmailQuota;
+  live: boolean;
 }) {
   const zoom = integrations.zoom,
     resend = integrations.resend;
   return (
     <>
       <p className="settings-warning">
-        This prototype keeps only the last four characters of any key you enter.
-        Add real keys only on the live site.
+        {live
+          ? "Keys you enter here are stored encrypted and checked before they are saved. Leave a key blank to keep the saved one."
+          : "This prototype keeps only the last four characters of any key you enter. Add real keys only on the live site."}
       </p>
       <ActionForm
         action={adminMutation}
@@ -436,7 +528,12 @@ export function AdminSettings({
   logo,
   media,
   quota,
+  live,
+  webhookUrl,
 }: {
+  /** Real keys are saved (encrypted) instead of only their last four characters. */
+  live: boolean;
+  webhookUrl: string;
   quota: EmailQuota;
   settings: SiteSettings;
   integrations: Integrations;
@@ -462,9 +559,17 @@ export function AdminSettings({
       {tab === "general" ? (
         <General settings={settings} logo={logo} media={media} />
       ) : tab === "payments" ? (
-        <Payments stripe={integrations.stripe} />
+        <Payments
+          stripe={integrations.stripe}
+          live={live}
+          webhookUrl={webhookUrl}
+        />
       ) : (
-        <IntegrationsTab integrations={integrations} quota={quota} />
+        <IntegrationsTab
+          integrations={integrations}
+          quota={quota}
+          live={live}
+        />
       )}
     </div>
   );

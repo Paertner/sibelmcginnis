@@ -1,4 +1,6 @@
 import "server-only";
+import { getSecret } from "./secrets";
+import { getStore } from "./store";
 
 /**
  * Zoom (Server-to-Server OAuth). Sessions and member consultations require registration:
@@ -6,24 +8,54 @@ import "server-only";
  * membership, and the link can be revoked when the membership ends.
  */
 const env = (k: string) => process.env[k] ?? "";
-export const zoomConfigured = () =>
-  !!env("ZOOM_ACCOUNT_ID") &&
-  !!env("ZOOM_CLIENT_ID") &&
-  !!env("ZOOM_CLIENT_SECRET");
+/** Saved in Settings (secret encrypted); the server environment is the fallback. */
+function credentials() {
+  const saved = getStore().integrations?.zoom;
+  return {
+    accountId: saved?.accountId || env("ZOOM_ACCOUNT_ID"),
+    clientId: saved?.clientId || env("ZOOM_CLIENT_ID"),
+    clientSecret: getSecret("zoomClientSecret"),
+  };
+}
+export const zoomConfigured = () => {
+  const c = credentials();
+  return !!c.accountId && !!c.clientId && !!c.clientSecret;
+};
 const timezone = () => env("ZOOM_TIMEZONE") || "America/New_York";
 
 const globals = globalThis as typeof globalThis & {
   mccZoomToken?: { value: string; expires: number };
 };
 
+/** Checks a set of credentials without saving them. */
+export async function testZoomCredentials(c: {
+  accountId: string;
+  clientId: string;
+  clientSecret: string;
+}) {
+  const basic = Buffer.from(`${c.clientId}:${c.clientSecret}`).toString(
+    "base64",
+  );
+  const response = await fetch(
+    `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${encodeURIComponent(c.accountId)}`,
+    { method: "POST", headers: { Authorization: `Basic ${basic}` } },
+  );
+  return response.ok;
+}
+/** Forget the cached sign-in, e.g. after the credentials were changed. */
+export function resetZoomToken() {
+  globals.mccZoomToken = undefined;
+}
+
 async function token() {
   const cached = globals.mccZoomToken;
   if (cached && cached.expires > Date.now() + 60_000) return cached.value;
-  const basic = Buffer.from(
-    `${env("ZOOM_CLIENT_ID")}:${env("ZOOM_CLIENT_SECRET")}`,
-  ).toString("base64");
+  const c = credentials();
+  const basic = Buffer.from(`${c.clientId}:${c.clientSecret}`).toString(
+    "base64",
+  );
   const response = await fetch(
-    `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${encodeURIComponent(env("ZOOM_ACCOUNT_ID"))}`,
+    `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${encodeURIComponent(c.accountId)}`,
     { method: "POST", headers: { Authorization: `Basic ${basic}` } },
   );
   const data = (await response.json()) as {

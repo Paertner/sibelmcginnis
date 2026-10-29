@@ -1,10 +1,11 @@
 import type Stripe from "stripe";
 import { applySubscription } from "@/lib/billing";
 import { stripe } from "@/lib/stripe";
+import { getSecret } from "@/lib/secrets";
 
 // Stripe calls this address when a subscription starts, renews, fails or ends.
 export async function POST(request: Request) {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = getSecret("stripeWebhookSecret");
   const signature = request.headers.get("stripe-signature");
   if (!secret || !signature)
     return new Response("Webhook is not set up", { status: 400 });

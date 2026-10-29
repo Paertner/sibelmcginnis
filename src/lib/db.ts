@@ -369,6 +369,7 @@ const settingKeys = [
   "siteImages",
   "siteSettings",
   "integrations",
+  "secretsVault",
   "emailUsage",
   "emailTemplates",
   "emailFooter",

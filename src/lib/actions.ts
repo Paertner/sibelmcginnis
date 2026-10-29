@@ -13,7 +13,9 @@ import {
 } from "./meetings";
 import { memberRole } from "./membership";
 import { checkoutUrl, portalUrl } from "./billing";
-import { stripeConfigured, stripeMode, stripe } from "./stripe";
+import { stripeConfigured, stripe, modeOf } from "./stripe";
+import { getSecret, saveSecret } from "./secrets";
+import { resetZoomToken, testZoomCredentials } from "./zoom";
 import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
 import { isPast } from "./event-posts";
@@ -1026,24 +1028,48 @@ export async function adminMutation(
         now = new Date().toISOString();
       let message = "Saved.";
       if (op === "stripe-connect" && usesDatabase()) {
-        // The real connection is the account's secret key in the server settings; check it works.
-        if (!stripeConfigured())
-          throw new Error(
-            "Add the Stripe secret key to the server settings first.",
-          );
-        const account = await stripe().accounts.retrieveCurrent();
-        integrations.stripe = {
-          connected: true,
-          accountName:
-            account.business_profile?.name ||
-            account.settings?.dashboard?.display_name ||
-            account.email ||
-            "Stripe account",
-          accountId: account.id,
-          connectedAt: now,
-          mode: stripeMode(),
-        };
-        message = `Stripe connected in ${stripeMode()} mode.`;
+        // The owner types the keys here; check the secret key works before keeping it.
+        const secretKey = text(form, "secretKey", 300);
+        const webhookSecret = text(form, "webhookSecret", 300);
+        if (webhookSecret && !webhookSecret.startsWith("whsec_"))
+          throw new Error("A webhook signing secret starts with whsec_.");
+        if (secretKey) {
+          if (!/^(sk|rk)_(test|live)_/.test(secretKey))
+            throw new Error(
+              "Paste the secret key (it starts with sk_test_ or sk_live_).",
+            );
+          let account;
+          try {
+            account = await stripe(secretKey).accounts.retrieveCurrent();
+          } catch {
+            throw new Error("Stripe did not accept that key. Please check it.");
+          }
+          saveSecret("stripeSecretKey", secretKey);
+          integrations.stripe = {
+            ...integrations.stripe,
+            connected: true,
+            accountName:
+              account.business_profile?.name ||
+              account.settings?.dashboard?.display_name ||
+              account.email ||
+              "Stripe account",
+            accountId: account.id,
+            connectedAt: now,
+            mode: modeOf(secretKey),
+          };
+        } else if (!getSecret("stripeSecretKey"))
+          throw new Error("Paste your Stripe secret key to connect.");
+        if (webhookSecret) {
+          saveSecret("stripeWebhookSecret", webhookSecret);
+          integrations.stripe = {
+            ...integrations.stripe,
+            connected: true,
+            webhookSaved: true,
+          };
+        }
+        message = secretKey
+          ? `Stripe connected in ${modeOf(secretKey)} mode.`
+          : "Webhook secret saved.";
       } else if (op === "stripe-connect") {
         // The live site sends the admin to Stripe to sign in (Stripe Connect); the prototype simulates the result.
         integrations.stripe = {
@@ -1054,13 +1080,32 @@ export async function adminMutation(
         };
         message = "Stripe connected in test mode.";
       } else if (op === "stripe-disconnect") {
+        saveSecret("stripeSecretKey", "");
+        saveSecret("stripeWebhookSecret", "");
         integrations.stripe = { connected: false };
         message = "Stripe disconnected.";
       } else if (op === "zoom") {
         const secret = text(form, "clientSecret", 200);
+        const accountId = text(form, "accountId", 100),
+          clientId = text(form, "clientId", 100);
+        if (usesDatabase()) {
+          const clientSecret = secret || getSecret("zoomClientSecret");
+          if (!accountId || !clientId || !clientSecret)
+            throw new Error(
+              "Enter the account ID, client ID and client secret.",
+            );
+          if (
+            !(await testZoomCredentials({ accountId, clientId, clientSecret }))
+          )
+            throw new Error(
+              "Zoom did not accept these details. Please check them.",
+            );
+          if (secret) saveSecret("zoomClientSecret", secret);
+          resetZoomToken();
+        }
         integrations.zoom = {
-          accountId: text(form, "accountId", 100),
-          clientId: text(form, "clientId", 100),
+          accountId,
+          clientId,
           secretTail: secret ? secret.slice(-4) : integrations.zoom?.secretTail,
           savedAt: now,
         };
@@ -1072,6 +1117,7 @@ export async function adminMutation(
         const fromEmail = text(form, "fromEmail", 254).toLowerCase();
         if (fromEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fromEmail))
           throw new Error("Enter a valid sender email.");
+        if (usesDatabase() && key) saveSecret("resendApiKey", key);
         integrations.resend = {
           fromName: text(form, "fromName", 80),
           fromEmail,
