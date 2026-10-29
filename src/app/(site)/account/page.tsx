@@ -16,10 +16,12 @@ import { announcementVisible } from "@/lib/announcements";
 import { meetingUrl } from "@/lib/site-url";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { BookingForm } from "@/components/consultation-calendar";
+import { PasswordFields } from "@/components/password-fields";
 import { ActionForm } from "@/components/action-form";
 import { EmailPreferencesForm } from "@/components/email-preferences-form";
 import {
   cancelBooking,
+  changePassword,
   changeTier,
   openBillingPortal,
   signOut,
@@ -36,6 +38,7 @@ const tabs: [string, string, IconName][] = [
   ["podcast", "Podcast", "headphones"],
   ["membership", "Membership", "star"],
   ["emails", "Email preferences", "mail"],
+  ["password", "Password", "lock"],
 ];
 const premiumTabs = ["sessions", "book", "podcast"];
 function PremiumGate({ title }: { title: string }) {
@@ -291,6 +294,32 @@ export default async function Account({
         </>
       );
     }
+    if (tab === "password")
+      return (
+        <>
+          <h1 className="area-title">Change password</h1>
+          <div className="card">
+            <ActionForm action={changePassword} submitLabel="Change password">
+              <div className="field">
+                <label htmlFor="currentPassword">Current password</label>
+                <input
+                  id="currentPassword"
+                  name="currentPassword"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  maxLength={128}
+                />
+              </div>
+              <PasswordFields
+                label="New password"
+                repeatLabel="Repeat new password"
+                hint="Use at least 8 characters."
+              />
+            </ActionForm>
+          </div>
+        </>
+      );
     if (tab === "emails")
       return (
         <>

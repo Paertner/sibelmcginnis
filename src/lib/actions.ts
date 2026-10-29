@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearSession, getUser, setDemoSession } from "./auth";
+import { createClient } from "@supabase/supabase-js";
 import { adminClient, sessionClient } from "./supabase";
 import { reloadMembers } from "./db";
 import {
@@ -149,8 +150,22 @@ export async function login(
       email: email(form),
       password: String(form.get("password") ?? ""),
     });
-    if (error || !data.user)
-      throw new Error("The email or password is not correct.");
+    if (error || !data.user) {
+      // The real reason goes to the server log only; the visitor sees a generic message.
+      console.error(
+        "[login] Supabase refused the sign-in:",
+        error?.status,
+        error?.code,
+        error?.message,
+      );
+      throw new Error(
+        error?.code === "email_not_confirmed"
+          ? "Please confirm your email address first."
+          : error?.code === "invalid_credentials"
+            ? "The email or password is not correct."
+            : "Sign-in is temporarily unavailable. Please try again later.",
+      );
+    }
     const { data: profile } = await adminClient()
       .from("profiles")
       .select("role,status")
@@ -166,6 +181,48 @@ export async function login(
     return errorResult(error);
   }
   redirect(destination);
+}
+/** Signed-in member or admin changes their own password; the current one is required. */
+export async function changePassword(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    const user = await getUser();
+    if (!user) throw new Error("Please sign in again.");
+    const current = String(form.get("currentPassword") ?? ""),
+      next = String(form.get("password") ?? "");
+    if (next.length < 8)
+      throw new Error("Use a password with at least 8 characters.");
+    if (next !== String(form.get("repeatPassword") ?? ""))
+      throw new Error("The two passwords don’t match.");
+    if (next === current)
+      throw new Error("Choose a password different from the current one.");
+    if (demoEnabled())
+      throw new Error("Passwords are managed by the real sign-in only.");
+    // Check the current password on a throwaway client so the session cookies stay untouched.
+    const check = await createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    ).auth.signInWithPassword({ email: user.email, password: current });
+    if (check.error?.code === "invalid_credentials")
+      throw new Error("The current password is not correct.");
+    if (check.error) {
+      console.error("[changePassword] check failed:", check.error.code);
+      throw new Error("Could not change the password. Please try again.");
+    }
+    const { error } = await (await sessionClient()).auth.updateUser({
+      password: next,
+    });
+    if (error) {
+      console.error("[changePassword] update failed:", error.code);
+      throw new Error("Could not change the password. Please try again.");
+    }
+    return { ok: true, message: "Your password has been changed." };
+  } catch (error) {
+    return errorResult(error);
+  }
 }
 export async function signOut() {
   await clearSession();
