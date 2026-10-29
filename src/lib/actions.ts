@@ -4,7 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearSession, getUser, setDemoSession } from "./auth";
 import { adminClient, sessionClient } from "./supabase";
-import { demoEnabled, demoMeeting, getDemoState, getStore } from "./store";
+import { reloadMembers } from "./db";
+import {
+  demoEnabled,
+  demoMeeting,
+  getDemoState,
+  getStore,
+  usesDatabase,
+} from "./store";
 import { addDays, nextSaturday, today } from "./dates";
 import { isPast } from "./event-posts";
 import { isPremium } from "./access";
@@ -99,14 +106,15 @@ const success = (message: string): ActionResult => {
   return { ok: true, message };
 };
 function checkDemo() {
-  if (!demoEnabled())
+  if (!demoEnabled() && !usesDatabase())
     throw new Error(
       "This service is not connected yet. Development review is available locally.",
     );
 }
 
 export async function demoLogin(form: FormData) {
-  checkDemo();
+  // Sample accounts exist only in local development, never with the real database.
+  if (!demoEnabled()) throw new Error("Development sign-in is disabled.");
   const id = choice(form, "account", ["m0", "m1", "admin"]);
   await setDemoSession(id);
   // Visitors sent here from an event come back to it.
@@ -186,6 +194,7 @@ export async function join(
             ? "An account with this email already exists. Please sign in."
             : "We could not create the account. Please try again.",
         );
+      await reloadMembers(getStore());
       const signedIn = await (
         await sessionClient()
       ).auth.signInWithPassword({ email: address, password });

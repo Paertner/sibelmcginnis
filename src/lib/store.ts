@@ -3,6 +3,8 @@ import seed from "./seed.json";
 import type { EmailBlock, SavedEmailTemplate } from "./email-blocks";
 import { addDays, nextSaturday, today } from "./dates";
 import type { EmailPreferences } from "./email-preferences";
+import { emptyStore } from "./db";
+import { supabaseConfigured } from "./supabase";
 
 export type Member = (typeof seed)["members"][number] & {
   premiumUntil?: string;
@@ -252,7 +254,17 @@ function sampleEvents(): EventItem[] {
     },
   ];
 }
+/** With Supabase connected and demo mode off, data lives in the database. */
+export const usesDatabase = () => !demoEnabled() && supabaseConfigured();
 function createState(): DemoState {
+  // The real data is loaded from the database when the server starts (instrumentation.ts).
+  if (usesDatabase())
+    return {
+      data: emptyStore(),
+      audio: new Map(),
+      images: new Map(),
+      emailDrafts: [],
+    };
   const data: Store = structuredClone(seed);
   // Posts have two access levels; earlier "free" posts are open to everyone.
   for (const post of data.posts)
