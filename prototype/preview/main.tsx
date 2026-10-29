@@ -19,6 +19,7 @@ import Login from "../source/app/(site)/login/page";
 import Join from "../source/app/(site)/join/page";
 import Account from "../source/app/(site)/account/page";
 import Admin from "../source/app/admin/[[...section]]/page";
+import CompanyBooking from "../source/app/(site)/company/[token]/page";
 import Meeting from "../source/app/(site)/meetings/[kind]/[id]/page";
 import {Header,Footer} from "../source/components/site-chrome";
 import {getUser,chooseRole} from "../source/lib/auth";
@@ -50,6 +51,7 @@ async function renderRoute(){
  else if(path==="/account")content=await Account(params);
  else if(path.startsWith("/session/"))content=await SessionNotes({params:Promise.resolve({id:decodeURIComponent(path.slice(9))})});
  else if(path.startsWith("/post/"))content=await Post({params:Promise.resolve({id:decodeURIComponent(path.slice(6))})});
+ else if(path.startsWith("/company/"))content=await CompanyBooking({params:Promise.resolve({token:decodeURIComponent(path.slice(9))}),searchParams});
  else if(path.startsWith("/meetings/")){const [, ,kind,id]=path.split("/");content=await Meeting({params:Promise.resolve({kind,id})});}
  else content=<div className="wrap empty-page"><h1>Page not found</h1><a href="#/">Back home</a></div>;
  return{node:<><a className="skip-link" href="#main-content">Skip to content</a>{await Header()}<main id="main-content">{content}</main><Footer/></>,role:(await getUser())?.role??"visitor"};
@@ -88,10 +90,13 @@ document.addEventListener("click",async event=>{
  const raw=anchor.getAttribute("href")||"",url=new URL(raw,window.location.href);
  if(url.origin!==window.location.origin)return;
  if(url.pathname.startsWith("/api/calendar/")){
-  event.preventDefault();const user=await getUser();if(!user||!isPremium(user.role)){window.dispatchEvent(new CustomEvent("preview-toast",{detail:"Choose an active Premium member to add this event."}));return;}
+  event.preventDefault();const user=await getUser();
   const [,, ,kind,id]=url.pathname.split("/"),data=getStore();
+  // A company's confirmation page is open to the visitor who just booked; its id is not guessable.
+  const companyBooking=kind==="booking"?data.bookings.find(b=>b.id===id&&b.status==="confirmed"&&b.source==="company"):undefined;
+  if(!companyBooking&&(!user||!isPremium(user.role))){window.dispatchEvent(new CustomEvent("preview-toast",{detail:"Choose an active Premium member to add this event."}));return;}
   const session=kind==="session"?data.sessions.find(s=>s.id===id):undefined;
-  const booking=kind==="booking"?data.bookings.find(b=>b.id===id&&b.status==="confirmed"&&(b.memberId===user.id||user.role==="admin")):undefined;
+  const booking=companyBooking??(kind==="booking"&&user?data.bookings.find(b=>b.id===id&&b.status==="confirmed"&&(b.memberId===user.id||user.role==="admin")):undefined);
   if(session||booking)download(createIcs(session?sessionEvent(session):bookingEvent(booking!)),"text/calendar;charset=utf-8","morning-coffee.ics");
   return;
  }

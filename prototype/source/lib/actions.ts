@@ -12,6 +12,13 @@ import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
 import { parseBlocks } from "./email-blocks";
 import { emailCategories, type EmailPreferences } from "./email-preferences";
+import {
+  LINK_DAYS,
+  findLink,
+  linkStatus,
+  slotOffered,
+  slotTaken,
+} from "./company-links";
 
 const text = (f: FormData, key: string, max = 20000) =>
   String(f.get(key) ?? "")
@@ -331,6 +338,77 @@ export async function bookConsultation(
         ? "Consultation confirmed for review. The meeting link is a placeholder."
         : "Request saved, awaiting admin confirmation.",
     );
+  } catch (error) {
+    return errorResult(error);
+  }
+}
+/**
+ * A company books through its link. Nobody is signed in, so everything is
+ * checked again here: the link, the time and every field. Checking and saving
+ * happen in one step, so a link can only ever make one booking.
+ */
+export async function bookCompany(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    checkDemo();
+    const data = getStore(),
+      token = text(form, "token", 100),
+      link = findLink(token);
+    if (!link) throw new Error("This booking link is not valid.");
+    const status = linkStatus(link);
+    if (status === "used")
+      throw new Error("This link has already been used for a booking.");
+    if (status === "expired") throw new Error("This link has expired.");
+    if (status === "revoked") throw new Error("This link is no longer active.");
+    const date = text(form, "date", 10),
+      time = text(form, "time", 5);
+    if (!slotOffered(date, time))
+      throw new Error("Choose one of the available times.");
+    const company = text(form, "company", 120),
+      contact = text(form, "contact", 120),
+      address = text(form, "email", 254).toLowerCase(),
+      phone = text(form, "phone", 40),
+      topic = text(form, "topic", 1000);
+    if (company.length < 2) throw new Error("Enter your company name.");
+    if (contact.length < 2) throw new Error("Enter the name of the contact person.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address))
+      throw new Error("Enter a valid email address.");
+    if (!/^\+?[\d\s().-]{7,25}$/.test(phone) || phone.replace(/\D/g, "").length < 7)
+      throw new Error("Enter a valid phone number, for example +1 512 555 0148.");
+    if (topic.length < 5)
+      throw new Error("Tell us briefly what you would like to discuss.");
+    if (slotTaken(date, time))
+      throw new Error("That time has just been booked. Please choose another.");
+    const id = uid();
+    data.bookings.push({
+      id,
+      memberId: "",
+      date,
+      time,
+      topic,
+      status: "confirmed",
+      zoom: demoMeeting(id),
+      source: "company",
+      company,
+      contact,
+      email: address,
+      phone,
+      linkId: link.id,
+      createdAt: new Date().toISOString(),
+    });
+    link.bookingId = id;
+    (data.notices ??= []).push({
+      id: uid(),
+      kind: "company-booking",
+      bookingId: id,
+      createdAt: new Date().toISOString(),
+      seen: false,
+    });
+    const done = success("Your consultation is booked.");
+    navigate(`/company/${token}?booked=${id}`);
+    return { ...done, id };
   } catch (error) {
     return errorResult(error);
   }
@@ -657,6 +735,48 @@ export async function adminMutation(
       data.settings.consultsPerMonth = count;
       data.settings.consultMinutes = duration;
       data.settings.autoConfirm = form.has("autoConfirm");
+    } else if (entity === "companyLinks") {
+      const links = (data.companyLinks ??= []);
+      if (op === "create") {
+        const label = text(form, "label", 80);
+        const bytes = crypto.getRandomValues(new Uint8Array(24));
+        const token = Array.from(bytes, (b) =>
+          "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 56],
+        ).join("");
+        links.push({
+          id: uid(),
+          token,
+          label,
+          createdAt: today(),
+          expiresAt: addDays(today(), LINK_DAYS),
+        });
+        return success(
+          `Link created. It works for ${LINK_DAYS} days. Copy it from the list.`,
+        );
+      }
+      const link = links.find((l) => l.id === id);
+      if (!link) throw new Error("Link not found.");
+      const status = linkStatus(link);
+      if (op === "extend") {
+        if (status === "used")
+          throw new Error("This link has already been used.");
+        if (status === "revoked")
+          throw new Error("A revoked link cannot be extended. Create a new one.");
+        const from = link.expiresAt > today() ? link.expiresAt : today();
+        link.expiresAt = addDays(from, LINK_DAYS);
+        return success(`Link extended by ${LINK_DAYS} days.`);
+      }
+      if (op === "revoke") {
+        if (status === "used")
+          throw new Error("This link has already been used.");
+        link.revoked = true;
+        return success("Link revoked. It no longer opens the calendar.");
+      }
+      throw new Error("Unknown action.");
+    } else if (entity === "notices") {
+      for (const notice of data.notices ?? [])
+        if (op === "dismissAll" || notice.id === id) notice.seen = true;
+      return success("Notice dismissed.");
     } else if (entity === "bookings") {
       const booking = data.bookings.find((b) => b.id === id);
       if (!booking || booking.status !== "pending")

@@ -19,6 +19,8 @@ import { AdminTable, AdminRow } from "@/components/admin-table";
 import { AnnouncementComposer } from "@/components/announcement-composer";
 import { AnnouncementHistory } from "@/components/announcement-history";
 import { CopyLink } from "@/components/copy-link";
+import { CompanyLinks } from "@/components/company-links";
+import { bookingName } from "@/lib/company-links";
 import { memberRole } from "@/lib/membership";
 import { defaultEmailFooter } from "@/lib/email-templates";
 import { meetingUrl } from "@/lib/site-url";
@@ -143,6 +145,7 @@ export default async function Admin({
   const next = upcomingSessions()[0];
   const name = (id: string) =>
     data.members.find((m) => m.id === id)?.name ?? "Removed member";
+  const unseen =(data.notices ?? []).filter((n) => !n.seen).length;
   return (
     <div className="ad">
       <aside className="ad-side">
@@ -165,6 +168,14 @@ export default async function Admin({
             >
               <Icon name={icon} />
               {label}
+              {key === "consults" && unseen ? (
+                <span
+                  className="nav-badge"
+                  aria-label={`${unseen} new company booking${unseen === 1 ? "" : "s"}`}
+                >
+                  {unseen}
+                </span>
+              ) : null}
             </Link>
           ))}
         </nav>
@@ -580,6 +591,27 @@ export default async function Admin({
         ) : null}
         {section === "consults" ? (
           <>
+            {unseen ? (
+              <div className="dash-notice" role="status">
+                <span className="dash-notice-icon" aria-hidden="true">
+                  <Icon name="calendar" size={18} />
+                </span>
+                <div>
+                  <b>
+                    {unseen} new company booking{unseen === 1 ? "" : "s"}
+                  </b>
+                  <span>See them marked “Company” in the table below.</span>
+                </div>
+                <ActionForm action={adminMutation} submitLabel="Mark as seen">
+                  <EntityFields entity="notices" />
+                  <input type="hidden" name="op" value="dismissAll" />
+                </ActionForm>
+              </div>
+            ) : null}
+            <CompanyLinks
+              links={data.companyLinks ?? []}
+              bookings={data.bookings}
+            />
             <section className="panel" aria-labelledby="bookings-title">
               <header className="card-head">
                 <div>
@@ -639,7 +671,20 @@ export default async function Admin({
                           · {b.time}
                         </td>
                         <td>
-                          <MemberLink id={b.memberId} name={name(b.memberId)} />
+                          {b.source === "company" ? (
+                            <div className="company-cell">
+                              <b>{b.company}</b>{" "}
+                              <span className="badge b-grey">Company</span>
+                              <small>
+                                {b.contact} · {b.email} · {b.phone}
+                              </small>
+                            </div>
+                          ) : (
+                            <MemberLink
+                              id={b.memberId}
+                              name={bookingName(b)}
+                            />
+                          )}
                         </td>
                         <td>{b.topic}</td>
                         <td>
@@ -657,14 +702,14 @@ export default async function Admin({
                               <ActionForm
                                 action={adminMutation}
                                 submitLabel="Approve"
-                                confirmMessage={`Approve ${name(b.memberId)}’s consultation on ${fmtDate(b.date, { month: "short", day: "numeric" })} at ${b.time}?`}
+                                confirmMessage={`Approve ${bookingName(b)}’s consultation on ${fmtDate(b.date, { month: "short", day: "numeric" })} at ${b.time}?`}
                               >
                                 <EntityFields entity="bookings" id={b.id} />
                               </ActionForm>
                               <ActionForm
                                 action={adminMutation}
                                 submitLabel="Reject"
-                                confirmMessage={`Reject ${name(b.memberId)}’s request? The time becomes available again.`}
+                                confirmMessage={`Reject ${bookingName(b)}’s request? The time becomes available again.`}
                               >
                                 <EntityFields entity="bookings" id={b.id} />
                                 <input type="hidden" name="op" value="reject" />
@@ -674,7 +719,7 @@ export default async function Admin({
                             <ActionForm
                               action={cancelBooking}
                               submitLabel="Cancel"
-                              confirmMessage={`Cancel ${name(b.memberId)}’s consultation? The time becomes available again.`}
+                              confirmMessage={`Cancel ${bookingName(b)}’s consultation? The time becomes available again.`}
                             >
                               <input name="id" type="hidden" value={b.id} />
                             </ActionForm>

@@ -7398,3 +7398,179 @@ ul.ticks li::before {
   display: block;
   margin: -6px 0 14px;
 }
+
+/* Company booking links */
+.ad .ad-side nav a .nav-badge {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: #c0392b;
+  color: #fff;
+  font: 600 0.72rem/22px var(--font-inter);
+  text-align: center;
+}
+.dash-notices {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.dash-notice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #fff4e5;
+  border: 1px solid #f0c98f;
+  border-radius: 16px;
+}
+.dash-notice > div {
+  flex: 1;
+  min-width: 0;
+}
+.dash-notice b {
+  display: block;
+  color: var(--ad-ink);
+}
+.dash-notice span:not(.dash-notice-icon) {
+  color: var(--ad-muted);
+  font-size: 0.85rem;
+}
+.dash-notice-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ad-accent);
+  color: #fff;
+}
+.dash-notice form {
+  margin: 0;
+}
+.company-cell small,
+.block-small {
+  display: block;
+  color: var(--ad-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.company-url {
+  display: block;
+  max-width: 280px;
+  margin-bottom: 4px;
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+  color: var(--ad-muted);
+}
+.company-links td {
+  vertical-align: top;
+}
+.company-links .admin-row-actions form {
+  display: block;
+  margin: 0 0 6px;
+}
+@media (max-width: 640px) {
+  .dash-notice {
+    flex-wrap: wrap;
+  }
+}
+
+/* Public company booking page */
+.company-notice {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px;
+  text-align: center;
+}
+.company-notice h2 {
+  margin-top: 0;
+}
+.company-notice .btn {
+  margin-top: 8px;
+}
+.company-confirmed {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px;
+}
+.company-confirmed dl {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 14px 18px;
+  margin: 0 0 22px;
+}
+.company-confirmed dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.company-confirmed dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.booking-widget.is-company {
+  grid-template-columns: minmax(170px, 0.8fr) minmax(250px, 1.2fr);
+}
+.booking-widget.is-company > .company-times {
+  grid-column: 1 / -1;
+  border-left: 0;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: minmax(200px, 0.8fr) minmax(260px, 1.2fr);
+  gap: 0 32px;
+  align-items: start;
+}
+.company-times > h3,
+.company-times > p.muted,
+.company-times > .time-options {
+  grid-column: 1;
+}
+.company-times > .company-details {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  display: grid;
+  gap: 12px;
+}
+.company-details .field input,
+.company-details .field textarea {
+  width: 100%;
+  margin-top: 6px;
+}
+.company-details label {
+  font-size: 0.82rem;
+}
+.company-details input {
+  font-size: 0.85rem;
+  padding: 10px;
+}
+.company-times > .btn,
+.company-times > .form-feedback {
+  grid-column: 1 / -1;
+}
+@media (max-width: 760px) {
+  .booking-widget.is-company {
+    grid-template-columns: 1fr;
+  }
+  .booking-widget.is-company > .company-times {
+    display: block;
+  }
+  .company-times > .company-details {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .company-confirmed dl {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .company-confirmed dd {
+    margin-bottom: 10px;
+  }
+}
+.ad-main > .dash-notice {
+  margin-bottom: 20px;
+}

@@ -76,10 +76,44 @@ export type EventItem = {
   blocks: EmailBlock[];
   attendees: string[];
 };
+/** A consultation. Company bookings have no member: they carry the company's details instead. */
+export type Booking = (typeof seed)["bookings"][number] & {
+  source?: "company";
+  company?: string;
+  contact?: string;
+  email?: string;
+  phone?: string;
+  linkId?: string;
+  createdAt?: string;
+};
+/** A one-booking link the admin sends to a company. The link is the only credential. */
+export type CompanyLink = {
+  id: string;
+  /** Random, unguessable text used in the address: /company/<token> */
+  token: string;
+  label: string;
+  createdAt: string;
+  /** YYYY-MM-DD, the last day the link works */
+  expiresAt: string;
+  revoked?: boolean;
+  /** Set when the company has booked; the link cannot be used again. */
+  bookingId?: string;
+};
+/** Something the admin should see until it is dismissed. */
+export type AdminNotice = {
+  id: string;
+  kind: "company-booking";
+  bookingId: string;
+  createdAt: string;
+  seen: boolean;
+};
 export type Store = Omit<
   typeof seed,
-  "members" | "announcements" | "posts" | "sessions"
+  "members" | "announcements" | "posts" | "sessions" | "bookings"
 > & {
+  bookings: Booking[];
+  companyLinks?: CompanyLink[];
+  notices?: AdminNotice[];
   posts: ((typeof seed)["posts"][number] & {
     blocks?: EmailBlock[];
     audioName?: string;
@@ -102,7 +136,6 @@ export type Store = Omit<
 };
 export type Post = Store["posts"][number];
 export type Session = Store["sessions"][number];
-export type Booking = Store["bookings"][number];
 export type Episode = Store["podcasts"][number];
 type DemoState = {
   data: Store;
@@ -254,8 +287,86 @@ export function getDemoState() {
   }
   return state;
 }
+const clockMinutes = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+/** Three sample links: one waiting, one already used, one expired. */
+function sampleCompany(data: Store) {
+  let date = "",
+    time = "";
+  for (let i = 3; i <= 21 && !date; i++) {
+    const day = addDays(today(), i);
+    const free = (
+      (data.availability as Record<string, string[]>)[
+        new Date(day + "T12:00:00Z").getUTCDay()
+      ] ?? []
+    ).find(
+      (t) =>
+        !data.bookings.some(
+          (b) =>
+            b.status !== "cancelled" &&
+            b.date === day &&
+            Math.abs(clockMinutes(b.time) - clockMinutes(t)) <
+              data.settings.consultMinutes,
+        ),
+    );
+    if (free) [date, time] = [day, free];
+  }
+  if (date)
+    data.bookings.push({
+      id: "company-booking-1",
+      memberId: "",
+      date,
+      time,
+      topic: "Leadership coaching for our new team leads",
+      status: "confirmed",
+      zoom: demoMeeting("company-booking-1"),
+      source: "company",
+      company: "Northwind Studio",
+      contact: "Dana Ortiz",
+      email: "dana@northwind.example",
+      phone: "+1 512 555 0148",
+      linkId: "company-link-2",
+      createdAt: new Date().toISOString(),
+    });
+  data.companyLinks = [
+    {
+      id: "company-link-1",
+      token: "wc7Kp2mQx9Rt4Ln8Vb3Zd6HsYa",
+      label: "Willow & Co",
+      createdAt: addDays(today(), -2),
+      expiresAt: addDays(today(), 5),
+    },
+    {
+      id: "company-link-2",
+      token: "us9Xb3Td6Hs2Mn7Qw4Zk8Lp5Rc",
+      label: "Northwind Studio",
+      createdAt: addDays(today(), -3),
+      expiresAt: addDays(today(), 4),
+      bookingId: date ? "company-booking-1" : undefined,
+    },
+    {
+      id: "company-link-3",
+      token: "ex4Mn8Qw2Zt7Kp5Lb9Rd3HsVc",
+      label: "Harbor Bakery",
+      createdAt: addDays(today(), -12),
+      expiresAt: addDays(today(), -5),
+    },
+  ];
+  data.notices = date
+    ? [
+        {
+          id: "notice-1",
+          kind: "company-booking",
+          bookingId: "company-booking-1",
+          createdAt: new Date().toISOString(),
+          seen: false,
+        },
+      ]
+    : [];
+}
 // Posts have two access levels now; older "free" posts are open to everyone.
 function normalize(state: DemoState) {
+  // Browsers that saved their sample data before company links existed get the samples.
+  if (!state.data.companyLinks) sampleCompany(state.data);
   // Browsers that saved their sample data before Events existed get the sample events.
   if (!state.data.events) state.data.events = sampleEvents();
   for (const post of state.data.posts)

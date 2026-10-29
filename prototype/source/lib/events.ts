@@ -20,7 +20,10 @@ export function bookingEvent(b: Booking): CalendarEvent {
     date: b.date,
     time: b.time,
     minutes: getStore().settings.consultMinutes,
-    url: meetingUrl("booking", b.id),
-    details: `Open your protected consultation page when it is time to join. Active Premium membership is checked at entry.\nTopic: ${b.topic}`,
+    url: b.source === "company" ? b.zoom : meetingUrl("booking", b.id),
+    details:
+      b.source === "company"
+        ? `Consultation for ${b.company}. Join with the meeting link.\nTopic: ${b.topic}`
+        : `Open your protected consultation page when it is time to join. Active Premium membership is checked at entry.\nTopic: ${b.topic}`,
   };
 }

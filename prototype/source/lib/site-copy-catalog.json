@@ -2158,5 +2158,115 @@
     "id": "events.browse",
     "group": "Events",
     "text": "Browse events"
+  },
+  {
+    "id": "company.eyebrow",
+    "group": "Company booking",
+    "text": "Company consultation"
+  },
+  {
+    "id": "company.title",
+    "group": "Company booking",
+    "text": "Book your consultation with Sibel"
+  },
+  {
+    "id": "company.intro",
+    "group": "Company booking",
+    "text": "This private link is for one booking. Choose a time that suits you and tell us a little about your company."
+  },
+  {
+    "id": "company.perk",
+    "group": "Company booking",
+    "text": "Booked through your private company link."
+  },
+  {
+    "id": "company.company-name",
+    "group": "Company booking",
+    "text": "Company name"
+  },
+  {
+    "id": "company.contact-person",
+    "group": "Company booking",
+    "text": "Contact person"
+  },
+  {
+    "id": "company.email",
+    "group": "Company booking",
+    "text": "Email"
+  },
+  {
+    "id": "company.phone",
+    "group": "Company booking",
+    "text": "Phone"
+  },
+  {
+    "id": "company.topic",
+    "group": "Company booking",
+    "text": "What would you like to discuss?"
+  },
+  {
+    "id": "company.used-title",
+    "group": "Company booking",
+    "text": "This link has already been used"
+  },
+  {
+    "id": "company.used-text",
+    "group": "Company booking",
+    "text": "A consultation was already booked with this link. Each link works for one booking only. Please contact Sibel if you need another."
+  },
+  {
+    "id": "company.expired-title",
+    "group": "Company booking",
+    "text": "This link has expired"
+  },
+  {
+    "id": "company.expired-text",
+    "group": "Company booking",
+    "text": "Company links work for one week. Please contact Sibel and ask for a new link."
+  },
+  {
+    "id": "company.revoked-title",
+    "group": "Company booking",
+    "text": "This link is no longer active"
+  },
+  {
+    "id": "company.revoked-text",
+    "group": "Company booking",
+    "text": "This link was withdrawn. Please contact Sibel if you think this is a mistake."
+  },
+  {
+    "id": "company.unknown-title",
+    "group": "Company booking",
+    "text": "We could not find this link"
+  },
+  {
+    "id": "company.unknown-text",
+    "group": "Company booking",
+    "text": "Check that you copied the whole address from your message, or contact Sibel for a new link."
+  },
+  {
+    "id": "company.confirmed-title",
+    "group": "Company booking",
+    "text": "Your consultation is booked"
+  },
+  {
+    "id": "company.confirmed-text",
+    "group": "Company booking",
+    "text": "Thank you. Your time is confirmed and no further approval is needed. Keep this page for your details."
+  },
+  {
+    "id": "company.meeting-link",
+    "group": "Company booking",
+    "text": "Meeting link"
+  },
+  {
+    "id": "company.meeting-note",
+    "group": "Company booking",
+    "text": "This is a placeholder link in the review version."
+  },
+  {
+    "id": "company.contact-us",
+    "group": "Company booking",
+    "text": "Contact Sibel"
   }
 ]
