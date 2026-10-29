@@ -5,6 +5,7 @@ import { requireMember } from "@/lib/auth";
 import { isPremium } from "@/lib/access";
 import { getDemoState, getStore } from "@/lib/store";
 import { fmtDate, today } from "@/lib/dates";
+import { bySlug } from "@/lib/slug";
 import { BlockContent, textToBlocks } from "@/components/block-content";
 
 export const metadata = { title: "Session notes" };
@@ -17,7 +18,9 @@ export default async function SessionNotes({
   const { id } = await params;
   const user = await requireMember(),
     data = getStore();
-  const session = data.sessions.find((s) => s.id === id && s.date < today());
+  const session = data.sessions.find(
+    (s) => s === bySlug(data.sessions, id) && s.date < today(),
+  );
   if (!session) notFound();
   const premium = isPremium(user.role);
   const episode = data.podcasts.find(

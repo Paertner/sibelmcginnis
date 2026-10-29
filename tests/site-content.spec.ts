@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import seed from "../src/lib/seed.json";
 
 test("site dropdowns support keyboard selection and stay inside edit dialogs", async ({
   page,
@@ -98,4 +99,26 @@ test("admin can edit static page and shared navigation text, then restore defaul
   await expect(
     page.getByRole("heading", { name: "What to Expect", exact: true }),
   ).toBeVisible();
+});
+
+test("admin can change a post's web address and the old link still works", async ({
+  page,
+}) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Sibel/ }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  await page.goto("/admin/posts");
+  const post = seed.posts.find(
+    (post) => post.status === "published" && post.access === "public",
+  )!;
+  const slug = `my-new-address-${Date.now()}`;
+  await page.getByRole("button", { name: `Edit: ${post.title}` }).click();
+  const editor = page.getByRole("dialog", { name: `Edit: ${post.title}` });
+  await editor.getByLabel("Web address: /post/…").fill(slug);
+  await editor.getByRole("button", { name: "Save changes" }).click();
+  await expect(editor).not.toBeVisible();
+  expect((await page.request.get(`/post/${slug}`)).status()).toBe(200);
+  expect((await page.request.get(`/post/${post.id}`)).status()).toBe(200);
+  await page.goto("/blog");
+  await expect(page.locator(`a[href="/post/${slug}"]`).first()).toBeVisible();
 });

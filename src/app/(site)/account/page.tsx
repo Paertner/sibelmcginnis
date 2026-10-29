@@ -1,4 +1,5 @@
 import { siteText } from "@/lib/site-copy";
+import { slugOf } from "@/lib/slug";
 import { PodcastLibrary } from "@/components/podcast-library";
 import Link from "next/link";
 import { requireMember } from "@/lib/auth";
@@ -137,7 +138,7 @@ export default async function Account({
                   .toSorted((a, b) => b.date.localeCompare(a.date))
                   .map((s) => (
                     <li key={s.id}>
-                      <Link className="session-card" href={`/session/${s.id}`}>
+                      <Link className="session-card" href={`/session/${slugOf(s)}`}>
                         <span className="date-chip" aria-hidden="true">
                           <b>{fmtDate(s.date, { day: "numeric" })}</b>
                           {fmtDate(s.date, { month: "short" })}
@@ -674,7 +675,7 @@ export default async function Account({
                 .slice(0, 3)
                 .map((p) => (
                   <li key={p.id}>
-                    <Link className="latest-item" href={`/post/${p.id}`}>
+                    <Link className="latest-item" href={`/post/${slugOf(p)}`}>
                       <span className="latest-thumb">
                         <Image
                           {...postImageProps(p)}

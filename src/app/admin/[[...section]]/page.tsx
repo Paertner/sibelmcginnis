@@ -4,6 +4,7 @@ import { Icon, type IconName } from "@/components/admin-icons";
 import { MediaLibrary } from "@/components/media-library";
 import { AdminSettings } from "@/components/admin-settings";
 import { emailQuota } from "@/lib/email-quota";
+import { slugOf } from "@/lib/slug";
 import { optedOut } from "@/lib/email-preferences";
 import { notificationDraft } from "@/lib/notification-drafts";
 import { SiteContentEditor } from "@/components/site-content-editor";
@@ -365,7 +366,7 @@ export default async function Admin({
                         />{" "}
                         <Link
                           className="btn btn-sm btn-ghost"
-                          href={`/post/${p.id}`}
+                          href={`/post/${slugOf(p)}`}
                         >
                           View
                         </Link>

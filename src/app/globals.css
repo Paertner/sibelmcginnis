@@ -2812,6 +2812,15 @@ button {
 }
 .admin-head-actions form {
   display: inline;
+  position: relative;
+}
+.admin-head-actions form > .form-feedback {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin: 6px 0 0;
+  width: max-content;
+  max-width: 260px;
 }
 .admin-head-actions > form > .btn,
 .admin-row-actions > form > .btn {
@@ -4097,6 +4106,15 @@ ul.ticks li::before {
 }
 .next-circle-actions > form {
   margin: 0;
+  position: relative;
+}
+.next-circle-actions > form > .form-feedback {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin: 6px 0 0;
+  width: max-content;
+  max-width: 260px;
 }
 .ad .next-circle-actions > .btn-ghost {
   background: rgba(255, 255, 255, 0.1);
@@ -4121,7 +4139,7 @@ ul.ticks li::before {
   color: #fff;
 }
 .next-circle-note {
-  margin-top: 16px !important;
+  margin-top: 40px !important;
   font-size: 0.8rem;
   color: #cdb5a6;
   max-width: 560px;

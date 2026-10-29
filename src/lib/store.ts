@@ -126,10 +126,12 @@ export type Store = Omit<
   posts: ((typeof seed)["posts"][number] & {
     blocks?: EmailBlock[];
     audioName?: string;
+    slug?: string;
   })[];
   sessions: ((typeof seed)["sessions"][number] & {
     zoomId?: string;
     blocks?: EmailBlock[];
+    slug?: string;
   })[];
   events?: EventItem[];
   siteCopy?: Record<string, string>;

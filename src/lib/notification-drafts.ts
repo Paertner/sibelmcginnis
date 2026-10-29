@@ -2,6 +2,7 @@ import { getStore } from "./store";
 import { mediaLibrary, siteImage } from "./site-images";
 import type { EmailBlock } from "./email-blocks";
 import { fmtDate } from "./dates";
+import { slugOf } from "./slug";
 import { isPaid, seatsLeft, timeRange } from "./event-posts";
 
 const escapeText = (text: string) =>
@@ -61,7 +62,7 @@ export function notificationDraft(about?: string):
           id: "cta",
           type: "button",
           label: "Read the post",
-          href: `/post/${post.id}`,
+          href: `/post/${slugOf(post)}`,
         },
         signOff,
       ] as EmailBlock[],

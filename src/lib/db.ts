@@ -103,6 +103,7 @@ const tables: Table[] = [
         body: p.body ?? "",
         blocks: p.blocks ?? [],
         audio_name: nullIfEmpty(p.audioName),
+        slug: nullIfEmpty(p.slug),
       })),
     apply: (s, rows) => {
       s.posts = rows.map((r) => ({
@@ -117,6 +118,7 @@ const tables: Table[] = [
         body: str(r.body),
         blocks: (r.blocks ?? []) as never,
         audioName: r.audio_name ? str(r.audio_name) : undefined,
+        slug: r.slug ? str(r.slug) : undefined,
       })) as never;
     },
   },
@@ -134,6 +136,7 @@ const tables: Table[] = [
         zoom_meeting_id: nullIfEmpty(x.zoomId),
         zoom_url: nullIfEmpty(x.zoom),
         zoom_pass: nullIfEmpty(x.pass),
+        slug: nullIfEmpty(x.slug),
         podcast_id: s.podcasts.some((p) => p.id === x.podcast)
           ? x.podcast
           : null,
@@ -149,6 +152,7 @@ const tables: Table[] = [
         zoom: str(r.zoom_url),
         pass: str(r.zoom_pass),
         ...(r.zoom_meeting_id ? { zoomId: str(r.zoom_meeting_id) } : {}),
+        ...(r.slug ? { slug: str(r.slug) } : {}),
         podcast: str(r.podcast_id),
       })) as never;
     },

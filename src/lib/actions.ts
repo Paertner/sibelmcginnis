@@ -21,6 +21,7 @@ import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
 import { isPast } from "./event-posts";
 import { isPremium } from "./access";
+import { slugify } from "./slug";
 import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
 import { parseBlocks } from "./email-blocks";
@@ -43,6 +44,31 @@ const required = (f: FormData, key: string, max = 20000) => {
   const v = text(f, key, max);
   if (!v) throw new Error(`Please fill in ${key}.`);
   return v;
+};
+/**
+ * The web address typed for a post or session. Blank means "make one from the title" for a new
+ * item and "keep what it has" for an existing one. Addresses must be unique, and must not
+ * look like another item's id, so old links keep pointing at the right page.
+ */
+const chooseSlug = (
+  f: FormData,
+  title: string,
+  items: { id: string; slug?: string }[],
+  current?: { id: string; slug?: string },
+) => {
+  const typed = text(f, "slug", 100);
+  const slug = slugify(typed);
+  if (typed && !slug)
+    throw new Error("Use letters and numbers in the web address.");
+  const wanted = slug || (current ? current.slug : slugify(title)) || undefined;
+  if (
+    wanted &&
+    items.some(
+      (x) => x.id !== current?.id && (x.slug === wanted || x.id === wanted),
+    )
+  )
+    throw new Error("That web address is already used. Choose another one.");
+  return wanted;
 };
 const choice = (f: FormData, key: string, values: string[]) => {
   const v = text(f, key);
@@ -716,8 +742,11 @@ export async function adminMutation(
     } else if (entity === "posts") {
       const blocks = parseBlocks(text(form, "blocks", 400000));
       if (!blocksText(blocks)) throw new Error("Add some content to the post.");
+      const item = data.posts.find((x) => x.id === id);
+      const title = required(form, "title", 250);
       const value = {
-        title: required(form, "title", 250),
+        title,
+        slug: chooseSlug(form, title, data.posts, item),
         category: required(form, "category", 100),
         excerpt: required(form, "excerpt", 500),
         blocks,
@@ -726,7 +755,6 @@ export async function adminMutation(
         status: choice(form, "status", ["draft", "published"]),
         cover: number(form, "cover", 0, 2),
       };
-      const item = data.posts.find((x) => x.id === id);
       const postId = item?.id ?? uid();
       if (item) Object.assign(item, value);
       else data.posts.push({ id: postId, date: today(), ...value });
@@ -868,16 +896,17 @@ export async function adminMutation(
         // Notes are written with the block editor; their plain text stays in `notes`.
         const blocks = parseBlocks(text(form, "blocks", 400000));
         const topic = required(form, "topic", 250);
+        const item = data.sessions.find((x) => x.id === id);
         const value = {
           date,
           topic,
+          slug: chooseSlug(form, topic, data.sessions, item),
           zoom,
           pass: text(form, "pass", 100),
           notes: blocksText(blocks),
           blocks,
           podcast,
         };
-        const item = data.sessions.find((x) => x.id === id);
         const sessionId = item?.id ?? uid();
         if (item?.zoomId) {
           // A pasted link replaces the Zoom meeting; a new date moves it.

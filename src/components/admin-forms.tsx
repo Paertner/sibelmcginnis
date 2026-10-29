@@ -293,6 +293,12 @@ export function PostEditor({
             label="Category"
             value={post?.category ?? "Mindset"}
           />
+          <Field
+            name="slug"
+            label="Web address: /post/…"
+            value={post?.slug ?? ""}
+            required={false}
+          />
           <input type="hidden" name="cover" value={post?.cover ?? 0} />
           <CoverField
             key={`${cover.mediaId}|${cover.alt}|${cover.position}`}
@@ -478,6 +484,12 @@ export function SessionEditor({
             label="Saturday date"
             value={session?.date ?? nextSaturday()}
             type="date"
+          />
+          <Field
+            name="slug"
+            label="Web address: /session/…"
+            value={session?.slug ?? ""}
+            required={false}
           />
           <Field
             name="zoom"

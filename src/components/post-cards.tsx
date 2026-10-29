@@ -5,6 +5,7 @@ import Link from "next/link";
 import { canView, type Role } from "@/lib/access";
 import type { Post } from "@/lib/store";
 import { fmtDate } from "@/lib/dates";
+import { slugOf } from "@/lib/slug";
 
 export function Badge({ access }: { access: string }) {
   return (
@@ -20,7 +21,7 @@ export function Badge({ access }: { access: string }) {
 export function PostCards({ posts, role }: { posts: Post[]; role: Role }) {
   return posts.length ? (
     posts.map((p) => (
-      <Link className="card post-card" href={`/post/${p.id}`} key={p.id}>
+      <Link className="card post-card" href={`/post/${slugOf(p)}`} key={p.id}>
         <div className="post-cover">
           <Image
             {...postImageProps(p)}

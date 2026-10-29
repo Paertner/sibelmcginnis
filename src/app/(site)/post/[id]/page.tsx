@@ -8,6 +8,7 @@ import { BlockContent, textToBlocks } from "@/components/block-content";
 import { getUser } from "@/lib/auth";
 import { canView } from "@/lib/access";
 import { fmtDate } from "@/lib/dates";
+import { bySlug } from "@/lib/slug";
 import { Badge } from "@/components/post-cards";
 export async function generateMetadata({
   params,
@@ -16,7 +17,7 @@ export async function generateMetadata({
 }) {
   const { id } = await params;
   const published = getStore().posts.find(
-    (p) => p.id === id && p.status === "published",
+    (p) => p === bySlug(getStore().posts, id) && p.status === "published",
   );
   return { title: published?.title ?? "Post not found" };
 }
@@ -27,7 +28,7 @@ export default async function Post({
 }) {
   const { id } = await params;
   const post = getStore().posts.find(
-    (p) => p.id === id && p.status === "published",
+    (p) => p === bySlug(getStore().posts, id) && p.status === "published",
   );
   if (!post) notFound();
   const user = await getUser(),
