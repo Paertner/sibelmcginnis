@@ -1,12 +1,26 @@
 export function siteOrigin() {
-  const url = new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:3000",
-  );
+  const configured = (process.env.NEXT_PUBLIC_SITE_URL || "").trim();
+  // An address typed without https:// still works; an unusable one is logged and ignored
+  // so pages such as admin Settings keep opening.
+  const raw = !configured
+    ? "http://127.0.0.1:3000"
+    : /^https?:\/\//i.test(configured)
+      ? configured
+      : `https://${configured}`;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    console.error("[site-url] NEXT_PUBLIC_SITE_URL is not a valid address.");
+    return "http://127.0.0.1:3000";
+  }
   if (
     url.protocol !== "https:" &&
     !["localhost", "127.0.0.1"].includes(url.hostname)
-  )
-    throw new Error("Configure an HTTPS site URL.");
+  ) {
+    console.error("[site-url] NEXT_PUBLIC_SITE_URL should start with https://.");
+    url.protocol = "https:";
+  }
   return url.origin;
 }
 export const meetingPath = (kind: "session" | "booking", id: string) =>
