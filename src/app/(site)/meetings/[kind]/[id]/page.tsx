@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getUser } from "@/lib/auth";
 import { meetingAccess } from "@/lib/meeting-access";
 import { fmtDate } from "@/lib/dates";
+import { liveZoom } from "@/lib/meetings";
+import { registerAttendee } from "@/lib/zoom";
 export const metadata = {
   title: "Session access",
   robots: { index: false, follow: false },
@@ -15,6 +17,20 @@ export default async function Meeting({
   const { kind, id } = await params,
     user = await getUser(),
     access = meetingAccess(user, kind, id);
+  // The membership was checked just above; only now does the member get a personal Zoom link.
+  let joinUrl = "";
+  let zoomProblem = false;
+  if (access.status === 200 && user && access.zoomId && liveZoom()) {
+    try {
+      joinUrl = await registerAttendee(access.zoomId, {
+        email: user.email,
+        name: user.name,
+      });
+    } catch (error) {
+      console.error("[zoom] registration failed", error);
+      zoomProblem = true;
+    }
+  }
   return (
     <section className="block">
       <div className="wrap narrow">
@@ -37,16 +53,45 @@ export default async function Meeting({
                   )}
                 </p>
               </div>
-              <p>
-                {siteText(
-                  "meetings.zoom-registration-is-not-connected-in-this-review-a-direct-meetin",
-                )}
-              </p>
-              <p className="hint">
-                {siteText(
-                  "meetings.the-live-service-must-issue-a-personal-zoom-registration-and-revo",
-                )}
-              </p>
+              {joinUrl ? (
+                <>
+                  <a
+                    className="btn"
+                    href={joinUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Join on Zoom
+                  </a>
+                  <p className="hint">
+                    This link is just for you. Please do not share it; it stops
+                    working if your Premium access ends.
+                  </p>
+                </>
+              ) : zoomProblem ? (
+                <p role="alert">
+                  We could not prepare your Zoom link just now. Please try again
+                  in a minute, or contact Sibel if it keeps happening.
+                </p>
+              ) : access.zoomId ? null : liveZoom() ? (
+                <p>
+                  The Zoom meeting for this session has not been set up yet.
+                  Please check back soon.
+                </p>
+              ) : (
+                <>
+                  <p>
+                    {siteText(
+                      "meetings.zoom-registration-is-not-connected-in-this-review-a-direct-meetin",
+                    )}
+                  </p>
+                  <p className="hint">
+                    {siteText(
+                      "meetings.the-live-service-must-issue-a-personal-zoom-registration-and-revo",
+                    )}
+                  </p>
+                </>
+              )}
             </>
           ) : (
             <>

@@ -81,6 +81,8 @@ export type EventItem = {
 };
 /** A consultation. Company bookings have no member: they carry the company's details instead. */
 export type Booking = (typeof seed)["bookings"][number] & {
+  /** Zoom meeting id, when the meeting was made through Zoom. */
+  zoomId?: string;
   source?: "company";
   company?: string;
   contact?: string;
@@ -122,6 +124,7 @@ export type Store = Omit<
     audioName?: string;
   })[];
   sessions: ((typeof seed)["sessions"][number] & {
+    zoomId?: string;
     blocks?: EmailBlock[];
   })[];
   events?: EventItem[];

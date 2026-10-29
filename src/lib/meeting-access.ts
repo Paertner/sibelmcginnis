@@ -12,6 +12,7 @@ export function meetingAccess(user: User | null, kind: string, id: string) {
       ? {
           status: 200 as const,
           title: session.topic,
+          zoomId: session.zoomId,
           date: session.date,
           time: data.settings.meetingTime,
           minutes: data.settings.meetingMinutes,
@@ -29,6 +30,7 @@ export function meetingAccess(user: User | null, kind: string, id: string) {
       ? {
           status: 200 as const,
           title: "Your consultation with Sibel",
+          zoomId: booking.zoomId,
           date: booking.date,
           time: booking.time,
           minutes: data.settings.consultMinutes,

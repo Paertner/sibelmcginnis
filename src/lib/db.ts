@@ -127,6 +127,7 @@ const tables: Table[] = [
         topic: x.topic ?? "",
         notes: x.notes ?? "",
         blocks: x.blocks ?? [],
+        zoom_meeting_id: nullIfEmpty(x.zoomId),
         zoom_url: nullIfEmpty(x.zoom),
         zoom_pass: nullIfEmpty(x.pass),
         podcast_id: s.podcasts.some((p) => p.id === x.podcast)
@@ -143,6 +144,7 @@ const tables: Table[] = [
         blocks: (r.blocks ?? []) as never,
         zoom: str(r.zoom_url),
         pass: str(r.zoom_pass),
+        ...(r.zoom_meeting_id ? { zoomId: str(r.zoom_meeting_id) } : {}),
         podcast: str(r.podcast_id),
       })) as never;
     },
@@ -223,6 +225,7 @@ const tables: Table[] = [
         time: b.time,
         topic: b.topic ?? "",
         status: b.status,
+        zoom_meeting_id: nullIfEmpty(b.zoomId),
         zoom_url: nullIfEmpty(b.zoom),
         source: b.source ?? null,
         company: b.company ?? null,
@@ -241,6 +244,7 @@ const tables: Table[] = [
         topic: str(r.topic),
         status: str(r.status),
         zoom: str(r.zoom_url),
+        ...(r.zoom_meeting_id ? { zoomId: str(r.zoom_meeting_id) } : {}),
         ...(r.source ? { source: "company" } : {}),
         ...(r.company ? { company: str(r.company) } : {}),
         ...(r.contact ? { contact: str(r.contact) } : {}),
@@ -501,14 +505,12 @@ async function writeChanges(store: Store) {
     if (before.get(k) !== text) changedSettings.push({ key: k, value });
   }
   if (changedSettings.length) {
-    const { error } = await db
-      .from("site_settings")
-      .upsert(
-        changedSettings.map((c) => ({
-          ...c,
-          updated_at: new Date().toISOString(),
-        })),
-      );
+    const { error } = await db.from("site_settings").upsert(
+      changedSettings.map((c) => ({
+        ...c,
+        updated_at: new Date().toISOString(),
+      })),
+    );
     if (error) {
       log("site_settings", error.message);
       return;

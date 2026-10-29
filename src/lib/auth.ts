@@ -6,6 +6,7 @@ import { demoEnabled, getStore } from "./store";
 import type { User } from "./access";
 import { memberRole } from "./membership";
 import { adminClient, sessionClient, supabaseConfigured } from "./supabase";
+import { reloadMembers } from "./db";
 
 const globalAuth = globalThis as typeof globalThis & {
   morningCoffeeSecret?: string;
@@ -27,6 +28,12 @@ async function getRealUser(): Promise<User | null> {
     .eq("id", data.user.id)
     .maybeSingle();
   if (!profile || profile.status !== "active") return null;
+  // Someone who joined from another server or script: bring them into the member list.
+  if (
+    profile.role !== "admin" &&
+    !getStore().members.some((m) => m.id === profile.id)
+  )
+    await reloadMembers(getStore());
   return {
     id: profile.id,
     name: profile.name || profile.email,

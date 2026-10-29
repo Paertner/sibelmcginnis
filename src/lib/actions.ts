@@ -6,12 +6,13 @@ import { clearSession, getUser, setDemoSession } from "./auth";
 import { adminClient, sessionClient } from "./supabase";
 import { reloadMembers } from "./db";
 import {
-  demoEnabled,
-  demoMeeting,
-  getDemoState,
-  getStore,
-  usesDatabase,
-} from "./store";
+  dropMeeting,
+  moveMeeting,
+  provision,
+  revokeFromUpcoming,
+} from "./meetings";
+import { memberRole } from "./membership";
+import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
 import { isPast } from "./event-posts";
 import { isPremium } from "./access";
@@ -280,12 +281,20 @@ export async function changeTier(
     const tier = choice(form, "tier", ["free", "premium"]);
     const member = getStore().members.find((m) => m.id === user.id);
     if (!member) throw new Error("Member not found.");
+    // With real accounts, Premium can only be bought; it is never switched on here.
+    if (usesDatabase() && tier === "premium")
+      throw new Error("Premium checkout is not open yet.");
     member.tier = tier;
     member.premiumUntil =
       tier === "premium"
         ? new Date(Date.now() + 30 * 86400000).toISOString()
         : "";
-    return success("Review membership updated. No payment was taken.");
+    if (tier === "free") await revokeFromUpcoming(member.email);
+    return success(
+      usesDatabase()
+        ? "Your membership has been changed."
+        : "Review membership updated. No payment was taken.",
+    );
   } catch (error) {
     return errorResult(error);
   }
@@ -468,6 +477,14 @@ export async function bookCompany(
     if (slotTaken(date, time))
       throw new Error("That time has just been booked. Please choose another.");
     const id = uid();
+    const meeting = await provision({
+      id,
+      topic: `Consultation: ${company}`,
+      date,
+      time,
+      minutes: data.settings.consultMinutes,
+      registration: false,
+    });
     data.bookings.push({
       id,
       memberId: "",
@@ -475,7 +492,8 @@ export async function bookCompany(
       time,
       topic,
       status: "confirmed",
-      zoom: demoMeeting(id),
+      zoom: meeting.zoom,
+      zoomId: meeting.zoomId,
       source: "company",
       company,
       contact,
@@ -515,6 +533,8 @@ export async function cancelBooking(
     )
       throw new Error("You cannot change this booking.");
     booking.status = "cancelled";
+    await dropMeeting(booking.zoomId);
+    booking.zoomId = undefined;
     return success("Consultation cancelled.");
   } catch (error) {
     return errorResult(error);
@@ -537,6 +557,9 @@ export async function adminMutation(
     if (op === "delete") {
       switch (entity) {
         case "members":
+          await revokeFromUpcoming(
+            data.members.find((x) => x.id === id)?.email ?? "",
+          );
           data.members = data.members.filter((x) => x.id !== id);
           data.bookings = data.bookings.filter((x) => x.memberId !== id);
           break;
@@ -545,6 +568,7 @@ export async function adminMutation(
           getDemoState().audio.delete(`post-${id}`);
           break;
         case "sessions":
+          await dropMeeting(data.sessions.find((x) => x.id === id)?.zoomId);
           data.sessions = data.sessions.filter((x) => x.id !== id);
           break;
         case "podcasts":
@@ -590,6 +614,9 @@ export async function adminMutation(
       const item = data.members.find((x) => x.id === id);
       if (item) Object.assign(item, value);
       else data.members.push({ id: uid(), joined: today(), ...value });
+      // A member who is no longer Premium loses their personal meeting links.
+      if (item && memberRole(item) !== "premium")
+        await revokeFromUpcoming(item.email);
     } else if (entity === "posts") {
       const blocks = parseBlocks(text(form, "blocks", 400000));
       if (!blocksText(blocks)) throw new Error("Add some content to the post.");
@@ -689,21 +716,42 @@ export async function adminMutation(
             ? addDays(latest.date, 7)
             : nextSaturday();
         const newId = uid();
+        const meeting = data.settings.autoZoom
+          ? await provision({
+              id: newId,
+              topic: "Morning Coffee Community",
+              date,
+              time: "10:30",
+              minutes: data.settings.meetingMinutes,
+              registration: true,
+            })
+          : { zoom: "", pass: "", zoomId: undefined };
         data.sessions.push({
           id: newId,
           date,
           time: "10:30",
           topic: "Community reflection",
-          zoom: data.settings.autoZoom ? demoMeeting(newId) : "",
-          pass: data.settings.autoZoom ? uid().slice(0, 6) : "",
+          zoom: meeting.zoom,
+          zoomId: meeting.zoomId,
+          pass: meeting.pass || (meeting.zoom ? uid().slice(0, 6) : ""),
           notes: "",
           podcast: "",
         });
       } else if (op === "regenerate") {
         const item = data.sessions.find((x) => x.id === id);
         if (!item) throw new Error("Session not found.");
-        item.zoom = demoMeeting(uid());
-        item.pass = uid().slice(0, 6);
+        await dropMeeting(item.zoomId);
+        const meeting = await provision({
+          id: uid(),
+          topic: item.topic || "Morning Coffee Community",
+          date: item.date,
+          time: item.time,
+          minutes: data.settings.meetingMinutes,
+          registration: true,
+        });
+        item.zoom = meeting.zoom;
+        item.zoomId = meeting.zoomId;
+        item.pass = meeting.pass || uid().slice(0, 6);
       } else {
         const date = required(form, "date");
         if (!validDate(date) || new Date(date + "T12:00:00Z").getUTCDay() !== 6)
@@ -735,6 +783,21 @@ export async function adminMutation(
         };
         const item = data.sessions.find((x) => x.id === id);
         const sessionId = item?.id ?? uid();
+        if (item?.zoomId) {
+          // A pasted link replaces the Zoom meeting; a new date moves it.
+          if (zoom !== item.zoom) {
+            await dropMeeting(item.zoomId);
+            item.zoomId = undefined;
+          } else if (date !== item.date)
+            await moveMeeting(item.zoomId, {
+              id: item.id,
+              topic,
+              date,
+              time: item.time,
+              minutes: data.settings.meetingMinutes,
+              registration: true,
+            });
+        }
         if (item) Object.assign(item, value);
         else data.sessions.push({ id: sessionId, time: "10:30", ...value });
         const session = data.sessions.find((x) => x.id === sessionId)!;
@@ -875,8 +938,17 @@ export async function adminMutation(
         booking.status = "cancelled";
         return success("Booking declined. The time is open again.");
       }
+      const meeting = await provision({
+        id: booking.id,
+        topic: "Consultation with Sibel",
+        date: booking.date,
+        time: booking.time,
+        minutes: data.settings.consultMinutes,
+        registration: true,
+      });
       booking.status = "confirmed";
-      booking.zoom = demoMeeting(booking.id);
+      booking.zoom = meeting.zoom;
+      booking.zoomId = meeting.zoomId;
       return success("Booking approved. The member can now join.");
     } else if (entity === "announcements") {
       const { recipients, emails, skipped } = await publishAnnouncement(form);
