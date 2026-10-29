@@ -322,21 +322,18 @@ export async function bookConsultation(
       )
     )
       throw new Error("That time has just been booked. Please choose another.");
-    const id = uid(),
-      confirmed = data.settings.autoConfirm;
+    // Member requests always wait for the admin to approve them.
     data.bookings.push({
-      id,
+      id: uid(),
       memberId: user.id,
       date,
       time,
       topic: text(form, "topic", 1000) || "General conversation",
-      status: confirmed ? "confirmed" : "pending",
-      zoom: confirmed ? demoMeeting(id) : "",
+      status: "pending",
+      zoom: "",
     });
     return success(
-      confirmed
-        ? "Consultation confirmed for review. The meeting link is a placeholder."
-        : "Request saved, awaiting admin confirmation.",
+      "Request sent. Sibel will confirm it soon; the meeting link appears here after she approves.",
     );
   } catch (error) {
     return errorResult(error);
@@ -734,7 +731,6 @@ export async function adminMutation(
       data.availability = availability as typeof data.availability;
       data.settings.consultsPerMonth = count;
       data.settings.consultMinutes = duration;
-      data.settings.autoConfirm = form.has("autoConfirm");
     } else if (entity === "companyLinks") {
       const links = (data.companyLinks ??= []);
       if (op === "create") {

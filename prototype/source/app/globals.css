@@ -7597,3 +7597,56 @@ ul.ticks li::before {
     margin: -6px 0 14px;
   }
 }
+
+/* Overview: the 1:1 consultation card. */
+.consult-card {
+  display: flex;
+  flex-direction: column;
+}
+.consult-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.consult-list > li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.consult-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.consult-info > b {
+  font: 500 0.98rem var(--font-poppins);
+  color: var(--ad-ink, var(--ink));
+}
+.consult-topic {
+  color: var(--ad-text, var(--text));
+  font-size: 0.9rem;
+}
+.consult-actions {
+  margin-top: 6px;
+}
+.consult-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 18px;
+}
+.consult-list + .consult-footer {
+  margin-top: 20px;
+  border-top: 1px solid var(--ad-line, var(--line));
+}
+.consult-footer .muted {
+  font-size: 0.85rem;
+}

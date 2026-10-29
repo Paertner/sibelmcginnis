@@ -175,7 +175,7 @@ export function BookingForm({
       <ActionForm
         action={company ? bookCompany : bookConsultation}
         className={`booking-times ${company ? "company-times" : ""}`}
-        submitLabel="Confirm booking"
+        submitLabel={company ? "Confirm booking" : "Request consultation"}
         submitDisabled={!time}
       >
         <input name="date" type="hidden" value={activeDay.date} />

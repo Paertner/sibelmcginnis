@@ -236,7 +236,7 @@ export default async function Account({
                         <span
                           className={`badge b-${b.status === "confirmed" ? "ok" : b.status === "pending" ? "warn" : "bad"}`}
                         >
-                          {b.status}
+                          {b.status === "pending" ? "awaiting approval" : b.status}
                         </span>
                         {b.status === "confirmed" ? (
                           <>
@@ -512,42 +512,62 @@ export default async function Account({
           </div>
         ) : null}
         <div className="grid g2 section-top">
-          <div className="card">
+          <div className="card consult-card">
             <h3>{siteText("account.1-1-consultation")}</h3>
             {premium ? (
               <>
                 {upcomingBookings.length ? (
-                  upcomingBookings.map((b) => (
-                    <div key={b.id}>
-                      <b>
-                        {fmtDate(b.date)} {siteText("account.at")} {b.time}
-                      </b>
-                      <p>
-                        {b.topic}{" "}
-                        <span
-                          className={`badge b-${b.status === "confirmed" ? "ok" : "warn"}`}
-                        >
-                          {b.status}
+                  <ul className="consult-list">
+                    {upcomingBookings.map((b) => (
+                      <li key={b.id}>
+                        <span className="date-chip" aria-hidden="true">
+                          <b>{fmtDate(b.date, { day: "numeric" })}</b>
+                          {fmtDate(b.date, { month: "short" })}
                         </span>
-                      </p>
-                      {b.status === "confirmed" ? (
-                        <CalendarButtons
-                          event={bookingEvent(b)}
-                          kind="booking"
-                        />
-                      ) : null}
-                    </div>
-                  ))
+                        <div className="consult-info">
+                          <b>
+                            {fmtDate(b.date)} {siteText("account.at")} {b.time}
+                          </b>
+                          <span className="consult-topic">{b.topic}</span>
+                          <span
+                            className={`badge b-${b.status === "confirmed" ? "ok" : "warn"}`}
+                          >
+                            {b.status === "pending"
+                              ? "awaiting approval"
+                              : b.status}
+                          </span>
+                          {b.status === "confirmed" ? (
+                            <div className="consult-actions">
+                              <CalendarButtons
+                                event={bookingEvent(b)}
+                                kind="booking"
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 ) : (
-                  <p>
+                  <p className="muted">
                     {siteText("account.no-consultation-booked-yet-you-have")}{" "}
                     {Math.max(0, data.settings.consultsPerMonth - used)}{" "}
                     {siteText("account.left-this-month")}
                   </p>
                 )}
-                <Link className="btn btn-sm" href="/account?tab=book">
-                  {siteText("account.book-a-time")}
-                </Link>
+                <div className="consult-footer">
+                  {upcomingBookings.length ? (
+                    <span className="muted">
+                      {Math.max(0, data.settings.consultsPerMonth - used)}{" "}
+                      {siteText("account.left-this-month")}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <Link className="btn btn-sm" href="/account?tab=book">
+                    {siteText("account.book-a-time")}
+                  </Link>
+                </div>
               </>
             ) : (
               <>
@@ -556,9 +576,11 @@ export default async function Account({
                     "account.one-on-one-time-with-sibel-is-a-premium-perk",
                   )}
                 </p>
-                <Link className="btn btn-sm" href="/account?tab=membership">
-                  {siteText("account.see-premium")}
-                </Link>
+                <div className="consult-footer">
+                  <Link className="btn btn-sm" href="/account?tab=membership">
+                    {siteText("account.see-premium")}
+                  </Link>
+                </div>
               </>
             )}
           </div>

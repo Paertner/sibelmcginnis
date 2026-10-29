@@ -708,8 +708,8 @@ export default async function Admin({
                               </ActionForm>
                               <ActionForm
                                 action={adminMutation}
-                                submitLabel="Reject"
-                                confirmMessage={`Reject ${bookingName(b)}’s request? The time becomes available again.`}
+                                submitLabel="Cancel"
+                                confirmMessage={`Cancel ${bookingName(b)}’s request? The time becomes available again.`}
                               >
                                 <EntityFields entity="bookings" id={b.id} />
                                 <input type="hidden" name="op" value="reject" />
@@ -804,14 +804,10 @@ export default async function Admin({
                     type="number"
                   />
                 </div>
-                <label className="checkbox-field">
-                  <input
-                    name="autoConfirm"
-                    type="checkbox"
-                    defaultChecked={settings.autoConfirm}
-                  />{" "}
-                  Confirm automatically and create a placeholder meeting
-                </label>
+                <p className="hint">
+                  Member requests wait for your approval. The member gets the
+                  meeting link after you press Approve.
+                </p>
               </div>
             </ActionForm>
           </>
