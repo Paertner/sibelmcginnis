@@ -224,7 +224,9 @@ function Payments({ stripe }: { stripe: Integrations["stripe"] }) {
           </p>
         </div>
         <span className={`badge ${stripe?.connected ? "b-ok" : "b-grey"}`}>
-          {stripe?.connected ? "Connected · test mode" : "Not connected"}
+          {stripe?.connected
+            ? `Connected · ${stripe.mode === "live" ? "live" : "test"} mode`
+            : "Not connected"}
         </span>
       </div>
       {stripe?.connected ? (

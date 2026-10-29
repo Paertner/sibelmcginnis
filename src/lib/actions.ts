@@ -12,6 +12,8 @@ import {
   revokeFromUpcoming,
 } from "./meetings";
 import { memberRole } from "./membership";
+import { checkoutUrl, portalUrl } from "./billing";
+import { stripeConfigured, stripeMode, stripe } from "./stripe";
 import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
 import { isPast } from "./event-posts";
@@ -201,6 +203,13 @@ export async function join(
       ).auth.signInWithPassword({ email: address, password });
       if (signedIn.error) throw new Error("Account created. Please sign in.");
       destination = safeBack(form) || "/account";
+      // Someone who chose Premium goes straight on to pay.
+      if (text(form, "plan", 10) === "premium" && stripeConfigured()) {
+        const created = getStore().members.find(
+          (m) => m.email.toLowerCase() === address,
+        );
+        if (created) destination = await checkoutUrl(created.id);
+      }
     } catch (error) {
       return errorResult(error);
     }
@@ -298,6 +307,34 @@ export async function changeTier(
   } catch (error) {
     return errorResult(error);
   }
+}
+/** Sends a signed-in member to Stripe to start Premium. */
+export async function startCheckout(): Promise<ActionResult> {
+  let destination = "";
+  try {
+    const user = await getUser();
+    if (!user || user.role === "admin")
+      throw new Error("Sign in as a member first.");
+    if (!stripeConfigured())
+      throw new Error("Premium checkout is not open yet.");
+    destination = await checkoutUrl(user.id);
+  } catch (error) {
+    return errorResult(error);
+  }
+  redirect(destination);
+}
+/** Sends a Premium member to Stripe's page to update their card or cancel. */
+export async function openBillingPortal(): Promise<ActionResult> {
+  let destination = "";
+  try {
+    const user = await getUser();
+    if (!user || user.role === "admin")
+      throw new Error("Sign in as a member first.");
+    destination = await portalUrl(user.id);
+  } catch (error) {
+    return errorResult(error);
+  }
+  redirect(destination);
 }
 /** Saves which emails the signed-in member wants (the target of the unsubscribe link). */
 export async function saveEmailPreferences(
@@ -988,7 +1025,26 @@ export async function adminMutation(
       const integrations = { ...data.integrations },
         now = new Date().toISOString();
       let message = "Saved.";
-      if (op === "stripe-connect") {
+      if (op === "stripe-connect" && usesDatabase()) {
+        // The real connection is the account's secret key in the server settings; check it works.
+        if (!stripeConfigured())
+          throw new Error(
+            "Add the Stripe secret key to the server settings first.",
+          );
+        const account = await stripe().accounts.retrieveCurrent();
+        integrations.stripe = {
+          connected: true,
+          accountName:
+            account.business_profile?.name ||
+            account.settings?.dashboard?.display_name ||
+            account.email ||
+            "Stripe account",
+          accountId: account.id,
+          connectedAt: now,
+          mode: stripeMode(),
+        };
+        message = `Stripe connected in ${stripeMode()} mode.`;
+      } else if (op === "stripe-connect") {
         // The live site sends the admin to Stripe to sign in (Stripe Connect); the prototype simulates the result.
         integrations.stripe = {
           connected: true,

@@ -8,6 +8,7 @@ import { DiskMap } from "./file-storage";
 import { supabaseConfigured } from "./supabase";
 
 export type Member = (typeof seed)["members"][number] & {
+  stripeCustomerId?: string;
   premiumUntil?: string;
   emailPreferences?: EmailPreferences;
 };
@@ -37,6 +38,7 @@ export type Integrations = {
     accountName?: string;
     accountId?: string;
     connectedAt?: string;
+    mode?: "test" | "live";
   };
   zoom?: {
     accountId?: string;

@@ -39,6 +39,7 @@ const tables: Table[] = [
         joined: m.joined,
         premium_until: nullIfEmpty(m.premiumUntil),
         email_preferences: m.emailPreferences ?? {},
+        stripe_customer_id: nullIfEmpty(m.stripeCustomerId),
       })),
     apply: (s, rows) => {
       s.members = rows
@@ -53,6 +54,9 @@ const tables: Table[] = [
           joined: day(r.joined),
           premiumUntil: r.premium_until ? str(r.premium_until) : undefined,
           emailPreferences: (r.email_preferences ?? {}) as never,
+          stripeCustomerId: r.stripe_customer_id
+            ? str(r.stripe_customer_id)
+            : undefined,
         })) as never;
     },
   },
@@ -383,6 +387,8 @@ const fingerprint = (r: Row) => JSON.stringify(r);
 /** An empty store with the built-in defaults, ready to be filled from the database. */
 export function emptyStore(): Store {
   const base = structuredClone(seed) as unknown as Store;
+  // No sample data: the weekly consultation times start empty until Sibel sets them.
+  base.availability = {} as never;
   base.members = [];
   base.posts = [];
   base.podcasts = [];

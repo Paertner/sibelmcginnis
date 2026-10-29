@@ -18,7 +18,15 @@ import { Icon, type IconName } from "@/components/admin-icons";
 import { BookingForm } from "@/components/consultation-calendar";
 import { ActionForm } from "@/components/action-form";
 import { EmailPreferencesForm } from "@/components/email-preferences-form";
-import { cancelBooking, changeTier, signOut } from "@/lib/actions";
+import {
+  cancelBooking,
+  changeTier,
+  openBillingPortal,
+  signOut,
+  startCheckout,
+} from "@/lib/actions";
+import { usesDatabase } from "@/lib/store";
+import { stripeConfigured } from "@/lib/stripe";
 export const metadata = { title: "My account" };
 const tabs: [string, string, IconName][] = [
   ["overview", "Overview", "home"],
@@ -48,7 +56,11 @@ function PremiumGate({ title }: { title: string }) {
 export default async function Account({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; unsubscribe?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    unsubscribe?: string;
+    checkout?: string;
+  }>;
 }) {
   const user = await requireMember(),
     data = getStore(),
@@ -308,6 +320,16 @@ export default async function Account({
       return (
         <>
           <h1 className="area-title">{siteText("account.membership")}</h1>
+          {query.checkout === "success" ? (
+            <p className="dash-notice" role="status">
+              Thank you! Your payment went through. Premium access switches on
+              within a minute; refresh this page if you do not see it yet.
+            </p>
+          ) : query.checkout === "cancelled" ? (
+            <p className="dash-notice" role="status">
+              Checkout was cancelled. You have not been charged.
+            </p>
+          ) : null}
           <div className="card">
             <div className="list-item">
               <div>
@@ -349,7 +371,27 @@ export default async function Account({
                 "account.billing-will-be-managed-securely-through-stripe-once-checkout-is-",
               )}
             </p>
-            {user.role !== "admin" ? (
+            {user.role !== "admin" && usesDatabase() ? (
+              stripeConfigured() ? (
+                premium ? (
+                  <ActionForm
+                    action={openBillingPortal}
+                    submitLabel="Manage billing"
+                  >
+                    <></>
+                  </ActionForm>
+                ) : (
+                  <ActionForm
+                    action={startCheckout}
+                    submitLabel={`Subscribe · $${data.settings.premiumPrice} / month`}
+                  >
+                    <></>
+                  </ActionForm>
+                )
+              ) : (
+                <p className="muted">Premium checkout is not open yet.</p>
+              )
+            ) : user.role !== "admin" ? (
               <ActionForm
                 action={changeTier}
                 submitLabel={
