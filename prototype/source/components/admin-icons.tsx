@@ -201,6 +201,18 @@ const paths = {
       <circle cx="12" cy="12" r="3" />
     </>
   ),
+  pin: (
+    <>
+      <path d="M12 21.5s6.5-5.7 6.5-11a6.5 6.5 0 0 0-13 0c0 5.3 6.5 11 6.5 11z" />
+      <circle cx="12" cy="10.5" r="2.4" />
+    </>
+  ),
+  ticket: (
+    <>
+      <path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6z" />
+      <path d="M14 5v14" strokeDasharray="2 3" />
+    </>
+  ),
 } as const;
 export type IconName = keyof typeof paths;
 export function Icon({

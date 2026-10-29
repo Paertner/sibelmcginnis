@@ -7189,3 +7189,212 @@ ul.ticks li::before {
   font: 400 0.78rem var(--font-poppins);
   color: var(--ad-muted);
 }
+
+/* Events */
+.events-heading {
+  margin: 0 0 18px;
+  font-size: 1.5rem;
+}
+.events-past-heading {
+  margin-top: 54px;
+}
+.event-card .post-cover {
+  position: relative;
+}
+.event-card.is-past {
+  opacity: 0.75;
+}
+.event-card .post-cover .badge {
+  left: auto;
+  right: 12px;
+}
+.event-date {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 12px;
+  width: 58px;
+  padding: 6px 0;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  display: grid;
+  text-align: center;
+  line-height: 1.15;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+}
+.event-date small {
+  font: 500 0.62rem var(--font-poppins);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.event-date b {
+  font: 500 1.4rem/1.1 var(--font-inter);
+}
+.event-venue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.event-venue svg {
+  flex: none;
+}
+.seat-meter {
+  margin-top: auto;
+  font: 400 0.84rem var(--font-poppins);
+}
+.seat-meter b {
+  font-weight: 500;
+}
+.seat-meter-bar {
+  height: 6px;
+  margin-bottom: 8px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+.seat-meter-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--accent-d);
+}
+.seat-meter.full b {
+  color: var(--danger);
+}
+.seat-meter.full .seat-meter-bar span {
+  background: var(--danger);
+}
+.event-title {
+  margin: 12px 0 28px;
+}
+.event-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 36px;
+  align-items: start;
+}
+.event-side {
+  position: sticky;
+  top: 96px;
+  padding: 26px;
+}
+.event-side h2 {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+}
+.event-facts {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.event-facts li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.event-facts svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--accent-d);
+}
+.event-facts span {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.event-facts b {
+  display: block;
+  color: var(--ink);
+  font-weight: 500;
+}
+.event-join {
+  margin-top: 20px;
+}
+.event-join .btn,
+.event-join form > .btn {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}
+.event-join .btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.event-join-note {
+  margin: 12px 0 0;
+  font-size: 0.88rem;
+}
+.event-going {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(59, 122, 75, 0.12);
+  color: var(--ok);
+  font-weight: 500;
+}
+@media (max-width: 900px) {
+  .event-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .event-side {
+    position: static;
+  }
+}
+.my-events-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.my-events-list a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+.my-events-list .date-chip {
+  flex: none;
+  background: var(--tan-soft);
+  color: var(--ink);
+}
+.my-events-list span b {
+  display: block;
+}
+.my-events-list small {
+  color: var(--muted);
+}
+.attendee-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.attendee-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.attendee-list small {
+  display: block;
+}
+.ad tr.is-past td {
+  color: var(--ad-muted);
+}
+.ad td.nowrap {
+  min-width: 104px;
+}
+.wide-editor-side .setting-hint {
+  display: block;
+  margin: -6px 0 14px;
+}

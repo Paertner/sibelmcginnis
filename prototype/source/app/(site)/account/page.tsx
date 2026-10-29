@@ -9,6 +9,7 @@ import { bookingEvent, sessionEvent } from "@/lib/events";
 import { Badge, PostCards } from "@/components/post-cards";
 import Image from "next/image";
 import { postImageProps } from "@/lib/site-images";
+import { fmtTime, upcomingEvents } from "@/lib/event-posts";
 import { CalendarButtons } from "@/components/calendar-buttons";
 import { AnnouncementContent } from "@/components/announcement-content";
 import { announcementVisible } from "@/lib/announcements";
@@ -70,6 +71,9 @@ export default async function Account({
     announcementVisible(a, user.id, user.role),
   );
   const member = data.members.find((m) => m.id === user.id);
+  const myEvents = upcomingEvents().filter((e) =>
+    e.attendees.includes(user.id),
+  );
   const upcomingBookings = bookings.filter(
     (b) => b.status !== "cancelled" && b.date >= today(),
   );
@@ -430,6 +434,37 @@ export default async function Account({
             <p>{siteText("account.check-back-soon-for-your-next-circle")}</p>
           </div>
         )}
+        <section
+          className="card section-top my-events"
+          aria-labelledby="my-events-title"
+        >
+          <div className="latest-head">
+            <h3 id="my-events-title">{siteText("events.my-events")}</h3>
+            <Link href="/events">{siteText("events.browse")} →</Link>
+          </div>
+          {myEvents.length ? (
+            <ul className="my-events-list">
+              {myEvents.map((e) => (
+                <li key={e.id}>
+                  <Link href={`/event/${e.id}`}>
+                    <span className="date-chip" aria-hidden="true">
+                      <b>{fmtDate(e.date, { day: "numeric" })}</b>
+                      {fmtDate(e.date, { month: "short" })}
+                    </span>
+                    <span>
+                      <b>{e.title}</b>
+                      <small>
+                        {fmtDate(e.date)} · {fmtTime(e.start)} · {e.venue}
+                      </small>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">{siteText("events.my-none")}</p>
+          )}
+        </section>
         {messages.length ? (
           <section
             className="member-messages section-top"

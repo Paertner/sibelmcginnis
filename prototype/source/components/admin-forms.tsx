@@ -7,7 +7,7 @@ import { BlocksField } from "./blocks-field";
 import { textToBlocks } from "./block-content";
 import type { MediaItem, SiteImage } from "@/lib/site-images";
 import { fmtDate, today, nextSaturday } from "@/lib/dates";
-import type { Episode, Member, Post, Session, Store } from "@/lib/store";
+import type { Episode, EventItem, Member, Post, Session, Store } from "@/lib/store";
 type InputProps = {
   name: string;
   label: string;
@@ -312,6 +312,113 @@ export function PostEditor({
               <input type="checkbox" name="removeAudio" /> Remove the audio
             </label>
           ) : null}
+        </>
+      }
+    />
+  );
+}
+export function EventEditor({
+  event,
+  cover,
+  media,
+}: {
+  event?: EventItem;
+  cover: SiteImage;
+  media: MediaItem[];
+}) {
+  return (
+    <WideEditor
+      title={event ? `Edit: ${event.title}` : "+ New event"}
+      entity="events"
+      id={event?.id}
+      main={
+        <>
+          <input
+            className="wide-editor-title"
+            name="title"
+            defaultValue={event?.title}
+            placeholder="Event title"
+            aria-label="Title"
+            required
+            maxLength={250}
+          />
+          <BlocksField
+            label="Event description"
+            initial={event?.blocks ?? []}
+            media={media}
+          />
+        </>
+      }
+      side={
+        <>
+          <Select
+            name="status"
+            label="Status"
+            value={event?.status ?? "draft"}
+            options={["draft", "published"]}
+          />
+          <Field
+            name="date"
+            label="Date"
+            type="date"
+            value={event?.date ?? today()}
+          />
+          <div className="row">
+            <Field
+              name="start"
+              label="Starts"
+              type="time"
+              value={event?.start ?? "10:00"}
+            />
+            <Field
+              name="end"
+              label="Ends"
+              type="time"
+              value={event?.end ?? "12:00"}
+            />
+          </div>
+          <Field name="venue" label="Venue name" value={event?.venue} />
+          <Field name="address" label="Address" value={event?.address} />
+          <Field
+            name="mapUrl"
+            label="Map link (optional)"
+            type="url"
+            value={event?.mapUrl}
+            required={false}
+          />
+          <div className="row">
+            <Field
+              name="seats"
+              label="Seat limit"
+              type="number"
+              value={event?.seats ?? 20}
+            />
+            <Field
+              name="price"
+              label="Price"
+              value={event?.price ?? "Free"}
+              required={false}
+            />
+          </div>
+          <small className="setting-hint">
+            Paid events show the price and a “Payment comes later” note. No
+            payment is taken yet.
+          </small>
+          <CoverField
+            key={`${cover.mediaId}|${cover.alt}|${cover.position}`}
+            cover={{
+              ...cover,
+              group: "Events",
+              label: event?.title ?? "New event",
+            }}
+            media={media}
+          />
+          <Field
+            name="summary"
+            label="Short summary"
+            value={event?.summary}
+            multiline
+          />
         </>
       }
     />

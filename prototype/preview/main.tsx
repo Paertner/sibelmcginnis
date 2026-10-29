@@ -9,6 +9,8 @@ import About from "../source/app/(site)/about/page";
 import Membership from "../source/app/(site)/morning-coffee/page";
 import Solutions from "../source/app/(site)/solutions/page";
 import Blog from "../source/app/(site)/blog/page";
+import Events from "../source/app/(site)/events/page";
+import EventPage from "../source/app/(site)/event/[id]/page";
 import Post from "../source/app/(site)/post/[id]/page";
 import SessionNotes from "../source/app/(site)/session/[id]/page";
 import Podcast from "../source/app/(site)/podcast/page";
@@ -39,9 +41,11 @@ async function renderRoute(){
  else if(path==="/morning-coffee")content=await Membership();
  else if(path==="/solutions")content=await Solutions();
  else if(path==="/blog")content=await Blog(params);
+ else if(path==="/events")content=await Events();
+ else if(path.startsWith("/event/"))content=await EventPage({params:Promise.resolve({id:decodeURIComponent(path.slice(7))})});
  else if(path==="/podcast")content=await Podcast();
  else if(path==="/contact")content=Contact();
- else if(path==="/login")content=await Login();
+ else if(path==="/login")content=await Login(params);
  else if(path==="/join")content=await Join(params);
  else if(path==="/account")content=await Account(params);
  else if(path.startsWith("/session/"))content=await SessionNotes({params:Promise.resolve({id:decodeURIComponent(path.slice(9))})});
@@ -71,7 +75,7 @@ function App(){
   renderRoute().then(result=>{if(active){setView(result.node);setRole(result.role);applySiteSettings();const anchor=currentLocation().hash.slice(1);if(anchor)requestAnimationFrame(()=>document.getElementById(anchor)?.scrollIntoView());}}).catch(error=>{
    if(!active)return;
    if(error.previewRedirect){navigate(error.previewRedirect);return;}
-   if(error.previewNotFound){setView(<div className="wrap empty-page"><h1>Post not found</h1><a href="#/blog">Back to blog</a></div>);return;}
+   if(error.previewNotFound){setView(<div className="wrap empty-page"><h1>Page not found</h1><a href="#/">Back home</a></div>);return;}
    console.error(error);setView(<div className="wrap empty-page"><h1>Could not open this preview</h1><p>Please return home and try again.</p><button className="btn" onClick={()=>navigate("/")}>Back home</button></div>);
   });
   return()=>{active=false};

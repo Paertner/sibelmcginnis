@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon, type IconName } from "./admin-icons";
 import { fmtDate, today } from "@/lib/dates";
 import { upcomingSessions, type Store } from "@/lib/store";
+import { fmtTime } from "@/lib/event-posts";
 
 type Point = { key: string; label: string; value: number };
 
@@ -258,6 +259,9 @@ export function AdminDashboard({ data }: { data: Store }) {
     .toSorted((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   const pending = bookings.filter((b) => b.status === "pending").length;
   const next = upcomingSessions()[0];
+  const events = (data.events ?? [])
+    .filter((e) => e.status === "published" && e.date >= today())
+    .toSorted((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
   const name = (id: string) =>
     data.members.find((m) => m.id === id)?.name ?? "Removed member";
   const revenueMax = Math.max(price, ...revenue.map((r) => r.value));
@@ -499,6 +503,44 @@ export function AdminDashboard({ data }: { data: Store }) {
                 </li>
               ))}
           </ul>
+        </section>
+      </div>
+
+      <div className="dash-row">
+        <section className="card-soft" aria-labelledby="events-title">
+          <header className="card-head">
+            <h2 id="events-title">Upcoming events</h2>
+            <Link className="card-link" href="/admin/events">
+              See all
+            </Link>
+          </header>
+          {events.length ? (
+            <ul className="mini-list">
+              {events.slice(0, 4).map((e) => (
+                <li key={e.id}>
+                  <span className="date-chip">
+                    <b>{fmtDate(e.date, { day: "numeric" })}</b>
+                    {fmtDate(e.date, { month: "short" })}
+                  </span>
+                  <div>
+                    <b>{e.title}</b>
+                    <small>
+                      {fmtTime(e.start)} · {e.venue}
+                    </small>
+                  </div>
+                  <span
+                    className={`badge b-${e.attendees.length >= e.seats ? "warn" : "ok"}`}
+                  >
+                    {e.attendees.length} / {e.seats} seats
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-note">
+              No upcoming events. Add one from Events.
+            </p>
+          )}
         </section>
       </div>
     </div>

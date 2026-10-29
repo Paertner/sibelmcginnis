@@ -27,12 +27,14 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { getStore, upcomingSessions, type Session } from "@/lib/store";
 import { fmtDate, today } from "@/lib/dates";
+import { fmtTime, isPast } from "@/lib/event-posts";
 import { adminMutation, cancelBooking, signOut } from "@/lib/actions";
 import { ActionForm } from "@/components/action-form";
 import {
   ContentForm,
   EntityFields,
   EpisodeEditor,
+  EventEditor,
   Field,
   MemberEditor,
   PostEditor,
@@ -55,6 +57,12 @@ const sections: [string, string, IconName, string][] = [
     "Blog posts",
     "pen",
     "Write posts and choose who can read each one.",
+  ],
+  [
+    "events",
+    "Events",
+    "ticket",
+    "In-person gatherings: seats, reminders and who joined.",
   ],
   [
     "sessions",
@@ -119,10 +127,12 @@ export default async function Admin({
   if (route.length > 1 || !sections.some(([key]) => key === section))
     notFound();
   const { to, about } = await searchParams;
+  const draft = notificationDraft(about);
   const data = getStore(),
     settings = data.settings;
   const media =
     section === "posts" ||
+    section === "events" ||
     section === "sessions" ||
     section === "media" ||
     section === "announce" ||
@@ -196,6 +206,9 @@ export default async function Admin({
               <PostEditor cover={siteImage("blog.cover-0")} media={media} />
             ) : null}
             {section === "podcast" ? <EpisodeEditor /> : null}
+            {section === "events" ? (
+              <EventEditor cover={siteImage("blog.cover-0")} media={media} />
+            ) : null}
             {section === "sessions" ? (
               <>
                 <SessionEditor episodes={data.podcasts} media={media} />
@@ -352,6 +365,125 @@ export default async function Admin({
                       </td>
                     </AdminRow>
                   ))}
+              </tbody>
+            </table>
+          </AdminTable>
+        ) : null}
+        {section === "events" ? (
+          <AdminTable>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Event</th>
+                  <th>Seats</th>
+                  <th>Status</th>
+                  <th aria-label="Actions" />
+                </tr>
+              </thead>
+              <tbody>
+                {(data.events ?? [])
+                  .toSorted(
+                    (a, b) =>
+                      Number(isPast(a)) - Number(isPast(b)) ||
+                      (isPast(a)
+                        ? (b.date + b.start).localeCompare(a.date + a.start)
+                        : (a.date + a.start).localeCompare(b.date + b.start)),
+                  )
+                  .map((e) => (
+                    <tr key={e.id} className={isPast(e) ? "is-past" : ""}>
+                      <td className="nowrap">
+                        <b>
+                          {fmtDate(e.date, {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </b>
+                        <br />
+                        <small className="muted">
+                          {fmtTime(e.start)} – {fmtTime(e.end)}
+                        </small>
+                      </td>
+                      <td>
+                        <b>{e.title}</b>
+                        <br />
+                        <small className="muted">{e.venue}</small>
+                      </td>
+                      <td>
+                        {e.attendees.length} / {e.seats}
+                        {e.attendees.length >= e.seats ? (
+                          <small className="muted"> · full</small>
+                        ) : null}
+                      </td>
+                      <td>
+                        <Status value={e.status} />
+                      </td>
+                      <td className="admin-row-actions">
+                        <EventEditor
+                          event={e}
+                          cover={siteImage(`event.${e.id}`)}
+                          media={media}
+                        />{" "}
+                        <Link
+                          className="btn btn-sm btn-ghost"
+                          href={`/event/${e.id}`}
+                        >
+                          View
+                        </Link>
+                        <AdminDialog
+                          title={`Attendees: ${e.title}`}
+                          trigger={`Attendees (${e.attendees.length})`}
+                        >
+                          {e.attendees.length ? (
+                            <ul className="attendee-list">
+                              {e.attendees.map((id) => (
+                                <li key={id}>
+                                  <span className="avatar-soft" aria-hidden="true">
+                                    {initials(name(id))}
+                                  </span>
+                                  <span>
+                                    <MemberLink id={id} name={name(id)} />
+                                    <small className="muted">
+                                      {data.members.find((m) => m.id === id)
+                                        ?.email ?? ""}
+                                    </small>
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="muted">Nobody has joined yet.</p>
+                          )}
+                        </AdminDialog>
+                        {e.status === "published" ? (
+                          <>
+                            <Link
+                              className="btn btn-sm btn-ghost notify-link"
+                              href={`/admin/announce?about=event:${e.id}`}
+                            >
+                              Send notification
+                            </Link>
+                            {!isPast(e) && e.attendees.length ? (
+                              <Link
+                                className="btn btn-sm btn-ghost notify-link"
+                                href={`/admin/announce?about=eventreminder:${e.id}`}
+                              >
+                                Send reminder
+                              </Link>
+                            ) : null}
+                          </>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                {!(data.events ?? []).length && (
+                  <tr>
+                    <td colSpan={5} className="muted">
+                      No events yet. Add one with + New event.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </AdminTable>
@@ -644,11 +776,11 @@ export default async function Admin({
             <AnnouncementComposer
               key={`${to ?? ""}|${about ?? ""}`}
               quota={emailQuota()}
-              draft={notificationDraft(about)}
+              draft={draft}
               siteSettings={data.siteSettings}
-              initialRecipients={
-                to && data.members.some((member) => member.id === to) ? [to] : []
-              }
+              initialRecipients={(draft?.recipientIds ?? (to ? [to] : [])).filter(
+                (id) => data.members.some((member) => member.id === id),
+              )}
               members={data.members.map((member) => ({
                 id: member.id,
                 name: member.name,

@@ -2033,5 +2033,130 @@
     "id": "contact.preferred-time-hint",
     "group": "Contact",
     "text": "Pick a time that suits you and Sibel will confirm by email."
+  },
+  {
+    "id": "navigation./events",
+    "group": "Navigation",
+    "text": "Events"
+  },
+  {
+    "id": "events.eyebrow",
+    "group": "Events",
+    "text": "Events"
+  },
+  {
+    "id": "events.title",
+    "group": "Events",
+    "text": "Meet us in person"
+  },
+  {
+    "id": "events.sub",
+    "group": "Events",
+    "text": "Warm, small gatherings with Sibel and the community. Everyone can look; members join with one click."
+  },
+  {
+    "id": "events.upcoming",
+    "group": "Events",
+    "text": "Upcoming events"
+  },
+  {
+    "id": "events.past",
+    "group": "Events",
+    "text": "Past events"
+  },
+  {
+    "id": "events.none",
+    "group": "Events",
+    "text": "No upcoming events right now. Please check back soon."
+  },
+  {
+    "id": "events.seats-left",
+    "group": "Events",
+    "text": "seats left"
+  },
+  {
+    "id": "events.no-seats",
+    "group": "Events",
+    "text": "No seats left"
+  },
+  {
+    "id": "events.join",
+    "group": "Events",
+    "text": "Join"
+  },
+  {
+    "id": "events.leave",
+    "group": "Events",
+    "text": "Leave"
+  },
+  {
+    "id": "events.joined",
+    "group": "Events",
+    "text": "You are going"
+  },
+  {
+    "id": "events.sign-in-to-join",
+    "group": "Events",
+    "text": "Sign in or register to join this event."
+  },
+  {
+    "id": "events.register",
+    "group": "Events",
+    "text": "Register"
+  },
+  {
+    "id": "events.admin-note",
+    "group": "Events",
+    "text": "You are signed in as the administrator. Manage this event from the Events page in the admin panel."
+  },
+  {
+    "id": "events.back",
+    "group": "Events",
+    "text": "All events"
+  },
+  {
+    "id": "events.details",
+    "group": "Events",
+    "text": "Event details"
+  },
+  {
+    "id": "events.map",
+    "group": "Events",
+    "text": "View map"
+  },
+  {
+    "id": "events.free",
+    "group": "Events",
+    "text": "Free"
+  },
+  {
+    "id": "events.payment-later",
+    "group": "Events",
+    "text": "Payment comes later. Nothing is charged when you join."
+  },
+  {
+    "id": "events.past-notice",
+    "group": "Events",
+    "text": "This event has already taken place."
+  },
+  {
+    "id": "events.past-label",
+    "group": "Events",
+    "text": "Event finished"
+  },
+  {
+    "id": "events.my-events",
+    "group": "Events",
+    "text": "My events"
+  },
+  {
+    "id": "events.my-none",
+    "group": "Events",
+    "text": "You have not joined any upcoming events yet."
+  },
+  {
+    "id": "events.browse",
+    "group": "Events",
+    "text": "Browse events"
   }
 ]

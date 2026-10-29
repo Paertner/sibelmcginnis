@@ -6,6 +6,7 @@ import { navigate } from "../../preview/shims/navigation";
 import { clearSession, getUser, setDemoSession } from "./auth";
 import { demoEnabled, demoMeeting, getDemoState, getStore } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
+import { isPast } from "./event-posts";
 import { isPremium } from "./access";
 import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
@@ -97,7 +98,15 @@ export async function demoLogin(form: FormData) {
   checkDemo();
   const id = choice(form, "account", ["m0", "m1", "admin"]);
   await setDemoSession(id);
-  return navigate(id === "admin" ? "/admin" : "/account");
+  // Visitors sent here from an event come back to it.
+  const back = text(form, "next", 200);
+  return navigate(
+    back.startsWith("/") && !back.startsWith("//")
+      ? back
+      : id === "admin"
+        ? "/admin"
+        : "/account",
+  );
 }
 export async function signOut() {
   await clearSession();
@@ -138,6 +147,8 @@ export async function join(
           : "",
     });
     await setDemoSession(id);
+    const back = text(form, "next", 200);
+    if (back.startsWith("/") && !back.startsWith("//")) return navigate(back);
   } catch (error) {
     return errorResult(error);
   }
@@ -212,6 +223,53 @@ export async function saveEmailPreferences(
         ? "You are unsubscribed from all emails. You can turn them back on here at any time."
         : "Your email preferences are saved.",
     );
+  } catch (error) {
+    return errorResult(error);
+  }
+}
+
+/** A signed-in member takes a seat at an event. */
+export async function joinEvent(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    checkDemo();
+    const user = await getUser();
+    if (!user || user.role === "admin")
+      throw new Error("Sign in as a member to join an event.");
+    const event = (getStore().events ?? []).find(
+      (e) => e.id === text(form, "id") && e.status === "published",
+    );
+    if (!event) throw new Error("This event is no longer available.");
+    if (isPast(event)) throw new Error("This event has already taken place.");
+    if (event.attendees.includes(user.id))
+      throw new Error("You have already joined this event.");
+    if (event.attendees.length >= event.seats)
+      throw new Error("No seats left for this event.");
+    event.attendees.push(user.id);
+    return success("You’re in! Your seat is saved.");
+  } catch (error) {
+    return errorResult(error);
+  }
+}
+/** A member gives their seat back. */
+export async function leaveEvent(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  try {
+    checkDemo();
+    const user = await getUser();
+    if (!user) throw new Error("Sign in first.");
+    const event = (getStore().events ?? []).find(
+      (e) => e.id === text(form, "id"),
+    );
+    if (!event || !event.attendees.includes(user.id))
+      throw new Error("You have not joined this event.");
+    if (isPast(event)) throw new Error("This event has already taken place.");
+    event.attendees = event.attendees.filter((m) => m !== user.id);
+    return success("You left the event. Your seat is free again.");
   } catch (error) {
     return errorResult(error);
   }
@@ -328,6 +386,9 @@ export async function adminMutation(
           data.podcasts = data.podcasts.filter((x) => x.id !== id);
           getDemoState().audio.delete(id);
           break;
+        case "events":
+          data.events = (data.events ?? []).filter((x) => x.id !== id);
+          break;
         default:
           throw new Error("Unknown item.");
       }
@@ -396,6 +457,59 @@ export async function adminMutation(
       if (coverMedia) {
         const cover = new FormData();
         cover.set("slot", `post.${postId}`);
+        cover.set("media", coverMedia);
+        cover.set("alt", text(form, "coverAlt", 300));
+        cover.set("position", text(form, "coverPosition", 40) || "center");
+        await updateSiteImage(cover);
+      }
+    } else if (entity === "events") {
+      const blocks = parseBlocks(text(form, "blocks", 400000));
+      if (!blocksText(blocks))
+        throw new Error("Add a description to the event.");
+      const date = required(form, "date"),
+        start = required(form, "start", 5),
+        end = required(form, "end", 5),
+        seats = Number(text(form, "seats", 6)),
+        mapUrl = text(form, "mapUrl", 500),
+        timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+      if (!Number.isInteger(seats) || seats < 1 || seats > 10000)
+        throw new Error("The seat limit must be a whole number, at least 1.");
+      if (!validDate(date)) throw new Error("Choose a valid event date.");
+      if (!timePattern.test(start) || !timePattern.test(end))
+        throw new Error("Enter the start and end time.");
+      if (end <= start) throw new Error("The event must end after it starts.");
+      if (mapUrl && !/^https:\/\/\S+$/i.test(mapUrl))
+        throw new Error("Enter a full https:// link for the map.");
+      const list = (data.events ??= []);
+      const item = list.find((x) => x.id === id);
+      if (item && seats < item.attendees.length)
+        throw new Error(
+          `${item.attendees.length} ${item.attendees.length === 1 ? "person has" : "people have"} already joined, so the seat limit cannot be lower than ${item.attendees.length}.`,
+        );
+      const value = {
+        title: required(form, "title", 250),
+        status: choice(form, "status", ["draft", "published"]) as
+          | "draft"
+          | "published",
+        date,
+        start,
+        end,
+        venue: required(form, "venue", 200),
+        address: required(form, "address", 300),
+        mapUrl,
+        seats,
+        price: text(form, "price", 40) || "Free",
+        summary: required(form, "summary", 500),
+        blocks,
+      };
+      const eventId = item?.id ?? uid();
+      if (item) Object.assign(item, value);
+      else list.push({ id: eventId, attendees: [], ...value });
+      // A cover chosen in the media picker becomes this event's own image.
+      const coverMedia = text(form, "coverMedia", 200);
+      if (coverMedia) {
+        const cover = new FormData();
+        cover.set("slot", `event.${eventId}`);
         cover.set("media", coverMedia);
         cover.set("alt", text(form, "coverAlt", 300));
         cover.set("position", text(form, "coverPosition", 40) || "center");

@@ -56,6 +56,26 @@ export type MediaFile = {
   size: number;
   uploadedAt: string;
 };
+/** An in-person event. Members join with one button; attendees are member ids. */
+export type EventItem = {
+  id: string;
+  title: string;
+  status: "draft" | "published";
+  /** YYYY-MM-DD */
+  date: string;
+  /** HH:MM, 24 hour */
+  start: string;
+  end: string;
+  venue: string;
+  address: string;
+  mapUrl: string;
+  seats: number;
+  /** "Free" or a price such as "$35". Payment itself comes later. */
+  price: string;
+  summary: string;
+  blocks: EmailBlock[];
+  attendees: string[];
+};
 export type Store = Omit<
   typeof seed,
   "members" | "announcements" | "posts" | "sessions"
@@ -67,6 +87,7 @@ export type Store = Omit<
   sessions: ((typeof seed)["sessions"][number] & {
     blocks?: EmailBlock[];
   })[];
+  events?: EventItem[];
   siteCopy?: Record<string,string>;
   siteImages?: Record<string, {imageId?:string;builtin?:string;alt?:string;position?:string;fileName?:string}>;
   media?: MediaFile[];
@@ -100,6 +121,95 @@ const globalStore = globalThis as typeof globalThis & {
   morningCoffeeDemo?: DemoState;
 };
 
+const eventText = (id: string, html: string): EmailBlock => ({
+  id,
+  type: "text",
+  html,
+});
+function sampleEvents(): EventItem[] {
+  return [
+    {
+      id: "event-brunch",
+      title: "Women’s Spring Brunch",
+      status: "published",
+      date: addDays(today(), 12),
+      start: "10:00",
+      end: "12:30",
+      venue: "The Garden Room",
+      address: "214 Maple Street, Austin, TX 78701",
+      mapUrl: "https://maps.google.com/?q=214+Maple+Street+Austin+TX",
+      seats: 12,
+      price: "Free",
+      summary:
+        "A relaxed brunch to meet other women from the community, share a story and leave with one clear intention.",
+      blocks: [
+        eventText(
+          "b1",
+          "Join Sibel and the community for a relaxed brunch. We will share a table, a short guided reflection and a lot of laughter.",
+        ),
+        eventText(
+          "b2",
+          "<strong>What to expect</strong><br>A warm welcome, coffee and brunch, a short circle and time to connect.",
+        ),
+      ],
+      attendees: ["m0", "m2", "m3", "m5", "m8"],
+    },
+    {
+      id: "event-workshop",
+      title: "Intention Setting Workshop",
+      status: "published",
+      date: addDays(today(), 26),
+      start: "18:30",
+      end: "20:30",
+      venue: "Maple Studio",
+      address: "88 Congress Avenue, Austin, TX 78701",
+      mapUrl: "",
+      seats: 3,
+      price: "$35",
+      summary:
+        "A small hands-on evening workshop to set your intentions for the season. Only three seats.",
+      blocks: [
+        eventText(
+          "w1",
+          "A small, hands-on evening to turn your goals into simple weekly intentions. Bring a notebook.",
+        ),
+      ],
+      attendees: ["m1", "m4", "m7"],
+    },
+    {
+      id: "event-draft",
+      title: "Holiday Coffee Morning",
+      status: "draft",
+      date: addDays(today(), 45),
+      start: "09:30",
+      end: "11:30",
+      venue: "To be confirmed",
+      address: "",
+      mapUrl: "",
+      seats: 20,
+      price: "Free",
+      summary: "A cozy coffee morning before the holidays.",
+      blocks: [eventText("d1", "Details coming soon.")],
+      attendees: [],
+    },
+    {
+      id: "event-past",
+      title: "Autumn Walk and Coffee",
+      status: "published",
+      date: addDays(today(), -20),
+      start: "09:00",
+      end: "11:00",
+      venue: "Zilker Park Café",
+      address: "2100 Barton Springs Road, Austin, TX 78746",
+      mapUrl: "",
+      seats: 15,
+      price: "Free",
+      summary: "A gentle walk followed by coffee and conversation.",
+      blocks: [eventText("p1", "Thank you to everyone who joined us.")],
+      attendees: ["m1", "m2", "m4", "m6", "m9", "m11"],
+    },
+  ];
+}
 function createFreshState(): DemoState {
   const data: Store = structuredClone(seed);
   const anchor = seed.sessions[4].date;
@@ -125,6 +235,7 @@ function createFreshState(): DemoState {
   for (const member of data.members)
     if (member.tier === "premium")
       member.premiumUntil = new Date(Date.now() + 30 * 86400000).toISOString();
+  data.events = sampleEvents();
   return { data, audio: new Map(), images: new Map(), emailDrafts: [] };
 }
 
@@ -145,11 +256,14 @@ export function getDemoState() {
 }
 // Posts have two access levels now; older "free" posts are open to everyone.
 function normalize(state: DemoState) {
+  // Browsers that saved their sample data before Events existed get the sample events.
+  if (!state.data.events) state.data.events = sampleEvents();
   for (const post of state.data.posts)
     if ((post.access as string) === "free") post.access = "public";
   return state;
 }
 export const getStore = () => getDemoState().data;
+export const eventList = () => getStore().events ?? [];
 export const demoEnabled = () =>
   true;
 export const demoMeeting = (id: string) => `https://example.invalid/zoom/${id}`;
