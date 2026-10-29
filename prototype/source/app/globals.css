@@ -7574,3 +7574,26 @@ ul.ticks li::before {
 .ad-main > .dash-notice {
   margin-bottom: 20px;
 }
+
+/* Days left until the next Saturday circle. */
+.next-circle {
+  position: relative;
+}
+.next-circle .days-left {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font: 500 0.8rem var(--font-poppins);
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .next-circle .days-left {
+    position: static;
+    display: inline-block;
+    margin: -6px 0 14px;
+  }
+}

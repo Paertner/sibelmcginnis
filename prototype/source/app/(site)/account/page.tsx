@@ -4,7 +4,7 @@ import Link from "next/link";
 import { requireMember } from "@/lib/auth";
 import { getDemoState, getStore, upcomingSessions } from "@/lib/store";
 import { canView, isPremium } from "@/lib/access";
-import { addDays, fmtDate, today } from "@/lib/dates";
+import { addDays, daysLeftLabel, fmtDate, today } from "@/lib/dates";
 import { bookingEvent, sessionEvent } from "@/lib/events";
 import { Badge, PostCards } from "@/components/post-cards";
 import Image from "next/image";
@@ -379,6 +379,11 @@ export default async function Account({
             <p className="next-circle-eyebrow">
               {siteText("account.your-next-saturday-circle")}
             </p>
+            {daysLeftLabel(next.date) ? (
+              <span className="days-left" role="status">
+                {daysLeftLabel(next.date)}
+              </span>
+            ) : null}
             <div className="next-circle-row">
               <span className="date-block" aria-hidden="true">
                 <small>{fmtDate(next.date, { weekday: "short" })}</small>

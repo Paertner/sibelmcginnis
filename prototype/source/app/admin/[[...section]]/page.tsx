@@ -28,7 +28,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { getStore, upcomingSessions, type Session } from "@/lib/store";
-import { fmtDate, today } from "@/lib/dates";
+import { daysLeftLabel, fmtDate, today } from "@/lib/dates";
 import { fmtTime, isPast } from "@/lib/event-posts";
 import { adminMutation, cancelBooking, signOut } from "@/lib/actions";
 import { ActionForm } from "@/components/action-form";
@@ -895,6 +895,11 @@ function SessionsPage({
         {next ? (
           <section className="next-circle" aria-labelledby="next-circle-title">
             <p className="next-circle-eyebrow">Next circle</p>
+            {daysLeftLabel(next.date) ? (
+              <span className="days-left" role="status">
+                {daysLeftLabel(next.date)}
+              </span>
+            ) : null}
             <div className="next-circle-row">
               <span className="date-block" aria-hidden="true">
                 <small>{fmtDate(next.date, { weekday: "short" })}</small>
