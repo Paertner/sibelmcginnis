@@ -25,7 +25,7 @@ import {Header,Footer} from "../source/components/site-chrome";
 import {getUser,chooseRole} from "../source/lib/auth";
 import {getStore,resetPreview,hydratePreviewImages} from "../source/lib/store";
 import {currentLocation,navigate} from "./shims/navigation";
-import {sessionEvent,bookingEvent} from "../source/lib/events";
+import {sessionEvent,bookingEvent,eventCalendarEvent} from "../source/lib/events";
 import {createIcs} from "../source/lib/calendar";
 import {emailDraft} from "../source/lib/announcements";
 import {isPremium,type Role} from "../source/lib/access";
@@ -92,6 +92,8 @@ document.addEventListener("click",async event=>{
  if(url.pathname.startsWith("/api/calendar/")){
   event.preventDefault();const user=await getUser();
   const [,, ,kind,id]=url.pathname.split("/"),data=getStore();
+  // Events are public, so their calendar file needs no sign-in.
+  if(kind==="event"){const item=data.events?.find(e=>e.id===id&&e.status==="published");if(item)download(createIcs(eventCalendarEvent(item)),"text/calendar;charset=utf-8","morning-coffee-event.ics");return;}
   // A company's confirmation page is open to the visitor who just booked; its id is not guessable.
   const companyBooking=kind==="booking"?data.bookings.find(b=>b.id===id&&b.status==="confirmed"&&b.source==="company"):undefined;
   if(!companyBooking&&(!user||!isPremium(user.role))){window.dispatchEvent(new CustomEvent("preview-toast",{detail:"Choose an active Premium member to add this event."}));return;}

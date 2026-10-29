@@ -10,6 +10,8 @@ import { isPaid, isPast, timeRange } from "@/lib/event-posts";
 import { BlockContent } from "@/components/block-content";
 import { Icon } from "@/components/admin-icons";
 import { JoinPanel, SeatMeter } from "@/components/event-join";
+import { CalendarButtons } from "@/components/calendar-buttons";
+import { eventCalendarEvent } from "@/lib/events";
 export async function generateMetadata({
   params,
 }: {
@@ -100,6 +102,14 @@ export default async function EventPage({
               role={user?.role ?? "visitor"}
               userId={user?.id}
             />
+            {isPast(event) ? null : (
+              <div className="event-calendar">
+                <CalendarButtons
+                  event={eventCalendarEvent(event)}
+                  kind="event"
+                />
+              </div>
+            )}
           </aside>
         </div>
       </div>

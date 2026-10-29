@@ -5,7 +5,11 @@ import { requireMember } from "@/lib/auth";
 import { getDemoState, getStore, upcomingSessions } from "@/lib/store";
 import { canView, isPremium } from "@/lib/access";
 import { addDays, daysLeftLabel, fmtDate, today } from "@/lib/dates";
-import { bookingEvent, sessionEvent } from "@/lib/events";
+import {
+  bookingEvent,
+  eventCalendarEvent,
+  sessionEvent,
+} from "@/lib/events";
 import { Badge, PostCards } from "@/components/post-cards";
 import Image from "next/image";
 import { postImageProps } from "@/lib/site-images";
@@ -463,6 +467,10 @@ export default async function Account({
                       </small>
                     </span>
                   </Link>
+                  <CalendarButtons
+                    event={eventCalendarEvent(e)}
+                    kind="event"
+                  />
                 </li>
               ))}
             </ul>

@@ -7355,7 +7355,15 @@ ul.ticks li::before {
   display: grid;
   gap: 12px;
 }
-.my-events-list a {
+.my-events-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.my-events-list li > a {
+  flex: 1;
+  min-width: 200px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -7649,4 +7657,16 @@ ul.ticks li::before {
 }
 .consult-footer .muted {
   font-size: 0.85rem;
+}
+
+/* Add to calendar on the event page. */
+.event-calendar {
+  margin-top: 14px;
+}
+.event-calendar .cal-menu > summary {
+  width: 100%;
+  justify-content: center;
+}
+.event-calendar .cal-menu {
+  display: block;
 }

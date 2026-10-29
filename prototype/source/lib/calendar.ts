@@ -6,6 +6,8 @@ export type CalendarEvent = {
   minutes: number;
   details: string;
   url: string;
+  /** Where it happens, for in-person events; the link is used when empty. */
+  location?: string;
 };
 export function calendarTimes(event: CalendarEvent) {
   const match = /^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i.exec(event.time);
@@ -30,7 +32,7 @@ export function googleCalendarUrl(event: CalendarEvent) {
       text: event.title,
       dates: `${start}/${end}`,
       details: event.details,
-      location: event.url,
+      location: event.location || event.url,
     })
   );
 }
@@ -54,7 +56,7 @@ export function createIcs(event: CalendarEvent) {
     `DTEND:${end}`,
     `SUMMARY:${escape(event.title)}`,
     `DESCRIPTION:${escape(event.details)}`,
-    `LOCATION:${escape(event.url)}`,
+    `LOCATION:${escape(event.location || event.url)}`,
     `URL:${event.url}`,
     "BEGIN:VALARM",
     "TRIGGER:-PT30M",
