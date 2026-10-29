@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearSession, getUser, setDemoSession } from "./auth";
+import { adminClient, sessionClient } from "./supabase";
 import { demoEnabled, demoMeeting, getDemoState, getStore } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
 import { isPast } from "./event-posts";
@@ -118,6 +119,41 @@ export async function demoLogin(form: FormData) {
         : "/account",
   );
 }
+const safeBack = (form: FormData) => {
+  const back = text(form, "next", 200);
+  return back.startsWith("/") && !back.startsWith("//") ? back : "";
+};
+/** Real sign-in with email and password. */
+export async function login(
+  _state: ActionResult,
+  form: FormData,
+): Promise<ActionResult> {
+  let destination = "/account";
+  try {
+    const { data, error } = await (
+      await sessionClient()
+    ).auth.signInWithPassword({
+      email: email(form),
+      password: String(form.get("password") ?? ""),
+    });
+    if (error || !data.user)
+      throw new Error("The email or password is not correct.");
+    const { data: profile } = await adminClient()
+      .from("profiles")
+      .select("role,status")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (profile?.status !== "active") {
+      await (await sessionClient()).auth.signOut();
+      throw new Error("This account is not active. Please get in touch.");
+    }
+    destination =
+      safeBack(form) || (profile.role === "admin" ? "/admin" : "/account");
+  } catch (error) {
+    return errorResult(error);
+  }
+  redirect(destination);
+}
 export async function signOut() {
   await clearSession();
   redirect("/");
@@ -128,6 +164,38 @@ export async function join(
 ): Promise<ActionResult> {
   let id: string,
     destination = "/account";
+  if (!demoEnabled()) {
+    try {
+      const name = required(form, "name", 120),
+        address = email(form),
+        password = String(form.get("password") ?? "");
+      if (password.length < 8)
+        throw new Error("Use a password with at least 8 characters.");
+      if (password !== String(form.get("repeatPassword") ?? ""))
+        throw new Error("The two passwords don’t match.");
+      const { error } = await adminClient().auth.admin.createUser({
+        email: address,
+        password,
+        // Email confirmation is switched on once our own sending domain is verified.
+        email_confirm: true,
+        user_metadata: { name },
+      });
+      if (error)
+        throw new Error(
+          /already|registered|exists/i.test(error.message)
+            ? "An account with this email already exists. Please sign in."
+            : "We could not create the account. Please try again.",
+        );
+      const signedIn = await (
+        await sessionClient()
+      ).auth.signInWithPassword({ email: address, password });
+      if (signedIn.error) throw new Error("Account created. Please sign in.");
+      destination = safeBack(form) || "/account";
+    } catch (error) {
+      return errorResult(error);
+    }
+    redirect(destination);
+  }
   try {
     checkDemo();
     const tier = choice(form, "plan", ["free", "premium"]);

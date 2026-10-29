@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { demoEnabled, getStore } from "./store";
 import type { User } from "./access";
 import { memberRole } from "./membership";
+import { adminClient, sessionClient, supabaseConfigured } from "./supabase";
 
 const globalAuth = globalThis as typeof globalThis & {
   morningCoffeeSecret?: string;
@@ -15,8 +16,34 @@ const sign = (value: string) =>
   createHmac("sha256", secret()).update(value).digest("hex");
 const COOKIE = "mcc-development-session";
 
+/** Real sign-in: the Supabase session cookie, then the member's profile row. */
+async function getRealUser(): Promise<User | null> {
+  if (!supabaseConfigured()) return null;
+  const { data } = await (await sessionClient()).auth.getUser();
+  if (!data.user) return null;
+  const { data: profile } = await adminClient()
+    .from("profiles")
+    .select("id,name,email,role,tier,status,premium_until")
+    .eq("id", data.user.id)
+    .maybeSingle();
+  if (!profile || profile.status !== "active") return null;
+  return {
+    id: profile.id,
+    name: profile.name || profile.email,
+    email: profile.email,
+    role:
+      profile.role === "admin"
+        ? "admin"
+        : memberRole({
+            tier: profile.tier,
+            status: profile.status,
+            premiumUntil: profile.premium_until ?? undefined,
+          }),
+  };
+}
+
 export async function getUser(): Promise<User | null> {
-  if (!demoEnabled()) return null;
+  if (!demoEnabled()) return getRealUser();
   const raw = (await cookies()).get(COOKIE)?.value;
   if (!raw) return null;
   const [id, expires, signature] = raw.split(".");
@@ -59,6 +86,7 @@ export async function setDemoSession(id: string) {
 }
 export async function clearSession() {
   (await cookies()).delete(COOKIE);
+  if (supabaseConfigured()) await (await sessionClient()).auth.signOut();
 }
 export async function requireMember() {
   const user = await getUser();

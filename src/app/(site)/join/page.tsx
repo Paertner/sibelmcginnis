@@ -5,6 +5,7 @@ import { PasswordFields } from "@/components/password-fields";
 import { join } from "@/lib/actions";
 import { siteBackground } from "@/lib/site-images";
 import { demoEnabled, getStore } from "@/lib/store";
+import { supabaseConfigured } from "@/lib/supabase";
 export const metadata = { title: "Join the community" };
 export default async function Join({
   searchParams,
@@ -61,7 +62,7 @@ export default async function Join({
               <small>${price} / month</small>
             </Link>
           </div>
-          {demoEnabled() ? (
+          {demoEnabled() || supabaseConfigured() ? (
             <ActionForm
               action={join}
               submitLabel={
@@ -99,11 +100,13 @@ export default async function Join({
                 repeatLabel={siteText("join.repeat-password")}
                 hint={siteText("join.password-hint")}
               />
-              <p className="join-note">
-                {siteText(
-                  "join.create-a-sample-membership-for-local-review-no-payment-is-taken-a",
-                )}
-              </p>
+              {demoEnabled() ? (
+                <p className="join-note">
+                  {siteText(
+                    "join.create-a-sample-membership-for-local-review-no-payment-is-taken-a",
+                  )}
+                </p>
+              ) : null}
             </ActionForm>
           ) : (
             <p>

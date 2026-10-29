@@ -3,7 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { demoEnabled } from "@/lib/store";
-import { demoLogin } from "@/lib/actions";
+import { demoLogin, login } from "@/lib/actions";
+import { ActionForm } from "@/components/action-form";
+import { supabaseConfigured } from "@/lib/supabase";
 export const metadata = { title: "Sign in" };
 export default async function Login({
   searchParams,
@@ -57,6 +59,23 @@ export default async function Login({
             ))}
           </form>
         </>
+      ) : supabaseConfigured() ? (
+        <ActionForm action={login} submitLabel="Sign in">
+          <input type="hidden" name="next" value={back} />
+          <label className="field">
+            Email
+            <input name="email" type="email" autoComplete="email" required />
+          </label>
+          <label className="field">
+            Password
+            <input
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+            />
+          </label>
+        </ActionForm>
       ) : (
         <p className="muted">
           {siteText(
