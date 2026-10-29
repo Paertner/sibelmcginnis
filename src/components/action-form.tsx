@@ -1,7 +1,7 @@
 "use client";
 import { startTransition, useActionState, useRef } from "react";
 import { useAdminDialog } from "./admin-dialog";
-export type ActionResult = { message: string; ok?: boolean; id?: string };
+export type ActionResult = { message: string; ok?: boolean; id?: string; keepOpen?: boolean };
 export function ActionForm({
   action,
   children,
@@ -26,7 +26,7 @@ export function ActionForm({
   const [state, formAction, pending] = useActionState(
     async (previous: ActionResult, data: FormData) => {
       const result = await action(previous, data);
-      if (result.ok) {
+      if (result.ok && !result.keepOpen) {
         form.current?.reset();
         closeDialog?.();
       }

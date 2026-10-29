@@ -86,12 +86,15 @@ function Editor({
   children,
   quiet = false,
   trigger,
+  extraActions,
 }: {
   title: string;
   entity: string;
   id?: string;
   children: React.ReactNode;
   quiet?: boolean;
+  /** Extra buttons next to Delete, only shown when editing. */
+  extraActions?: React.ReactNode;
   /** Show this text as a link-style trigger instead of the Edit button. */
   trigger?: string;
 }) {
@@ -108,6 +111,7 @@ function Editor({
         actions={
           <>
             {id ? <ConfirmDelete /> : null}
+            {id ? extraActions : null}
             <span className="form-actions-gap" />
             <AdminCancel />
           </>
@@ -133,6 +137,16 @@ export function MemberEditor({
       entity="members"
       id={member?.id}
       trigger={asName ? member?.name : undefined}
+      extraActions={
+        <button
+          className="btn btn-sm btn-ghost"
+          name="op"
+          value="resetLink"
+          formNoValidate
+        >
+          Create password link
+        </button>
+      }
     >
       <div className="row">
         <Field name="name" label="Full name" value={member?.name} />

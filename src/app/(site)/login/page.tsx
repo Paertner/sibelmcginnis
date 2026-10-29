@@ -83,6 +83,11 @@ export default async function Login({
           )}
         </p>
       )}
+      {!demoEnabled() && supabaseConfigured() ? (
+        <p className="center">
+          <Link href="/forgot-password">Forgot your password?</Link>
+        </p>
+      ) : null}
       <p className="center">
         {siteText("login.new-here")}{" "}
         <Link

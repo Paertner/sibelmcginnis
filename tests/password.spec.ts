@@ -16,3 +16,14 @@ test("the password form checks the new password before anything is sent to the r
   await page.getByRole("button", { name: "Change password" }).click();
   await expect(page.getByRole("status")).toContainText("don’t match");
 });
+
+test("forgot password gives the same neutral answer and a bare reset link asks for a new one", async ({
+  page,
+}) => {
+  await page.goto("/forgot-password");
+  await page.getByLabel("Email").fill("someone@example.com");
+  await page.getByRole("button", { name: "Send the link" }).click();
+  await expect(page.getByRole("status")).toContainText("If an account exists");
+  await page.goto("/reset-password");
+  await expect(page.getByText("This link is not complete")).toBeVisible();
+});

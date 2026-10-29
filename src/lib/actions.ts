@@ -16,6 +16,7 @@ import { memberRole } from "./membership";
 import { checkoutUrl, portalUrl } from "./billing";
 import { stripeConfigured, stripe, modeOf } from "./stripe";
 import { getSecret, saveSecret } from "./secrets";
+import { createResetLink } from "./password-reset";
 import { resetZoomToken, testZoomCredentials } from "./zoom";
 import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
 import { addDays, nextSaturday, today } from "./dates";
@@ -238,7 +239,9 @@ export async function changePassword(
       console.error("[changePassword] check failed:", check.error.code);
       throw new Error("Could not change the password. Please try again.");
     }
-    const { error } = await (await sessionClient()).auth.updateUser({
+    const { error } = await (
+      await sessionClient()
+    ).auth.updateUser({
       password: next,
     });
     if (error) {
@@ -705,7 +708,20 @@ export async function adminMutation(
       }
       return success("Item deleted.");
     }
-    if (entity === "members") {
+    if (entity === "members" && op === "resetLink") {
+      if (!usesDatabase())
+        throw new Error("Password links need the real sign-in.");
+      const member = data.members.find((x) => x.id === id);
+      if (!member) throw new Error("Save the member first.");
+      const link = await createResetLink(member.email);
+      if (!link)
+        throw new Error("Could not create the link. Please try again.");
+      return {
+        ok: true,
+        keepOpen: true,
+        message: `Password link for ${member.email}. It works once. Send it to the member: ${link}`,
+      };
+    } else if (entity === "members") {
       const address = email(form);
       if (
         data.members.some(
@@ -735,7 +751,36 @@ export async function adminMutation(
         ).toISOString();
       const item = data.members.find((x) => x.id === id);
       if (item) Object.assign(item, value);
-      else data.members.push({ id: uid(), joined: today(), ...value });
+      else if (usesDatabase()) {
+        // Every member is a Supabase sign-in account; the profile row is made by a trigger.
+        const { error } = await adminClient().auth.admin.createUser({
+          email: address,
+          email_confirm: true,
+          user_metadata: { name: value.name },
+        });
+        if (error)
+          throw new Error(
+            /already|registered|exists/i.test(error.message)
+              ? "An account with this email already exists."
+              : "Could not create the member. Please try again.",
+          );
+        await reloadMembers(data);
+        const created = data.members.find(
+          (m) => m.email.toLowerCase() === address,
+        );
+        if (!created)
+          throw new Error("Could not create the member. Please try again.");
+        Object.assign(created, value);
+        refresh();
+        const link = await createResetLink(address);
+        return {
+          ok: true,
+          keepOpen: true,
+          message: link
+            ? `Member added. They have no password yet. Send them this link to set one (works once): ${link}`
+            : "Member added. Use “Create password link” on their profile to let them set a password.",
+        };
+      } else data.members.push({ id: uid(), joined: today(), ...value });
       // A member who is no longer Premium loses their personal meeting links.
       if (item && memberRole(item) !== "premium")
         await revokeFromUpcoming(item.email);

@@ -190,6 +190,10 @@ export default async function Admin({
             <Icon name="external" />
             View website
           </Link>
+          <Link href="/account?tab=password">
+            <Icon name="lock" />
+            Change password
+          </Link>
           <form action={signOut}>
             <button className="side-signout">
               <Icon name="logout" />

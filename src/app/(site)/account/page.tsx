@@ -360,6 +360,9 @@ export default async function Account({
               Checkout was cancelled. You have not been charged.
             </p>
           ) : null}
+          <p>
+            <Link href="/account?tab=password">Change your password</Link>
+          </p>
           <div className="card">
             <div className="list-item">
               <div>
