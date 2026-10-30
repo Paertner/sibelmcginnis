@@ -7910,7 +7910,7 @@ label a {
 
 /* Coffee theme: warm canvas, large panels in #f4e7de, espresso for small dark accents. */
 :root {
-  --bg: #fff;
+  --bg: #fdfbfa;
   --card: #f4e7de;
   --cream: #f4e7de;
   --ink: #2d221c;
@@ -7934,7 +7934,7 @@ label a {
   color: #fbf6f1;
 }
 .paywall {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--bg) 70px);
+  background: linear-gradient(to bottom, rgba(253, 251, 250, 0), var(--bg) 70px);
 }
 .btn-dark,
 .btn-green {
