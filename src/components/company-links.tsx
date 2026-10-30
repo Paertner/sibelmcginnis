@@ -44,7 +44,14 @@ export function CompanyLinks({
   links: CompanyLink[];
   bookings: Booking[];
 }) {
-  const rows = links.toSorted((a, b) => b.createdAt.localeCompare(a.createdAt));
+  // Newest first. Created dates have no time, so links made on the same day keep the order they were added in, latest on top.
+  const rows = links
+    .map((link, index) => ({ link, index }))
+    .toSorted(
+      (a, b) =>
+        b.link.createdAt.localeCompare(a.link.createdAt) || b.index - a.index,
+    )
+    .map(({ link }) => link);
   return (
     <section
       className="panel company-links"

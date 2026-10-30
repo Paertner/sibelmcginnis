@@ -18,8 +18,8 @@ test("the weekly session day is chosen in Settings and the site follows it", asy
   await save("Friday", "1:00 PM");
   try {
     await page.goto("/");
-    await expect(page.locator(".avatars .tag")).toContainText("Fridays");
-    await expect(page.locator(".avatars .tag")).toContainText("1:00 PM");
+    await expect(page.locator(".photo-chip")).toContainText("Fridays");
+    await expect(page.locator(".photo-chip")).toContainText("1:00 PM");
     await page.goto("/admin/sessions");
     await expect(page.locator(".weekly-settings-note")).toContainText(
       "every Friday at 1:00 PM",

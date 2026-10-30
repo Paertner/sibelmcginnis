@@ -90,9 +90,7 @@ export default async function Login({
       ) : null}
       <p className="center">
         {siteText("login.new-here")}{" "}
-        <Link
-          href={back ? `/join?plan=free&next=${back}` : "/morning-coffee#plans"}
-        >
+        <Link href={back ? `/join?plan=free&next=${back}` : "/join?plan=free"}>
           {siteText("login.see-membership-plans")}
         </Link>
       </p>

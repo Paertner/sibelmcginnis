@@ -27,7 +27,12 @@ export default async function Page() {
               className="hero-photo"
               id="heroPhoto"
               {...siteBackground("home.hero")}
-            ></div>
+            >
+              <span className="photo-chip">
+                <span>{settings.meetingDay}</span> ·{" "}
+                <span>{settings.meetingTime}</span>
+              </span>
+            </div>
             <div className="hero-copy">
               <div className="avatars">
                 <div className="stack">
@@ -41,10 +46,6 @@ export default async function Page() {
                     {siteText("home.na")}
                   </span>
                 </div>
-                <span className="tag">
-                  <span>{settings.meetingDay}</span> ·{" "}
-                  <span>{settings.meetingTime}</span>
-                </span>
               </div>
               <h1>{settings.heroTitle}</h1>
               <p className="hero-intro">{settings.heroSub}</p>

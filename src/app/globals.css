@@ -7910,7 +7910,7 @@ label a {
 
 /* Coffee theme: warm canvas, large panels in #f4e7de, espresso for small dark accents. */
 :root {
-  --bg: #fbf6f1;
+  --bg: #fff;
   --card: #f4e7de;
   --cream: #f4e7de;
   --ink: #2d221c;
@@ -7931,10 +7931,10 @@ label a {
   --panel-sub: #6f5b4e;
 }
 .ghost {
-  color: #f0e1d6;
+  color: #fbf6f1;
 }
 .paywall {
-  background: linear-gradient(to bottom, rgba(251, 246, 241, 0), var(--bg) 70px);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--bg) 70px);
 }
 .btn-dark,
 .btn-green {
@@ -8057,4 +8057,340 @@ label a {
   margin: 0;
   align-self: start;
   font-size: 0.92rem;
+}
+
+/* Button colors follow the accent */
+:root {
+  --ad-accent: #9b5e41;
+  --ad-accent-deep: #7c4930;
+  --ad-accent-line: #c08a6c;
+  --ad-accent-soft: #f6e7dd;
+}
+.btn,
+.btn-dark,
+.btn-green {
+  background: var(--ad-accent);
+  color: #fff;
+}
+.btn:hover,
+.btn-dark:hover,
+.btn-green:hover {
+  background: var(--ad-accent-deep);
+  color: #fff;
+}
+.btn-ghost {
+  background: #fff;
+  color: var(--ink);
+}
+.btn-ghost:hover {
+  background: var(--card);
+  color: var(--ink);
+}
+.dark .btn-ghost,
+.btn-ghost.on-dark,
+.site-footer .btn-ghost {
+  background: var(--panel-soft);
+  color: var(--panel-ink);
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: var(--danger);
+  filter: brightness(0.92);
+}
+
+/* Footer is a little darker than the other panels */
+.site-footer {
+  background: #e4cfbf;
+  --panel-soft: #f4e7de;
+  --panel-line: #d3b9a6;
+}
+
+/* Sign in card alignment */
+.auth {
+  text-align: left;
+}
+.auth > form > .btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 22px;
+}
+.auth > p.center {
+  margin: 18px 0 0;
+  line-height: 1.5;
+}
+.auth > p.center + p.center {
+  margin-top: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.auth .form-feedback {
+  text-align: center;
+}
+
+/* White header; the shadow deepens once the page scrolls */
+.site-header {
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(59, 42, 33, 0.06);
+  transition: box-shadow 0.2s;
+}
+.site-header.scrolled {
+  box-shadow: 0 6px 22px rgba(59, 42, 33, 0.16);
+}
+
+/* Footer: main buttons keep the accent with white text; ghost buttons are white */
+.site-footer .btn:not(.btn-ghost) {
+  background: var(--ad-accent);
+  color: #fff;
+}
+.site-footer .btn:not(.btn-ghost):hover {
+  background: var(--ad-accent-deep);
+  color: #fff;
+}
+.site-footer .btn-ghost {
+  background: #fff;
+  color: var(--panel-ink);
+}
+.site-footer .btn-ghost:hover {
+  background: #fbf6f1;
+  color: var(--panel-ink);
+}
+
+/* Glass header (test): translucent white that blurs what scrolls under it */
+.site-header {
+  background: rgba(255, 255, 255, 0.68);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Previous/Next post cards keep their outline on hover */
+.post-pager a {
+  border: 1px solid transparent;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+.post-pager a:hover {
+  border-color: var(--ad-accent-line);
+}
+
+/* Glass surfaces: only where something sits behind them */
+.photo-chip {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font: 500 0.85rem var(--font-poppins);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow: 0 6px 20px rgba(45, 34, 28, 0.18);
+}
+.hero-photo {
+  position: relative;
+}
+.post-related {
+  background: rgba(244, 231, 222, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 8px 28px rgba(59, 42, 33, 0.1);
+}
+.post-cover .badge {
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--panel-ink, #2d221c);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(10px) saturate(1.4);
+}
+.paywall .card {
+  background: rgba(244, 231, 222, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 14px 40px rgba(59, 42, 33, 0.14);
+}
+.next-circle .date-block,
+.next-circle .status-pills li {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.admin-dialog {
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+.admin-dialog::backdrop {
+  background: rgba(45, 34, 28, 0.35);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+.ad .ad-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin: -30px -36px 26px;
+  padding: 24px 36px 14px;
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+@media (max-width: 1040px) {
+  .nav.open {
+    background: rgba(255, 255, 255, 0.78);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* Premium plan block gets an outline */
+.plan-solo {
+  border: 1px solid var(--ad-accent-line);
+}
+
+/* Cards in a row: the buttons line up at the bottom */
+.grid.g3 > .card {
+  display: flex;
+  flex-direction: column;
+}
+.grid.g3 > .card > .btn:last-child {
+  margin-top: auto;
+  align-self: flex-start;
+}
+.grid.g3 > .card > .ticks {
+  margin-bottom: 20px;
+}
+
+/* Notice actions: View and Dismiss are the same size */
+.dash-notice .btn {
+  padding: 8px 15px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  box-sizing: border-box;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.dash-notice form {
+  display: flex;
+  margin: 0;
+}
+
+/* Editor actions (Delete, Cancel, Save) share one size */
+.admin-dialog .form-actions .btn,
+.admin-dialog .editor-delete .btn,
+.wide-editor-side .editor-delete .btn,
+.wide-editor-side .form-actions .btn {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 20px;
+  font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+}
+.admin-dialog .editor-delete > .btn-danger {
+  margin-right: auto;
+}
+.admin-dialog .editor-delete > .btn-ghost {
+  margin-left: auto;
+}
+
+/* Next session card: the saved message sits on its own line from the left edge */
+.next-circle .nc-manage > form {
+  display: contents;
+}
+.next-circle .nc-manage > form > .form-feedback {
+  position: static;
+  order: 10;
+  flex: 0 0 100%;
+  width: auto;
+  max-width: none;
+  margin: 4px 0 0;
+  text-align: left;
+}
+
+/* No glass on phones: solid surfaces, no blur */
+@media (max-width: 760px) {
+  .site-header,
+  .photo-chip,
+  .post-related,
+  .post-cover .badge,
+  .paywall .card,
+  .next-circle .date-block,
+  .next-circle .status-pills li,
+  .admin-dialog,
+  .admin-dialog::backdrop,
+  .ad .ad-top,
+  .nav.open {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .site-header {
+    background: #fff;
+    border-bottom: 0;
+  }
+  .photo-chip {
+    background: rgba(45, 34, 28, 0.55);
+    border-color: transparent;
+  }
+  .post-related {
+    background: var(--card);
+    border-color: transparent;
+  }
+  .post-cover .badge {
+    background: #fff;
+    border-color: transparent;
+  }
+  .paywall .card {
+    background: #f4e7de;
+    border-color: transparent;
+  }
+  .admin-dialog {
+    background: #fff;
+    border-color: transparent;
+  }
+  .admin-dialog::backdrop {
+    background: rgba(45, 34, 28, 0.55);
+  }
+  .ad .ad-top {
+    background: #fffaf6;
+  }
+  .nav.open {
+    background: #fff;
+    border-color: transparent;
+  }
+}
+
+@media (max-width: 900px) {
+  .ad .ad-top {
+    margin: -22px -16px 20px;
+    padding: 16px 16px 12px;
+  }
+}
+
+/* Program card text is readable on the panel color */
+.pcard p {
+  color: #5c4a3f;
+}
+.faq details[open] p,
+.muted-on-dark,
+.b-dark p,
+.zoomcard p,
+.zoomcard {
+  color: #5c4a3f;
 }

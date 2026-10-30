@@ -765,8 +765,7 @@ export default async function Admin({
                 <h3>Your availability</h3>
                 <p className="hint">
                   Tick the times members can book. All times are Eastern Time
-                  (ET), shown as AM or PM, so 1:00 PM means 1 PM Eastern.
-                  Existing bookings stay in place when you change these.
+                  (EST). Existing bookings stay in place when you change these.
                 </p>
                 {[1, 2, 3, 4, 5, 6, 0].map((index) => {
                   const day = [

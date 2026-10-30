@@ -6,6 +6,7 @@ import { getUser } from "@/lib/auth";
 import { getStore } from "@/lib/store";
 import { Navigation } from "./navigation";
 import { navigation } from "@/lib/navigation";
+import { HeaderShadow } from "./header-shadow";
 export function Brand() {
   return (
     <Link className="brand" href="/">
@@ -26,6 +27,7 @@ export async function Header() {
   const user = await getUser();
   return (
     <header className="site-header">
+      <HeaderShadow />
       <div className="wrap">
         <Brand />
         <Navigation />
