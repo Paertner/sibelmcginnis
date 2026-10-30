@@ -582,7 +582,7 @@ section.block {
 .meter i {
   display: block;
   height: 3px;
-  background: #dcdcdc;
+  background: #e6d3c5;
   border-radius: 3px;
   position: relative;
   margin-bottom: 18px;
@@ -948,7 +948,7 @@ ul.ticks li::before {
   color: var(--danger);
 }
 .b-grey {
-  background: #e6e6e6;
+  background: #efe1d6;
   color: #666;
 }
 
@@ -1333,7 +1333,7 @@ textarea {
 }
 
 body {
-  background: #f5f5f5;
+  background: var(--bg);
   font-size: 16px;
 }
 .ad-main .card,
@@ -7693,4 +7693,368 @@ ul.ticks li::before {
 }
 .event-calendar .cal-menu {
   display: block;
+}
+
+/* Next session card: calendar and days-left share the title row; Join is full width. */
+.next-circle .nc-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.next-circle .nc-head .next-circle-row {
+  min-width: 0;
+}
+.next-circle .nc-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  margin-top: 8px;
+}
+.next-circle .nc-side .days-left {
+  position: static;
+  margin: 0;
+  display: inline-block;
+}
+.next-circle .nc-side .cal-menu > summary {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font: 500 0.8rem var(--font-poppins);
+  white-space: nowrap;
+}
+.next-circle .nc-side .cal-menu-list {
+  left: auto;
+  right: 0;
+}
+.next-circle .nc-join {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 20px;
+}
+.next-circle .nc-join > .btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8c9b4;
+  color: #2d221c;
+  border: 0;
+}
+.next-circle .nc-join > .btn:hover {
+  background: #f2dccc;
+}
+.next-circle .copy-icon-btn {
+  flex: none;
+  width: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-btn);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+}
+.next-circle .copy-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.next-circle .nc-manage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.next-circle .nc-manage > form {
+  margin: 0;
+  position: relative;
+}
+.next-circle .nc-manage > form > .form-feedback {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin: 6px 0 0;
+  width: max-content;
+  max-width: 260px;
+  color: #fff;
+}
+.next-circle .nc-manage .btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f1e5dc;
+}
+.next-circle .nc-manage .btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+@media (max-width: 700px) {
+  .next-circle .nc-head {
+    flex-direction: column;
+  }
+  .next-circle .nc-side {
+    margin-top: 0;
+  }
+}
+
+/* Meeting entry page: keep the note clear of the button, and make links look like links. */
+.meeting-entry .btn {
+  display: inline-block;
+}
+.meeting-entry .btn + .hint {
+  margin-top: 16px;
+}
+.meeting-entry a:not(.btn),
+p a:not(.btn),
+.hint a,
+small a,
+label a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Blog post: the article sits left, related posts stay in view on the right. */
+.post-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 760px) minmax(260px, 340px);
+  gap: 56px;
+  align-items: start;
+  justify-content: start;
+}
+.post-main {
+  min-width: 0;
+}
+.post-related {
+  position: sticky;
+  top: 96px;
+  background: var(--card);
+  border-radius: var(--r);
+  padding: 22px 20px;
+}
+.post-related h2 {
+  font: 400 1.15rem var(--font-inter);
+  margin: 0 0 14px;
+}
+.post-related ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.post-related a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 14px;
+  text-decoration: none;
+}
+.post-related a:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+.related-thumb {
+  position: relative;
+  flex: none;
+  width: 72px;
+  height: 60px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.related-thumb img {
+  object-fit: cover;
+}
+.post-related b {
+  display: block;
+  font: 500 0.9rem/1.35 var(--font-poppins);
+}
+.post-related small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.post-pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 48px;
+}
+.post-pager a {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: var(--r);
+  background: var(--card);
+  text-decoration: none;
+}
+.post-pager a:hover {
+  background: #fff;
+}
+.post-pager a[rel="next"] {
+  text-align: right;
+}
+.post-pager small {
+  color: var(--muted);
+}
+.post-pager b {
+  font: 500 0.95rem/1.35 var(--font-poppins);
+}
+@media (max-width: 960px) {
+  .post-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .post-related {
+    position: static;
+  }
+}
+
+/* Coffee theme: warm canvas, large panels in #f4e7de, espresso for small dark accents. */
+:root {
+  --bg: #fbf6f1;
+  --card: #f4e7de;
+  --cream: #f4e7de;
+  --ink: #2d221c;
+  --ink2: #241a15;
+  --text: #3a2e27;
+  --muted: #7a685c;
+  --line: #e8d6c9;
+  --brown: #3b2a21;
+  --brown-d: #2d221c;
+  --green: #3b2a21;
+  --green-soft: #f0e2d7;
+  --accent-d: #9b7a5c;
+  --shadow: 0 12px 34px rgba(59, 42, 33, 0.1);
+  --panel: #f4e7de;
+  --panel-soft: #ead8cb;
+  --panel-line: #dcc6b6;
+  --panel-ink: #2d221c;
+  --panel-sub: #6f5b4e;
+}
+.ghost {
+  color: #f0e1d6;
+}
+.paywall {
+  background: linear-gradient(to bottom, rgba(251, 246, 241, 0), var(--bg) 70px);
+}
+.btn-dark,
+.btn-green {
+  background: var(--brown);
+  color: #f4e7de;
+}
+.btn-dark:hover {
+  background: var(--brown-d);
+  color: #fff;
+}
+.dark,
+.hero-panel,
+.b-dark,
+.site-footer,
+.paywall .card,
+.zoomcard,
+.article-banner,
+.plan-solo-main {
+  background: var(--panel);
+  color: var(--panel-sub);
+}
+.strip {
+  background: var(--panel-soft);
+  color: var(--panel-sub);
+}
+.dark h1,
+.dark h2,
+.dark h3,
+.hero-copy h1,
+.strip b,
+.b-dark h3,
+.paywall .card h3,
+.zoomcard h2,
+.zoomcard h3,
+.article-banner h2,
+.pcard h3,
+.site-footer .brand,
+.site-footer h2,
+.site-footer h4,
+.plan-solo-sub,
+.plan-solo-price .price,
+.pricebox .price {
+  color: var(--panel-ink);
+}
+.on-dark .pill,
+.dark .pill {
+  background: rgba(45, 34, 28, 0.08);
+  color: var(--panel-ink);
+}
+.hero-intro,
+.plan-solo-price small,
+.paywall .card .muted,
+.pricebox .price small {
+  color: var(--panel-sub);
+}
+.b-dark li {
+  color: #8d7a6d;
+}
+.avatars .stack span {
+  border-color: var(--panel);
+}
+.avatars .tag,
+.dark .btn-ghost,
+.btn-ghost.on-dark,
+.site-footer .btn-ghost {
+  background: var(--panel-soft);
+  color: var(--panel-ink);
+}
+.dark .btn-ghost:hover,
+.btn-ghost.on-dark:hover,
+.site-footer .btn-ghost:hover {
+  background: var(--panel-line);
+  color: var(--panel-ink);
+}
+.pcard {
+  background: var(--panel-soft);
+  color: var(--panel-sub);
+}
+.pcard:hover {
+  background: #e4cfbf;
+}
+.pricebox {
+  background: var(--panel-soft);
+}
+.faq details[open] {
+  background: var(--panel-soft);
+}
+.faq details[open] summary {
+  color: var(--panel-ink);
+}
+.faq details p {
+  color: var(--panel-sub);
+  border-top-color: var(--panel-line);
+}
+.site-footer a {
+  color: var(--panel-sub);
+}
+.site-footer a:hover {
+  color: var(--accent-d);
+}
+.copy {
+  border-top-color: var(--panel-line);
+}
+.plan-solo {
+  background: #fffaf6;
+  box-shadow: 0 20px 60px rgba(59, 42, 33, 0.08);
+}
+.article-banner p {
+  color: var(--accent-d);
+}
+
+.member-circle .next-circle-note {
+  margin-top: 20px !important;
+}
+.next-circle .nc-manage .btn {
+  padding: 8px 15px;
+  font-size: 0.8rem;
+}
+.weekly-settings-note {
+  margin: 0;
+  align-self: start;
+  font-size: 0.92rem;
 }

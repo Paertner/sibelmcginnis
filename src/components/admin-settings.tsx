@@ -7,9 +7,12 @@ import type { EmailQuota } from "@/lib/email-quota";
 import { ActionForm } from "./action-form";
 import { Icon } from "./admin-icons";
 import { MediaPicker } from "./media-library";
+import { SiteSelect } from "./site-select";
+import { weekdays } from "@/lib/weekday";
 
 const tabs = [
   ["general", "General"],
+  ["weekly", "Weekly session"],
   ["payments", "Payments"],
   ["integrations", "Integrations"],
 ] as const;
@@ -206,6 +209,60 @@ function General({
         />
       ) : null}
     </>
+  );
+}
+
+export type WeeklySettings = {
+  weekday: number;
+  time: string;
+  minutes: number;
+  autoZoom: boolean;
+};
+
+function Weekly({ weekly }: { weekly: WeeklySettings }) {
+  return (
+    <ActionForm
+      action={adminMutation}
+      className="panel settings-form"
+      submitLabel="Save weekly session"
+    >
+      <input type="hidden" name="entity" value="weekly" />
+      <input type="hidden" name="id" value="" />
+      <h3>Weekly session</h3>
+      <p className="muted">
+        The day your live circle meets. Dates, labels and wording across the
+        site follow it. Existing sessions keep their dates.
+      </p>
+      <div className="row">
+        <SiteSelect
+          name="meetingWeekday"
+          label="Day of the week"
+          defaultValue={String(weekly.weekday)}
+          options={weekdays.map((day, i) => ({ value: String(i), label: day }))}
+        />
+        <Text
+          name="meetingTime"
+          label="Start time (Eastern Time, e.g. 1:00 PM)"
+          value={weekly.time}
+          required
+        />
+        <Text
+          name="meetingMinutes"
+          label="Length (minutes)"
+          type="number"
+          value={String(weekly.minutes)}
+          required
+        />
+      </div>
+      <label className="checkbox-field">
+        <input
+          type="checkbox"
+          name="autoZoom"
+          defaultChecked={weekly.autoZoom}
+        />{" "}
+        Create a Zoom link automatically when I add a session
+      </label>
+    </ActionForm>
   );
 }
 
@@ -435,7 +492,7 @@ function IntegrationsTab({
           <div>
             <h3>Zoom</h3>
             <p className="muted">
-              Creates a meeting for every Saturday circle and consultation. Uses
+              Creates a meeting for every weekly session and consultation. Uses
               a Zoom Server-to-Server OAuth app.
             </p>
           </div>
@@ -530,7 +587,9 @@ export function AdminSettings({
   quota,
   live,
   webhookUrl,
+  weekly,
 }: {
+  weekly: WeeklySettings;
   /** Real keys are saved (encrypted) instead of only their last four characters. */
   live: boolean;
   webhookUrl: string;
@@ -558,6 +617,8 @@ export function AdminSettings({
       </div>
       {tab === "general" ? (
         <General settings={settings} logo={logo} media={media} />
+      ) : tab === "weekly" ? (
+        <Weekly weekly={weekly} />
       ) : tab === "payments" ? (
         <Payments
           stripe={integrations.stripe}

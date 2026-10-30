@@ -84,6 +84,8 @@ export const footerTemplates: {
     ],
   },
 ];
+/** The footer new sites start with: social icons, address and preference links. */
+export const newsletterFooter = footerTemplates[1].blocks;
 export const emailTemplates: {
   id: string;
   name: string;

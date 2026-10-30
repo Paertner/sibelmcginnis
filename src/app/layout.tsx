@@ -32,7 +32,7 @@ export function generateMetadata(): Metadata {
       template: `%s | ${settings?.siteTitle || "Morning Coffee Community"}`,
     },
     description:
-      "A warm, supportive space for women to connect, reflect and grow. Weekly Saturday circles and personal coaching with Sibel McGinnis.",
+      "A warm, supportive space for women to connect, reflect and grow. Weekly live circles and personal coaching with Sibel McGinnis.",
     robots: { index: false, follow: false },
     ...(settings?.faviconPath ? { icons: { icon: settings.faviconPath } } : {}),
   };
@@ -50,7 +50,10 @@ export default function RootLayout({
       className={`${inter.variable} ${poppins.variable}`}
     >
       <body>
-        <SiteCopyProvider values={getStore().siteCopy ?? {}}>
+        <SiteCopyProvider
+          values={getStore().siteCopy ?? {}}
+          weekday={getStore().settings.meetingWeekday}
+        >
           {children}
         </SiteCopyProvider>
       </body>

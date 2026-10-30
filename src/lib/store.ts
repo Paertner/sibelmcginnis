@@ -1,7 +1,7 @@
 import "server-only";
 import seed from "./seed.json";
 import type { EmailBlock, SavedEmailTemplate } from "./email-blocks";
-import { addDays, nextSaturday, today } from "./dates";
+import { addDays, nextWeekday, today } from "./dates";
 import type { EmailPreferences } from "./email-preferences";
 import { emptyStore } from "./db";
 import { DiskMap } from "./file-storage";
@@ -300,7 +300,7 @@ function createState(): DemoState {
     const weeks = Math.round(
       (Date.parse(session.date) - Date.parse(anchor)) / (7 * 86400000),
     );
-    session.date = nextSaturday(weeks);
+    session.date = nextWeekday(6, weeks);
   }
   for (const member of data.members)
     if (member.tier === "premium")

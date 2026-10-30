@@ -6,7 +6,7 @@ import { CoverField } from "./media-library";
 import { BlocksField } from "./blocks-field";
 import { textToBlocks } from "./block-content";
 import type { MediaItem, SiteImage } from "@/lib/site-images";
-import { fmtDate, today, nextSaturday } from "@/lib/dates";
+import { fmtDate, today, nextWeekday } from "@/lib/dates";
 import type {
   Episode,
   EventItem,
@@ -455,10 +455,13 @@ export function SessionEditor({
   session,
   episodes,
   media = [],
+  weekday = 6,
 }: {
   session?: Session;
   episodes: Episode[];
   media?: MediaItem[];
+  /** The weekly session day, used to suggest the date of a new session. */
+  weekday?: number;
 }) {
   const episode = episodes.find((ep) => ep.id === session?.podcast);
   return (
@@ -495,8 +498,8 @@ export function SessionEditor({
         <>
           <Field
             name="date"
-            label="Saturday date"
-            value={session?.date ?? nextSaturday()}
+            label="Session date"
+            value={session?.date ?? nextWeekday(weekday)}
             type="date"
           />
           <Field
@@ -620,27 +623,7 @@ export function ContentForm({ settings }: { settings: Store["settings"] }) {
             type="number"
             value={settings.premiumPrice}
           />
-          <Field
-            name="meetingTime"
-            label="Saturday meeting time (10:30 AM)"
-            value={settings.meetingTime}
-          />
-          <Field
-            name="meetingMinutes"
-            label="Meeting length (minutes)"
-            type="number"
-            value={settings.meetingMinutes}
-          />
         </div>
-        <label className="checkbox-field">
-          <input
-            type="checkbox"
-            name="autoZoom"
-            defaultChecked={settings.autoZoom}
-          />{" "}
-          Create a distinct placeholder meeting for each new Saturday during
-          review
-        </label>
       </div>
     </ActionForm>
   );

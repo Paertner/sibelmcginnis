@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Icon, type IconName } from "./admin-icons";
-import { fmtDate, today } from "@/lib/dates";
+import { clock, fmtDate, today } from "@/lib/dates";
 import { upcomingSessions, type Store } from "@/lib/store";
 import { fmtTime } from "@/lib/event-posts";
 import { ActionForm } from "./action-form";
@@ -292,7 +292,7 @@ export function AdminDashboard({ data }: { data: Store }) {
                     month: "short",
                     day: "numeric",
                   })}{" "}
-                  at {booking!.time}. Nothing was emailed.
+                  at {clock(booking!.time)}. Nothing was emailed.
                 </span>
               </div>
               <Link className="btn btn-sm btn-ghost" href="/admin/consults">
@@ -418,7 +418,7 @@ export function AdminDashboard({ data }: { data: Store }) {
           aria-labelledby="next-session-title"
         >
           <header className="card-head">
-            <h2 id="next-session-title">Next Saturday circle</h2>
+            <h2 id="next-session-title">Next session</h2>
             <Link className="card-link" href="/admin/sessions">
               Manage
             </Link>
@@ -451,7 +451,7 @@ export function AdminDashboard({ data }: { data: Store }) {
             </>
           ) : (
             <p className="empty-note">
-              No Saturday scheduled. Add one from Saturday sessions.
+              No session scheduled. Add one from Weekly sessions.
             </p>
           )}
         </section>
@@ -493,7 +493,7 @@ export function AdminDashboard({ data }: { data: Store }) {
                       )}
                     </b>
                     <small>
-                      {b.time} · {b.topic}
+                      {clock(b.time)} · {b.topic}
                     </small>
                   </div>
                   <span

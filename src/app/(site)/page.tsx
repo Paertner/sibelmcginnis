@@ -52,11 +52,7 @@ export default async function Page() {
                 <Link className="btn" href="/morning-coffee#plans">
                   {siteText("home.join-our-community")}
                 </Link>
-                <Link
-                  className="btn btn-ghost on-dark"
-                  href="/solutions"
-                  style={{ color: "#ededed" }}
-                >
+                <Link className="btn btn-ghost on-dark" href="/solutions">
                   {siteText("home.explore-coaching")}
                 </Link>
               </div>
@@ -92,7 +88,7 @@ export default async function Page() {
               <span className="pill">{siteText("home.programs")}</span>
             </div>
             <h2>{siteText("home.ways-to-grow-with-sibel")}</h2>
-            <p style={{ color: "#9a9a9a" }}>
+            <p style={{ color: "var(--panel-sub)" }}>
               {siteText(
                 "home.join-a-weekly-circle-book-one-on-one-time-or-catch-up-on-the-podc",
               )}
@@ -166,8 +162,8 @@ export default async function Page() {
                 <span
                   className="pill"
                   style={{
-                    background: "rgba(255,255,255,.1)",
-                    color: "#ededed",
+                    background: "rgba(45,34,28,.08)",
+                    color: "var(--panel-ink)",
                   }}
                 >
                   {siteText("home.how-it-works")}
@@ -302,7 +298,7 @@ export default async function Page() {
             <p
               style={{
                 margin: "34px 0 0",
-                color: "#9a9a9a",
+                color: "var(--panel-sub)",
                 maxWidth: "420px",
               }}
             >

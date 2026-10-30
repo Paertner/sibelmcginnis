@@ -1,7 +1,14 @@
 "use client";
-import { useActionState, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useActionState,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { adminMutation } from "@/lib/actions";
 import { emailTemplates, footerTemplates } from "@/lib/email-templates";
+import { withWeekday } from "@/lib/weekday";
 import {
   blockCatalog,
   fillPlaceholders,
@@ -152,7 +159,10 @@ export function AnnouncementComposer({
   quota,
   siteSettings,
   draft,
+  weekday,
 }: {
+  /** The weekly session day; template wording written for Saturday follows it. */
+  weekday: number;
   initialRecipients?: string[];
   quota: EmailQuota;
   /** Site details from Settings, shown in the preview's merge fields. */
@@ -169,9 +179,21 @@ export function AnnouncementComposer({
   templates: SavedEmailTemplate[];
   footer: EmailBlock[];
 }) {
+  // Newsletter is the template a new announcement starts from.
+  const builtIn = useMemo(
+    () =>
+      (
+        JSON.parse(
+          withWeekday(JSON.stringify(emailTemplates), weekday),
+        ) as typeof emailTemplates
+      ).toSorted(
+        (a, b) => Number(b.id === "newsletter") - Number(a.id === "newsletter"),
+      ),
+    [weekday],
+  );
   const first = draft
     ? { id: "", subject: draft.subject, blocks: draft.blocks, footer: true }
-    : emailTemplates[0];
+    : builtIn[0];
   const [selectedMembers, setSelectedMembers] =
       useState<string[]>(initialRecipients),
     [groups, setGroups] = useState<string[]>(draft?.groups ?? []);
@@ -558,7 +580,7 @@ export function AnnouncementComposer({
           />
           <h3>Templates</h3>
           <ul className="template-list" aria-label="Templates">
-            {emailTemplates.map((t) => (
+            {builtIn.map((t) => (
               <li key={t.id}>
                 <button
                   type="button"

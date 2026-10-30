@@ -3,6 +3,7 @@
     "heroTitle": "Step into your next chapter with confidence, clarity, and care.",
     "heroSub": "Self-awareness is the foundation of personal growth, and by engaging in honest reflections, you can become a better version of yourself.",
     "meetingDay": "Saturdays",
+    "meetingWeekday": 6,
     "meetingTime": "10:30 AM",
     "meetingMinutes": 90,
     "autoZoom": true,

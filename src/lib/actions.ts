@@ -19,7 +19,8 @@ import { getSecret, saveSecret } from "./secrets";
 import { createResetLink } from "./password-reset";
 import { resetZoomToken, testZoomCredentials } from "./zoom";
 import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
-import { addDays, nextSaturday, today } from "./dates";
+import { addDays, nextWeekday, today } from "./dates";
+import { weekdayIndex, weekdays } from "./weekday";
 import { isPast } from "./event-posts";
 import { isPremium } from "./access";
 import { slugify } from "./slug";
@@ -880,10 +881,10 @@ export async function adminMutation(
         const latest = data.sessions.toSorted((a, b) =>
           b.date.localeCompare(a.date),
         )[0];
+        const weekday = weekdayIndex(data.settings.meetingWeekday);
+        const first = nextWeekday(weekday);
         const date =
-          latest && latest.date >= nextSaturday()
-            ? addDays(latest.date, 7)
-            : nextSaturday();
+          latest && latest.date >= first ? addDays(latest.date, 7) : first;
         const newId = uid();
         const meeting = data.settings.autoZoom
           ? await provision({
@@ -923,10 +924,17 @@ export async function adminMutation(
         item.pass = meeting.pass || uid().slice(0, 6);
       } else {
         const date = required(form, "date");
-        if (!validDate(date) || new Date(date + "T12:00:00Z").getUTCDay() !== 6)
-          throw new Error("Select a Saturday.");
+        const weekday = weekdayIndex(data.settings.meetingWeekday);
+        const day = weekdays[weekday];
+        // An older session on a different weekday can still be edited without moving it.
+        if (
+          !validDate(date) ||
+          (new Date(date + "T12:00:00Z").getUTCDay() !== weekday &&
+            data.sessions.find((s) => s.id === id)?.date !== date)
+        )
+          throw new Error(`Select a ${day}.`);
         if (data.sessions.some((s) => s.date === date && s.id !== id))
-          throw new Error("That Saturday already has a session.");
+          throw new Error(`That ${day} already has a session.`);
         const zoom = text(form, "zoom", 500);
         if (
           zoom &&
@@ -980,7 +988,7 @@ export async function adminMutation(
               id: uid(),
               num: Math.max(0, ...data.podcasts.map((p) => p.num)) + 1,
               title: topic,
-              description: `Saturday circle, ${date}.`,
+              description: `Weekly session, ${date}.`,
               date,
               duration: "30:00",
               status: "published",
@@ -1325,14 +1333,23 @@ export async function adminMutation(
           .split(/\r?\n/)
           .map((t) => t.trim())
           .filter(Boolean),
-        meetingTime: required(form, "meetingTime", 20),
-        meetingMinutes: number(form, "meetingMinutes", 15, 180),
         premiumPrice: number(form, "premiumPrice", 1, 1000),
-        autoZoom: form.has("autoZoom"),
       };
-      if (!/^(0?[1-9]|1[0-2]):[0-5]\d (AM|PM)$/.test(value.meetingTime))
-        throw new Error("Use a time such as 10:30 AM.");
       Object.assign(data.settings, value);
+    } else if (entity === "weekly") {
+      const meetingTime = required(form, "meetingTime", 20);
+      if (!/^(0?[1-9]|1[0-2]):[0-5]\d (AM|PM)$/.test(meetingTime))
+        throw new Error("Use a time such as 10:30 AM.");
+      const weekday = Number(text(form, "meetingWeekday", 1));
+      if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6)
+        throw new Error("Choose a weekday.");
+      Object.assign(data.settings, {
+        meetingWeekday: weekday,
+        meetingDay: `${weekdays[weekday]}s`,
+        meetingTime,
+        meetingMinutes: number(form, "meetingMinutes", 15, 180),
+        autoZoom: form.has("autoZoom"),
+      });
     } else throw new Error("Unknown action.");
     return success("Changes saved for this review session.");
   } catch (error) {

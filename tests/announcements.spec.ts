@@ -271,6 +271,7 @@ test("emails are built from blocks, saved as reusable templates and share a comm
   let footer = page.getByRole("dialog", { name: "Common email footer" });
   await footer
     .getByRole("textbox", { name: "Small print" })
+    .first()
     .fill("Thank you for being here.");
   await footer.getByRole("button", { name: "Save footer" }).click();
   await expect(page.locator(".email-footer-preview")).toContainText(

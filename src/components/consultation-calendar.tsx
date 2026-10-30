@@ -4,7 +4,7 @@ import { SiteText } from "@/components/site-copy";
 import { useState } from "react";
 import { ActionForm } from "./action-form";
 import { bookCompany, bookConsultation } from "@/lib/actions";
-import { fmtDate } from "@/lib/dates";
+import { clock, fmtDate } from "@/lib/dates";
 
 type AvailableDay = { date: string; label: string; times: string[] };
 export function BookingForm({
@@ -210,7 +210,7 @@ export function BookingForm({
                 onChange={() => setSelection({ date: activeDay.date, time: t })}
                 required
               />
-              {t}
+              {clock(t)}
             </label>
           ))}
         </fieldset>
@@ -221,7 +221,7 @@ export function BookingForm({
                 <>
                   <b>
                     {fmtDate(activeDay.date, { month: "long", day: "numeric" })}{" "}
-                    <SiteText id="consultation-calendar.at" /> {time}
+                    <SiteText id="consultation-calendar.at" /> {clock(time)}
                   </b>
                   <br />
                   <small>
@@ -286,7 +286,7 @@ export function BookingForm({
             <p>
               <b>
                 {fmtDate(activeDay.date, { month: "long", day: "numeric" })}{" "}
-                <SiteText id="consultation-calendar.at" /> {time}
+                <SiteText id="consultation-calendar.at" /> {clock(time)}
               </b>
               <br />
               <small>

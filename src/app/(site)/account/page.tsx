@@ -5,7 +5,7 @@ import Link from "next/link";
 import { requireMember } from "@/lib/auth";
 import { getDemoState, getStore, upcomingSessions } from "@/lib/store";
 import { canView, isPremium } from "@/lib/access";
-import { addDays, daysLeftLabel, fmtDate, today } from "@/lib/dates";
+import { addDays, clock, daysLeftLabel, fmtDate, today } from "@/lib/dates";
 import { bookingEvent, eventCalendarEvent, sessionEvent } from "@/lib/events";
 import { Badge, PostCards } from "@/components/post-cards";
 import Image from "next/image";
@@ -246,7 +246,7 @@ export default async function Account({
                     <div className="list-item" key={b.id}>
                       <div>
                         <b>
-                          {fmtDate(b.date)} · {b.time}
+                          {fmtDate(b.date)} · {clock(b.time)}
                         </b>
                         <p>{b.topic}</p>
                         <span
@@ -456,36 +456,39 @@ export default async function Account({
             <p className="next-circle-eyebrow">
               {siteText("account.your-next-saturday-circle")}
             </p>
-            {daysLeftLabel(next.date) ? (
-              <span className="days-left" role="status">
-                {daysLeftLabel(next.date)}
-              </span>
-            ) : null}
-            <div className="next-circle-row">
-              <span className="date-block" aria-hidden="true">
-                <small>{fmtDate(next.date, { weekday: "short" })}</small>
-                <b>{fmtDate(next.date, { day: "numeric" })}</b>
-                <small>{fmtDate(next.date, { month: "short" })}</small>
-              </span>
-              <div>
-                <h2 id="member-circle-title">{next.topic}</h2>
-                <p>
-                  {fmtDate(next.date)} · {data.settings.meetingTime} ·{" "}
-                  {data.settings.meetingMinutes} min
-                </p>
+            <div className="nc-head">
+              <div className="next-circle-row">
+                <span className="date-block" aria-hidden="true">
+                  <small>{fmtDate(next.date, { weekday: "short" })}</small>
+                  <b>{fmtDate(next.date, { day: "numeric" })}</b>
+                  <small>{fmtDate(next.date, { month: "short" })}</small>
+                </span>
+                <div>
+                  <h2 id="member-circle-title">{next.topic}</h2>
+                  <p>
+                    {fmtDate(next.date)} · {data.settings.meetingTime} ·{" "}
+                    {data.settings.meetingMinutes} min
+                  </p>
+                </div>
+              </div>
+              <div className="nc-side">
+                {premium && next.zoom ? (
+                  <CalendarButtons event={sessionEvent(next)} kind="session" />
+                ) : null}
+                {daysLeftLabel(next.date) ? (
+                  <span className="days-left" role="status">
+                    {daysLeftLabel(next.date)}
+                  </span>
+                ) : null}
               </div>
             </div>
             {premium ? (
               next.zoom ? (
                 <>
-                  <div className="next-circle-actions">
+                  <div className="nc-join">
                     <Link className="btn" href={meetingUrl("session", next.id)}>
                       {siteText("account.open-session")}
                     </Link>
-                    <CalendarButtons
-                      event={sessionEvent(next)}
-                      kind="session"
-                    />
                   </div>
                   <p className="next-circle-note">
                     {siteText(
@@ -607,7 +610,7 @@ export default async function Account({
                         </span>
                         <div className="consult-info">
                           <b>
-                            {fmtDate(b.date)} {siteText("account.at")} {b.time}
+                            {fmtDate(b.date)} {siteText("account.at")} {clock(b.time)}
                           </b>
                           <span className="consult-topic">{b.topic}</span>
                           <span

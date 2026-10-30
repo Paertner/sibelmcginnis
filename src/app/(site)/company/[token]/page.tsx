@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { siteText } from "@/lib/site-copy";
 import { getStore } from "@/lib/store";
-import { fmtDate } from "@/lib/dates";
+import { clock, fmtDate } from "@/lib/dates";
 import { bookingEvent } from "@/lib/events";
 import { companyDays, findLink, linkStatus } from "@/lib/company-links";
 import { BookingForm } from "@/components/consultation-calendar";
@@ -74,7 +74,7 @@ export default async function CompanyBooking({
                     })}
                   </b>
                   <br />
-                  {booking.time} · {data.settings.consultMinutes} minutes
+                  {clock(booking.time)} · {data.settings.consultMinutes} minutes
                 </dd>
                 <dt>Company</dt>
                 <dd>{booking.company}</dd>

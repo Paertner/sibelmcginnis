@@ -1,8 +1,9 @@
 export const iso = (date = new Date()) => date.toISOString().slice(0, 10);
 export const today = () => iso();
-export function nextSaturday(weeks = 0) {
+/** The next date that falls on a weekday (0 = Sunday ... 6 = Saturday), today included. */
+export function nextWeekday(weekday = 6, weeks = 0) {
   const d = new Date(today() + "T12:00:00Z");
-  d.setUTCDate(d.getUTCDate() + ((6 - d.getUTCDay() + 7) % 7) + weeks * 7);
+  d.setUTCDate(d.getUTCDate() + ((weekday - d.getUTCDay() + 7) % 7) + weeks * 7);
   return iso(d);
 }
 export function fmtDate(
@@ -40,4 +41,11 @@ export function daysLeftLabel(date: string) {
       : days === 1
         ? "Tomorrow"
         : `In ${days} days`;
+}
+/** "13:00" as "1:00 PM". Times already written with AM or PM are returned as they are. */
+export function clock(time: string) {
+  if (/[ap]m/i.test(time)) return time;
+  const [h, m] = time.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return time;
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
 }

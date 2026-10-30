@@ -5,6 +5,7 @@ import { MediaLibrary } from "@/components/media-library";
 import { AdminSettings } from "@/components/admin-settings";
 import { emailQuota } from "@/lib/email-quota";
 import { slugOf } from "@/lib/slug";
+import { weekdayIndex, weekdays } from "@/lib/weekday";
 import { optedOut } from "@/lib/email-preferences";
 import { notificationDraft } from "@/lib/notification-drafts";
 import { SiteContentEditor } from "@/components/site-content-editor";
@@ -18,11 +19,13 @@ import {
 import { AdminTable, AdminRow } from "@/components/admin-table";
 import { AnnouncementComposer } from "@/components/announcement-composer";
 import { AnnouncementHistory } from "@/components/announcement-history";
-import { CopyLink } from "@/components/copy-link";
+import { CopyIconButton } from "@/components/copy-link";
+import { CalendarButtons } from "@/components/calendar-buttons";
+import { sessionEvent } from "@/lib/events";
 import { CompanyLinks } from "@/components/company-links";
 import { bookingName } from "@/lib/company-links";
 import { memberRole } from "@/lib/membership";
-import { defaultEmailFooter } from "@/lib/email-templates";
+import { newsletterFooter } from "@/lib/email-templates";
 import { meetingUrl, siteOrigin } from "@/lib/site-url";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -33,7 +36,7 @@ import {
   usesDatabase,
   type Session,
 } from "@/lib/store";
-import { daysLeftLabel, fmtDate, today } from "@/lib/dates";
+import { clock, daysLeftLabel, fmtDate, today } from "@/lib/dates";
 import { fmtTime, isPast } from "@/lib/event-posts";
 import { adminMutation, cancelBooking, signOut } from "@/lib/actions";
 import { ActionForm } from "@/components/action-form";
@@ -73,9 +76,9 @@ const sections: [string, string, IconName, string][] = [
   ],
   [
     "sessions",
-    "Saturday sessions",
+    "Weekly sessions",
     "video",
-    "Plan each Saturday circle, its Zoom link and follow-up.",
+    "Plan each weekly session, its Zoom link and follow-up.",
   ],
   ["podcast", "Podcast", "headphones", "Audio episodes for Premium members."],
   [
@@ -231,10 +234,14 @@ export default async function Admin({
             ) : null}
             {section === "sessions" ? (
               <>
-                <SessionEditor episodes={data.podcasts} media={media} />
+                <SessionEditor
+                  episodes={data.podcasts}
+                  media={media}
+                  weekday={weekdayIndex(settings.meetingWeekday)}
+                />
                 <ActionForm
                   action={adminMutation}
-                  submitLabel="+ Add next Saturday"
+                  submitLabel="+ Add next session"
                 >
                   <EntityFields entity="sessions" />
                   <input type="hidden" name="op" value="next" />
@@ -680,7 +687,7 @@ export default async function Admin({
                               day: "numeric",
                             })}
                           </b>{" "}
-                          · {b.time}
+                          · {clock(b.time)}
                         </td>
                         <td>
                           {b.source === "company" ? (
@@ -711,7 +718,7 @@ export default async function Admin({
                               <ActionForm
                                 action={adminMutation}
                                 submitLabel="Approve"
-                                confirmMessage={`Approve ${bookingName(b)}’s consultation on ${fmtDate(b.date, { month: "short", day: "numeric" })} at ${b.time}?`}
+                                confirmMessage={`Approve ${bookingName(b)}’s consultation on ${fmtDate(b.date, { month: "short", day: "numeric" })} at ${clock(b.time)}?`}
                               >
                                 <EntityFields entity="bookings" id={b.id} />
                               </ActionForm>
@@ -757,8 +764,9 @@ export default async function Admin({
               <div className="panel">
                 <h3>Your availability</h3>
                 <p className="hint">
-                  Tick the times members can book. Existing bookings stay in
-                  place when you change these.
+                  Tick the times members can book. All times are Eastern Time
+                  (ET), shown as AM or PM, so 1:00 PM means 1 PM Eastern.
+                  Existing bookings stay in place when you change these.
                 </p>
                 {[1, 2, 3, 4, 5, 6, 0].map((index) => {
                   const day = [
@@ -789,7 +797,7 @@ export default async function Admin({
                                 ] ?? []
                               ).includes(time)}
                             />
-                            {time}
+                            {clock(time)}
                           </label>
                         ))}
                       </div>
@@ -840,7 +848,8 @@ export default async function Admin({
               }))}
               media={media}
               templates={data.emailTemplates ?? []}
-              footer={data.emailFooter ?? defaultEmailFooter}
+              footer={data.emailFooter ?? newsletterFooter}
+              weekday={weekdayIndex(settings.meetingWeekday)}
             />
             <AnnouncementHistory />
           </div>
@@ -860,6 +869,12 @@ export default async function Admin({
             quota={emailQuota()}
             logo={siteImage("shared.logo")}
             media={media}
+            weekly={{
+              weekday: weekdayIndex(settings.meetingWeekday),
+              time: settings.meetingTime,
+              minutes: settings.meetingMinutes,
+              autoZoom: settings.autoZoom,
+            }}
           />
         ) : null}
         {section === "content" ? (
@@ -886,6 +901,7 @@ function SessionsPage({
   episodes: Parameters<typeof SessionEditor>[0]["episodes"];
   settings: ReturnType<typeof getStore>["settings"];
 }) {
+  const weekdayName = weekdays[weekdayIndex(settings.meetingWeekday)];
   const upcoming = sessions
     .filter((s) => s.date >= today() && s.id !== next?.id)
     .toSorted((a, b) => a.date.localeCompare(b.date));
@@ -901,24 +917,29 @@ function SessionsPage({
       <div className="sessions-top">
         {next ? (
           <section className="next-circle" aria-labelledby="next-circle-title">
-            <p className="next-circle-eyebrow">Next circle</p>
-            {daysLeftLabel(next.date) ? (
-              <span className="days-left" role="status">
-                {daysLeftLabel(next.date)}
-              </span>
-            ) : null}
-            <div className="next-circle-row">
-              <span className="date-block" aria-hidden="true">
-                <small>{fmtDate(next.date, { weekday: "short" })}</small>
-                <b>{fmtDate(next.date, { day: "numeric" })}</b>
-                <small>{fmtDate(next.date, { month: "short" })}</small>
-              </span>
-              <div>
-                <h2 id="next-circle-title">{next.topic}</h2>
-                <p>
-                  {fmtDate(next.date)} · {settings.meetingTime} ·{" "}
-                  {settings.meetingMinutes} minutes
-                </p>
+            <p className="next-circle-eyebrow">Next session</p>
+            <div className="nc-head">
+              <div className="next-circle-row">
+                <span className="date-block" aria-hidden="true">
+                  <small>{fmtDate(next.date, { weekday: "short" })}</small>
+                  <b>{fmtDate(next.date, { day: "numeric" })}</b>
+                  <small>{fmtDate(next.date, { month: "short" })}</small>
+                </span>
+                <div>
+                  <h2 id="next-circle-title">{next.topic}</h2>
+                  <p>
+                    {fmtDate(next.date)} · {settings.meetingTime} ·{" "}
+                    {settings.meetingMinutes} minutes
+                  </p>
+                </div>
+              </div>
+              <div className="nc-side">
+                <CalendarButtons event={sessionEvent(next)} kind="session" />
+                {daysLeftLabel(next.date) ? (
+                  <span className="days-left" role="status">
+                    {daysLeftLabel(next.date)}
+                  </span>
+                ) : null}
               </div>
             </div>
             <ul className="status-pills">
@@ -931,13 +952,18 @@ function SessionsPage({
                 {next.pass ? `Passcode ${next.pass}` : "No passcode"}
               </li>
             </ul>
-            <div className="next-circle-actions">
+            <div className="nc-join">
+              <Link className="btn" href={meetingUrl("session", next.id)}>
+                Join session
+              </Link>
+              <CopyIconButton value={meetingUrl("session", next.id)} />
+            </div>
+            <div className="nc-manage">
               <SessionEditor session={next} episodes={episodes} media={media} />
               <ActionForm action={adminMutation} submitLabel="New Zoom link">
                 <EntityFields entity="sessions" id={next.id} />
                 <input type="hidden" name="op" value="regenerate" />
               </ActionForm>
-              <CopyLink value={meetingUrl("session", next.id)} />
             </div>
             <p className="next-circle-note">
               Members join through their protected link. It checks Premium
@@ -946,53 +972,15 @@ function SessionsPage({
           </section>
         ) : (
           <section className="next-circle empty">
-            <h2>No Saturday planned</h2>
-            <p>Add the next Saturday to open it to members.</p>
+            <h2>No session planned</h2>
+            <p>Add the next session to open it to members.</p>
           </section>
         )}
-        <ActionForm
-          action={adminMutation}
-          className="panel weekly-settings"
-          submitLabel="Save weekly settings"
-        >
-          <EntityFields entity="content" />
-          <input type="hidden" name="heroTitle" value={settings.heroTitle} />
-          <input type="hidden" name="heroSub" value={settings.heroSub} />
-          <input
-            type="hidden"
-            name="topics"
-            value={settings.topics.join("\n")}
-          />
-          <input
-            type="hidden"
-            name="premiumPrice"
-            value={settings.premiumPrice}
-          />
-          <h3>
-            <Icon name="sliders" size={18} /> Every Saturday
-          </h3>
-          <div className="row">
-            <Field
-              name="meetingTime"
-              label="Start time"
-              value={settings.meetingTime}
-            />
-            <Field
-              name="meetingMinutes"
-              label="Length (minutes)"
-              type="number"
-              value={settings.meetingMinutes}
-            />
-          </div>
-          <label className="checkbox-field">
-            <input
-              type="checkbox"
-              name="autoZoom"
-              defaultChecked={settings.autoZoom}
-            />
-            Create a Zoom link automatically when I add a Saturday
-          </label>
-        </ActionForm>
+        <p className="panel weekly-settings-note">
+          <Icon name="sliders" size={16} /> Meets every {weekdayName} at{" "}
+          {settings.meetingTime} Eastern Time.{" "}
+          <Link href="/admin/settings">Change the day or time in Settings</Link>
+        </p>
       </div>
 
       <section className="panel" aria-labelledby="upcoming-title">
@@ -1001,7 +989,7 @@ function SessionsPage({
             <h2 id="upcoming-title">Upcoming sessions</h2>
             <p className="card-sub">
               {upcoming.length
-                ? `${upcoming.length} more Saturday${upcoming.length === 1 ? "" : "s"} planned`
+                ? `${upcoming.length} more session${upcoming.length === 1 ? "" : "s"} planned`
                 : "Nothing planned after the next circle yet"}
             </p>
           </div>
@@ -1039,7 +1027,7 @@ function SessionsPage({
           </ul>
         ) : (
           <p className="empty-note">
-            Use + Add next Saturday to plan the following week.
+            Use + Add next session to plan the following week.
           </p>
         )}
       </section>
@@ -1086,7 +1074,7 @@ function SessionsPage({
             </li>
           ))}
           {!past.length ? (
-            <li className="empty-note">Past Saturdays will appear here.</li>
+            <li className="empty-note">Past sessions will appear here.</li>
           ) : null}
         </ul>
       </section>

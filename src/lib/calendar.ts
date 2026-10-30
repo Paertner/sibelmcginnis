@@ -15,13 +15,38 @@ export function calendarTimes(event: CalendarEvent) {
   const hours = match[3]
     ? (Number(match[1]) % 12) + (match[3].toUpperCase() === "PM" ? 12 : 0)
     : Number(match[1]);
-  const start = new Date(
-    `${event.date}T${String(hours).padStart(2, "0")}:${match[2]}:00Z`,
-  );
+  const start = easternInstant(event.date, hours, Number(match[2]));
   const end = new Date(start.getTime() + event.minutes * 60000);
   const stamp = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}Z/g, "");
-  // Floating event time matches the prototype. Confirm the host's timezone before live scheduling.
   return [stamp(start), stamp(end)];
+}
+/** Times on the site are Eastern Time; this is that moment in real (UTC) time, so every calendar shows it correctly. */
+function easternInstant(date: string, hours: number, minutes: number) {
+  const wall = Date.parse(
+    `${date}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00Z`,
+  );
+  const offset = (at: number) => {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        hourCycle: "h23",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      })
+        .formatToParts(at)
+        .map((p) => [p.type, Number(p.value)]),
+    );
+    return (
+      Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute) -
+      at
+    );
+  };
+  // Two passes settle the daylight-saving shift.
+  const guess = wall - offset(wall);
+  return new Date(wall - offset(guess));
 }
 export function googleCalendarUrl(event: CalendarEvent) {
   const [start, end] = calendarTimes(event);

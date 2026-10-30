@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ActionForm } from "./action-form";
 import { AdminCancel, AdminDialog } from "./admin-dialog";
 import { adminMutation } from "@/lib/actions";
-import { fmtDate, today } from "@/lib/dates";
+import { clock, fmtDate, today } from "@/lib/dates";
 import { linkStatus, LINK_DAYS } from "@/lib/company-link-status";
 import { companyUrl } from "@/lib/site-url";
 import type { Booking, CompanyLink } from "@/lib/store";
@@ -152,7 +152,7 @@ export function CompanyLinks({
                             month: "short",
                             day: "numeric",
                           })}{" "}
-                          · {booking.time}
+                          · {clock(booking.time)}
                         </b>
                         <small>
                           {booking.company} · {booking.contact}

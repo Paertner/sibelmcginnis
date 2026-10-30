@@ -2,7 +2,7 @@ import { siteText } from "@/lib/site-copy";
 import Link from "next/link";
 import { getUser } from "@/lib/auth";
 import { meetingAccess } from "@/lib/meeting-access";
-import { fmtDate } from "@/lib/dates";
+import { clock, fmtDate } from "@/lib/dates";
 import { liveZoom } from "@/lib/meetings";
 import { registerAttendee } from "@/lib/zoom";
 export const metadata = {
@@ -42,7 +42,7 @@ export default async function Meeting({
             <>
               <h1>{access.title}</h1>
               <p>
-                {fmtDate(access.date!)} · {access.time} · {access.minutes}{" "}
+                {fmtDate(access.date!)} · {clock(access.time!)} · {access.minutes}{" "}
                 {siteText("meetings.minutes")}
               </p>
               <div className="entry-success">

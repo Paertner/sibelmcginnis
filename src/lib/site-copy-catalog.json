@@ -227,7 +227,7 @@
   {
     "id": "account.your-next-saturday-circle",
     "group": "Member panel",
-    "text": "Your next Saturday circle"
+    "text": "Your next weekly session"
   },
   {
     "id": "account.topic",
@@ -1827,7 +1827,7 @@
   {
     "id": "consultation-calendar.times-are-shown-as-scheduled-by-sibel-the-meeting-timezone-will-b",
     "group": "Booking calendar",
-    "text": "Times are shown as scheduled by Sibel. The meeting timezone will be confirmed before live bookings open."
+    "text": "All times are shown in Eastern Time (ET)."
   },
   {
     "id": "consultation-calendar.select-a-date-amp-time",
