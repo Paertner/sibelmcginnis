@@ -1,4 +1,5 @@
 "use client";
+import { askConfirm } from "./confirm-dialog";
 import {
   useEffect,
   useLayoutEffect,
@@ -822,7 +823,14 @@ export function BlockList({
             onChange(next);
             onSelect(copy.id);
           }}
-          onRemove={() => {
+          onRemove={async () => {
+            if (
+              !(await askConfirm("This block will be removed.", {
+                title: "Delete this block?",
+                confirmLabel: "Yes, delete",
+              }))
+            )
+              return;
             onChange(blocks.filter((entry) => entry.id !== block.id));
             onSelect(undefined);
           }}

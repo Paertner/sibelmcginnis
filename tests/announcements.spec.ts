@@ -279,13 +279,19 @@ test("emails are built from blocks, saved as reusable templates and share a comm
   );
   await page.getByRole("button", { name: "Edit footer" }).click();
   footer = page.getByRole("dialog", { name: "Common email footer" });
-  page.once("dialog", (dialog) => dialog.accept());
   await footer.getByRole("button", { name: "Simple", exact: true }).click();
+  await page
+    .locator(".confirm-dialog")
+    .getByRole("button", { name: /^Yes/ })
+    .click();
   await footer.getByRole("button", { name: "Save footer" }).click();
   await expect(page.locator(".email-footer-preview")).toContainText(
     "A little space to connect",
   );
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: `Delete template ${name}` }).click();
+  await page
+    .locator(".confirm-dialog")
+    .getByRole("button", { name: /^Yes/ })
+    .click();
   await expect(page.getByText("Template deleted.")).toBeVisible();
 });

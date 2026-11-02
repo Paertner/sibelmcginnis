@@ -1,7 +1,13 @@
 "use client";
 import { startTransition, useActionState, useRef } from "react";
 import { useAdminDialog } from "./admin-dialog";
-export type ActionResult = { message: string; ok?: boolean; id?: string; keepOpen?: boolean };
+import { askConfirm } from "./confirm-dialog";
+export type ActionResult = {
+  message: string;
+  ok?: boolean;
+  id?: string;
+  keepOpen?: boolean;
+};
 export function ActionForm({
   action,
   children,
@@ -39,8 +45,14 @@ export function ActionForm({
       className="btn"
       disabled={pending || submitDisabled}
       onClick={(event) => {
-        if (confirmMessage && !window.confirm(confirmMessage))
-          event.preventDefault();
+        if (!confirmMessage) return;
+        event.preventDefault();
+        const button = event.currentTarget;
+        void askConfirm(confirmMessage, {
+          confirmLabel: `Yes, ${submitLabel.toLowerCase()}`,
+        }).then((ok) => {
+          if (ok) form.current?.requestSubmit(button);
+        });
       }}
     >
       {pending ? "Saving…" : submitLabel}
@@ -92,12 +104,14 @@ export function ConfirmDelete({
       name={name}
       value={value}
       onClick={(e) => {
-        if (
-          !window.confirm(
-            "Delete this item? This cannot be undone during this review session.",
-          )
-        )
-          e.preventDefault();
+        e.preventDefault();
+        const button = e.currentTarget;
+        void askConfirm("This cannot be undone.", {
+          title: "Delete this item?",
+          confirmLabel: "Yes, delete",
+        }).then((ok) => {
+          if (ok) button.form?.requestSubmit(button);
+        });
       }}
     >
       Delete

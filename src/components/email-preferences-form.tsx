@@ -28,6 +28,11 @@ export function EmailPreferencesForm({
       action={saveEmailPreferences}
       className="email-prefs"
       submitLabel={unsubscribed ? "Unsubscribe me" : "Save preferences"}
+      confirmMessage={
+        unsubscribed && !saved.unsubscribedAll
+          ? "You will stop receiving all emails from Sibel, including new posts and announcements."
+          : undefined
+      }
     >
       {preselectUnsubscribe && !saved.unsubscribedAll ? (
         <p className="email-prefs-banner" role="status">

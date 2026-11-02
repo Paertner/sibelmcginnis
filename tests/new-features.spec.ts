@@ -49,8 +49,11 @@ test("events are public to see, members join and leave, full events cannot be jo
   await signIn(page, "Amelia");
   await page.goto("/event/event-brunch");
   await expect(page.getByText("You are going")).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Leave", exact: true }).click();
+  await page
+    .locator(".confirm-dialog")
+    .getByRole("button", { name: /^Yes/ })
+    .click();
   await expect(
     page.getByRole("button", { name: "Join", exact: true }),
   ).toBeVisible();
@@ -84,16 +87,23 @@ test("consultation requests wait for approval, then the admin approves them", as
 
   const adminContext = await browser.newContext();
   const admin = await adminContext.newPage();
-  admin.on("dialog", (dialog) => dialog.accept());
   await signIn(admin, "Sibel");
   await admin.goto("/admin/consults");
   const row = admin.locator("tr").filter({ hasText: topic });
   await expect(row.getByText("pending", { exact: true })).toBeVisible();
   await expect(row.getByRole("button", { name: "Approve" })).toBeVisible();
   await row.getByRole("button", { name: "Approve" }).click();
+  await admin
+    .locator(".confirm-dialog")
+    .getByRole("button", { name: /^Yes/ })
+    .click();
   await expect(row.getByText("confirmed", { exact: true })).toBeVisible();
   // Cancel it again so the member's monthly allowance stays free for other tests.
   await row.getByRole("button", { name: "Cancel" }).click();
+  await admin
+    .locator(".confirm-dialog")
+    .getByRole("button", { name: /^Yes/ })
+    .click();
   await expect(row.getByText("cancelled", { exact: true })).toBeVisible();
   await adminContext.close();
 });

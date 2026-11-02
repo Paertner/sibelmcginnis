@@ -9,6 +9,7 @@ import {
 import { adminMutation } from "@/lib/actions";
 import { emailTemplates, footerTemplates } from "@/lib/email-templates";
 import { withWeekday } from "@/lib/weekday";
+import { askConfirm } from "./confirm-dialog";
 import {
   blockCatalog,
   fillPlaceholders,
@@ -110,11 +111,13 @@ function FooterEditor({
               type="button"
               className="btn btn-sm btn-ghost"
               title={template.description}
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
-                    `Replace this footer with the ${template.name} template?`,
-                  )
+                  await askConfirm("The current footer will be replaced.", {
+                    title: `Use the ${template.name} footer?`,
+                    confirmLabel: "Yes, replace",
+                    danger: false,
+                  })
                 )
                   setBlocks(withNewIds(template.blocks));
               }}
@@ -267,15 +270,16 @@ export function AnnouncementComposer({
     setHighlight(0);
     search.current?.focus();
   };
-  const load = (
+  const load = async (
     next: { subject: string; blocks: readonly EmailBlock[]; footer: boolean },
     which: Loaded,
   ) => {
     if (
       dirty &&
-      !window.confirm(
-        "Replace the current email with this template? Your changes will be lost.",
-      )
+      !(await askConfirm("Your changes will be lost.", {
+        title: "Replace the current email with this template?",
+        confirmLabel: "Yes, replace",
+      }))
     )
       return;
     setSubject(next.subject);
@@ -287,13 +291,18 @@ export function AnnouncementComposer({
     setMode("blocks");
     setSelected(undefined);
   };
-  const changeMode = (next: "blocks" | "html") => {
+  const changeMode = async (next: "blocks" | "html") => {
     if (next === mode) return;
     if (next === "blocks" && code !== null) {
       if (
-        !window.confirm(
-          "Turn your edited code into one HTML block? The footer switch will be turned off because the code already includes it.",
-        )
+        !(await askConfirm(
+          "The footer switch will be turned off because the code already includes it.",
+          {
+            title: "Turn your edited code into one HTML block?",
+            confirmLabel: "Yes, turn it into a block",
+            danger: false,
+          },
+        ))
       )
         return;
       setBlocks([
@@ -618,7 +627,12 @@ export function AnnouncementComposer({
                     aria-label={`Delete template ${t.name}`}
                     title="Delete template"
                     onClick={async () => {
-                      if (!window.confirm(`Delete the template “${t.name}”?`))
+                      if (
+                        !(await askConfirm("This cannot be undone.", {
+                          title: `Delete the template “${t.name}”?`,
+                          confirmLabel: "Yes, delete",
+                        }))
+                      )
                         return;
                       await templateMutation.run({
                         entity: "emailTemplates",

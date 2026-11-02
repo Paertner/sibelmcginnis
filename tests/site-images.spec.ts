@@ -167,8 +167,11 @@ test("a library image can be reused, and deleting it restores the original", asy
   await page.getByRole("tab", { name: /^Library/ }).click();
   await page.getByRole("button", { name: "library-review.png" }).click();
   await expect(details).toContainText("Homepage · Programs · The Podcast");
-  page.once("dialog", (dialog) => dialog.accept());
   await details.getByRole("button", { name: "Delete permanently" }).click();
+  await page
+    .locator(".confirm-dialog")
+    .getByRole("button", { name: /^Yes/ })
+    .click();
   await expect(pageStatus(page)).toHaveText(
     "Image deleted. 1 placement went back to the original image.",
   );

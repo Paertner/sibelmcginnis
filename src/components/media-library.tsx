@@ -1,4 +1,5 @@
 "use client";
+import { askConfirm } from "./confirm-dialog";
 import {
   useEffect,
   useId,
@@ -584,11 +585,15 @@ export function MediaLibrary({
                     disabled={pending}
                     onClick={async () => {
                       if (
-                        !window.confirm(
+                        !(await askConfirm(
                           active.usedBy.length
-                            ? "Delete this image? The pages using it will go back to their original image."
-                            : "Delete this image permanently?",
-                        )
+                            ? "The pages using it will go back to their original image."
+                            : "It will be deleted permanently.",
+                          {
+                            title: "Delete this image?",
+                            confirmLabel: "Yes, delete",
+                          },
+                        ))
                       )
                         return;
                       const result = await run({
