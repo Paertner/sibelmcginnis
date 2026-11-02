@@ -1,5 +1,6 @@
 "use server";
 import { randomUUID } from "node:crypto";
+import { isSeoId } from "./editor-pages";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearSession, getUser, setDemoSession } from "./auth";
@@ -1311,17 +1312,19 @@ export async function adminMutation(
         if (!key.startsWith("copy:")) continue;
         const id = key.slice(5);
         if (
-          !allowed.has(id) ||
+          !(allowed.has(id) || isSeoId(id)) ||
           typeof value !== "string" ||
-          value.length > 5000
+          value.length > (isSeoId(id) ? 400 : 5000)
         )
           throw new Error("One of the site text fields is invalid.");
         updates[id] = value;
       }
       const next = { ...data.siteCopy };
       for (const [id, value] of Object.entries(updates)) {
-        if (value === allowed.get(id)) delete next[id];
-        else next[id] = value;
+        // Search settings are removed when left empty; other text when it matches the original.
+        if (isSeoId(id) ? !value.trim() : value === allowed.get(id))
+          delete next[id];
+        else next[id] = isSeoId(id) ? value.trim() : value;
       }
       data.siteCopy = next;
       return success("Site text saved.");

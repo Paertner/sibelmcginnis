@@ -1,9 +1,10 @@
 import { siteText } from "@/lib/site-copy";
+import { pageMetadata } from "@/lib/page-meta";
 import Link from "next/link";
 import { PostCards } from "@/components/post-cards";
 import { getStore } from "@/lib/store";
 import { getUser } from "@/lib/auth";
-export const metadata = { title: "Blog" };
+export const generateMetadata = () => pageMetadata("blog", { title: "Blog" });
 export default async function Blog({
   searchParams,
 }: {

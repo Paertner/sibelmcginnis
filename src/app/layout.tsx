@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SiteCopyProvider } from "@/components/site-copy";
 import { ToastProvider } from "@/components/toast";
+import { defaultDescription } from "@/lib/editor-pages";
 import { getStore } from "@/lib/store";
 
 const inter = localFont({
@@ -32,8 +33,7 @@ export function generateMetadata(): Metadata {
       default: title,
       template: `%s | ${settings?.siteTitle || "Morning Coffee Community"}`,
     },
-    description:
-      "A warm, supportive space for women to connect, reflect and grow. Weekly live circles and personal coaching with Sibel McGinnis.",
+    description: defaultDescription,
     robots: { index: false, follow: false },
     ...(settings?.faviconPath ? { icons: { icon: settings.faviconPath } } : {}),
   };

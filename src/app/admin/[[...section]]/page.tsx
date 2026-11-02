@@ -10,6 +10,9 @@ import { optedOut } from "@/lib/email-preferences";
 import { notificationDraft } from "@/lib/notification-drafts";
 import { SiteContentEditor } from "@/components/site-content-editor";
 import { SiteContentTabs } from "@/components/site-content-tabs";
+import { VisualEditor } from "@/components/visual-editor";
+import { siteImageCatalog } from "@/lib/site-image-catalog";
+import { defaultDescription, editorPages, seoId } from "@/lib/editor-pages";
 import {
   mediaLibrary,
   siteImage,
@@ -145,6 +148,7 @@ export default async function Admin({
     section === "events" ||
     section === "sessions" ||
     section === "media" ||
+    section === "content" ||
     section === "announce" ||
     section === "settings"
       ? mediaLibrary()
@@ -879,6 +883,17 @@ export default async function Admin({
         {section === "content" ? (
           <SiteContentTabs
             settings={<ContentForm settings={settings} />}
+            visual={
+              <VisualEditor
+                values={data.siteCopy ?? {}}
+                weekday={weekdayIndex(settings.meetingWeekday)}
+                images={Object.fromEntries(
+                  siteImageCatalog.map((slot) => [slot.id, siteImage(slot.id)]),
+                )}
+                media={media}
+                {...seoProps(data.siteCopy ?? {}, data.siteSettings?.siteTitle)}
+              />
+            }
             text={<SiteContentEditor values={data.siteCopy ?? {}} />}
           />
         ) : null}
@@ -1115,4 +1130,28 @@ function Status({ value }: { value: string }) {
         ? "bad"
         : "grey";
   return <span className={`badge b-${color}`}>{value}</span>;
+}
+
+/** Search title and description per page: what is saved, and what the page uses by default. */
+function seoProps(copy: Record<string, string>, siteTitle?: string) {
+  const site = siteTitle || "Morning Coffee Community";
+  const defaultSeo: Record<string, { title: string; description: string }> = {};
+  const seo: Record<string, { title: string; description: string }> = {};
+  for (const page of editorPages) {
+    defaultSeo[page.key] = {
+      title: page.title
+        ? `${page.title} | ${site}`
+        : siteTitle
+          ? `${siteTitle} | Morning Coffee Community`
+          : "Morning Coffee Community | Sibel McGinnis",
+      description: defaultDescription,
+    };
+    seo[page.key] = {
+      title: copy[seoId(page.key, "title")] ?? defaultSeo[page.key].title,
+      description:
+        copy[seoId(page.key, "description")] ??
+        defaultSeo[page.key].description,
+    };
+  }
+  return { seo, defaultSeo };
 }

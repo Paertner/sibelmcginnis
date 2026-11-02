@@ -1,10 +1,12 @@
 import { siteText } from "@/lib/site-copy";
+import { pageMetadata } from "@/lib/page-meta";
 import Link from "next/link";
 import { getUser } from "@/lib/auth";
 import { getStore } from "@/lib/store";
 import { isPremium } from "@/lib/access";
 import { PodcastLibrary } from "@/components/podcast-library";
-export const metadata = { title: "Podcast" };
+export const generateMetadata = () =>
+  pageMetadata("podcast", { title: "Podcast" });
 export default async function Podcast() {
   const user = await getUser(),
     allowed = isPremium(user?.role);

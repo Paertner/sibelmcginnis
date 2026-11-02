@@ -1,7 +1,9 @@
 import { siteText } from "@/lib/site-copy";
+import { pageMetadata } from "@/lib/page-meta";
 import { EventCards } from "@/components/event-cards";
 import { pastEvents, upcomingEvents } from "@/lib/event-posts";
-export const metadata = { title: "Events" };
+export const generateMetadata = () =>
+  pageMetadata("events", { title: "Events" });
 export default async function Events() {
   const upcoming = upcomingEvents(),
     past = pastEvents();

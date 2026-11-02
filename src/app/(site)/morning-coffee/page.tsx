@@ -1,10 +1,12 @@
 import { siteImageProps } from "@/lib/site-images";
+import { pageMetadata } from "@/lib/page-meta";
 import { siteText } from "@/lib/site-copy";
 import Link from "next/link";
 import Image from "next/image";
 import { getStore } from "@/lib/store";
 
-export const metadata = { title: "Membership" };
+export const generateMetadata = () =>
+  pageMetadata("morning-coffee", { title: "Membership" });
 
 export default async function Page() {
   const settings = getStore().settings;

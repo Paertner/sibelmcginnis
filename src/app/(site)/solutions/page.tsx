@@ -1,7 +1,9 @@
 import { siteText } from "@/lib/site-copy";
+import { pageMetadata } from "@/lib/page-meta";
 import Link from "next/link";
 
-export const metadata = { title: "Solutions" };
+export const generateMetadata = () =>
+  pageMetadata("solutions", { title: "Solutions" });
 
 export default async function Page() {
   return (

@@ -1,9 +1,11 @@
 import { siteImageProps } from "@/lib/site-images";
+import { pageMetadata } from "@/lib/page-meta";
 import { siteText } from "@/lib/site-copy";
 import Link from "next/link";
 import Image from "next/image";
 
-export const metadata = { title: "Meet Sibel" };
+export const generateMetadata = () =>
+  pageMetadata("about", { title: "Meet Sibel" });
 
 export default async function Page() {
   return (

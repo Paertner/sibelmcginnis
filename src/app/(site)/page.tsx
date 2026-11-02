@@ -1,10 +1,12 @@
 import { siteBackground } from "@/lib/site-images";
+import { pageMetadata } from "@/lib/page-meta";
 import { siteText } from "@/lib/site-copy";
 import Link from "next/link";
 import { getStore } from "@/lib/store";
 import { PostCards } from "@/components/post-cards";
 import { getUser } from "@/lib/auth";
 
+export const generateMetadata = () => pageMetadata("home");
 export default async function Page() {
   const settings = getStore().settings;
   const role = (await getUser())?.role ?? "visitor";

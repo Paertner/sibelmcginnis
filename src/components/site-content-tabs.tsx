@@ -1,11 +1,13 @@
 "use client";
 import { useId, useState } from "react";
-const labels = ["General settings", "Page text"];
+const labels = ["General settings", "Visual editor", "Text list (advanced)"];
 export function SiteContentTabs({
   settings,
+  visual,
   text,
 }: {
   settings: React.ReactNode;
+  visual: React.ReactNode;
   text: React.ReactNode;
 }) {
   const [tab, setTab] = useState(0),
@@ -49,7 +51,7 @@ export function SiteContentTabs({
           </button>
         ))}
       </div>
-      {[settings, text].map((node, index) => (
+      {[settings, visual, text].map((node, index) => (
         <div
           role="tabpanel"
           aria-labelledby={`${id}-tab-${index}`}

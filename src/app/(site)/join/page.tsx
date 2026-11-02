@@ -1,4 +1,5 @@
 import { siteText } from "@/lib/site-copy";
+import { pageMetadata } from "@/lib/page-meta";
 import Link from "next/link";
 import { ActionForm } from "@/components/action-form";
 import { PasswordFields } from "@/components/password-fields";
@@ -6,7 +7,8 @@ import { join } from "@/lib/actions";
 import { siteBackground } from "@/lib/site-images";
 import { demoEnabled, getStore } from "@/lib/store";
 import { supabaseConfigured } from "@/lib/supabase";
-export const metadata = { title: "Join the community" };
+export const generateMetadata = () =>
+  pageMetadata("join", { title: "Join the community" });
 export default async function Join({
   searchParams,
 }: {

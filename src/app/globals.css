@@ -8517,3 +8517,108 @@ label a {
     background: #fff;
   }
 }
+
+/* Visual editor */
+.visual-editor .ve-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.ve-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.ve-page select {
+  min-width: 210px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+}
+.ve-device {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--card);
+}
+.ve-device button {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 14px;
+  background: transparent;
+  font: 500 0.82rem var(--font-poppins);
+  cursor: pointer;
+}
+.ve-device button[aria-pressed="true"] {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(59, 42, 33, 0.15);
+}
+.ve-count {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.ve-seo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 14px;
+  margin: 10px 0;
+}
+.ve-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--card);
+}
+.ve-frame {
+  display: block;
+  width: 100%;
+  height: min(72vh, 760px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+.ve-frame.mobile {
+  width: 390px;
+  max-width: 100%;
+}
+.ve-toolbar {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--ad-accent-line);
+  box-shadow: 0 8px 24px rgba(59, 42, 33, 0.18);
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .ve-seo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ve-count {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+.ve-loading {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 200px;
+  color: var(--muted);
+}

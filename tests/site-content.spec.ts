@@ -52,7 +52,7 @@ test("admin can edit static page and shared navigation text, then restore defaul
     await editor.getByRole("option", { name, exact: true }).click();
   };
   await page.goto("/admin/content");
-  await page.getByRole("tab", { name: "Page text", exact: true }).click();
+  await page.getByRole("tab", { name: "Text list (advanced)", exact: true }).click();
   await section("Meet Sibel");
   await editor.getByLabel("Find text in this section").fill("What to Expect");
   const unique = `Your next steps ${Date.now()}`;
@@ -82,7 +82,7 @@ test("admin can edit static page and shared navigation text, then restore defaul
     page.getByRole("heading", { name: unique, exact: true }),
   ).toBeVisible();
   await page.goto("/admin/content");
-  await page.getByRole("tab", { name: "Page text", exact: true }).click();
+  await page.getByRole("tab", { name: "Text list (advanced)", exact: true }).click();
   await section("Meet Sibel");
   await editor.getByLabel("Find text in this section").fill("What to Expect");
   await editor

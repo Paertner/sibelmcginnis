@@ -69,6 +69,7 @@ export function siteImage(id: string): SiteImage {
 export function siteImageProps(id: string) {
   const image = siteImage(id);
   return {
+    "data-site-image": id,
     src: image.src,
     alt: image.alt,
     unoptimized: image.custom,
@@ -81,6 +82,7 @@ export function siteImageProps(id: string) {
 export function siteBackground(id: string) {
   const image = siteImage(id);
   return {
+    "data-site-image": id,
     style: {
       backgroundImage: `url("${image.src}")`,
       backgroundPosition: image.position,

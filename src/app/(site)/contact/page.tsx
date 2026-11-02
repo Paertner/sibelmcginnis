@@ -1,9 +1,11 @@
 import { siteText } from "@/lib/site-copy";
+import { pageMetadata } from "@/lib/page-meta";
 import { SiteSelect } from "@/components/site-select";
 import { ActionForm } from "@/components/action-form";
 import { contact } from "@/lib/actions";
 import { DateTimePicker } from "@/components/datetime-picker";
-export const metadata = { title: "Contact" };
+export const generateMetadata = () =>
+  pageMetadata("contact", { title: "Contact" });
 export default function Contact() {
   return (
     <>
