@@ -1,4 +1,5 @@
 "use client";
+import { useToast } from "./toast";
 import { useState } from "react";
 import { adminMutation } from "@/lib/actions";
 import type { MediaItem, SiteImage } from "@/lib/site-images";
@@ -69,7 +70,7 @@ function General({
 }) {
   const [picking, setPicking] = useState<"logo" | "favicon">();
   const [favicon, setFavicon] = useState(settings.faviconPath ?? "");
-  const [saved, setSaved] = useState("");
+  const toast = useToast();
   const faviconSrc =
     media.find((item) => item.path === favicon)?.src ??
     (favicon || "/images/brand-cup.svg");
@@ -115,11 +116,6 @@ function General({
             </div>
           </div>
         </div>
-        {saved ? (
-          <p className="form-feedback success" role="status">
-            {saved}
-          </p>
-        ) : null}
       </section>
       <ActionForm
         action={adminMutation}
@@ -189,7 +185,7 @@ function General({
           slot={logo}
           media={media}
           onClose={() => setPicking(undefined)}
-          onSaved={() => setSaved("Logo updated.")}
+          onSaved={() => toast("Logo updated.")}
         />
       ) : null}
       {picking === "favicon" ? (

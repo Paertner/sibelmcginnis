@@ -67,7 +67,7 @@ test("admin can edit static page and shared navigation text, then restore defaul
   await editor
     .getByRole("button", { name: "Save site text", exact: true })
     .click();
-  await expect(editor.getByRole("status")).toHaveText("Site text saved.");
+  await expect(page.locator(".toast").last()).toHaveText("Site text saved.");
   await page.goto("/about");
   await expect(
     page.getByRole("heading", { name: unique, exact: true }),
@@ -94,7 +94,7 @@ test("admin can edit static page and shared navigation text, then restore defaul
   await editor
     .getByRole("button", { name: "Save site text", exact: true })
     .click();
-  await expect(editor.getByRole("status")).toHaveText("Site text saved.");
+  await expect(page.locator(".toast").last()).toHaveText("Site text saved.");
   await page.goto("/about");
   await expect(
     page.getByRole("heading", { name: "What to Expect", exact: true }),

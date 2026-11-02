@@ -2,6 +2,7 @@
 import { startTransition, useActionState, useRef } from "react";
 import { useAdminDialog } from "./admin-dialog";
 import { askConfirm } from "./confirm-dialog";
+import { Notify } from "./toast";
 export type ActionResult = {
   message: string;
   ok?: boolean;
@@ -80,14 +81,7 @@ export function ActionForm({
       ) : (
         submit
       )}
-      {state.message ? (
-        <p
-          className={`form-feedback ${state.ok ? "success" : "error"}`}
-          role="status"
-        >
-          {state.message}
-        </p>
-      ) : null}
+      <Notify result={state} />
     </form>
   );
 }

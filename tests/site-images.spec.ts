@@ -20,8 +20,7 @@ const placement = (page: Page, label: string) =>
   page
     .locator(".placement")
     .filter({ has: page.getByRole("heading", { name: label, exact: true }) });
-const pageStatus = (page: Page) =>
-  page.locator(".media-library > .form-feedback");
+const pageStatus = (page: Page) => page.locator(".toast").last();
 // Opens the picker for a placement and uploads a file through its Upload files tab.
 async function uploadInPicker(
   page: Page,

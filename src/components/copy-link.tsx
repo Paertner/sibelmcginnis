@@ -2,8 +2,9 @@
 import { SiteText } from "@/components/site-copy";
 
 import { useState } from "react";
+import { useToast } from "./toast";
 export function CopyLink({ value }: { value: string }) {
-  const [message, setMessage] = useState("");
+  const toast = useToast();
   return (
     <>
       <button
@@ -11,15 +12,14 @@ export function CopyLink({ value }: { value: string }) {
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(value);
-            setMessage("Copied");
+            toast("Copied");
           } catch {
-            setMessage("Copy the meeting link shown above.");
+            toast("Copy the meeting link shown above.", false);
           }
         }}
       >
         <SiteText id="copy-link.copy-link" />
       </button>
-      <span role="status">{message}</span>
     </>
   );
 }

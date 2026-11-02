@@ -10,6 +10,7 @@ import { adminMutation } from "@/lib/actions";
 import { emailTemplates, footerTemplates } from "@/lib/email-templates";
 import { withWeekday } from "@/lib/weekday";
 import { askConfirm } from "./confirm-dialog";
+import { Notify } from "./toast";
 import {
   blockCatalog,
   fillPlaceholders,
@@ -94,11 +95,7 @@ function FooterEditor({
         </div>
       </div>
       <footer className="media-picker-foot">
-        {feedback && !feedback.ok ? (
-          <p className="form-feedback error" role="status">
-            {feedback.message}
-          </p>
-        ) : null}
+        <Notify result={feedback && !feedback.ok ? feedback : null} />
         <span
           className="footer-templates"
           role="group"
@@ -698,14 +695,7 @@ export function AnnouncementComposer({
               <Icon name="save" size={15} /> Save as template
             </button>
           </div>
-          {templateMutation.feedback?.message && !saving ? (
-            <p
-              className={`form-feedback ${templateMutation.feedback.ok ? "success" : "error"}`}
-              role="status"
-            >
-              {templateMutation.feedback.message}
-            </p>
-          ) : null}
+          <Notify result={templateMutation.feedback} />
           {mode === "blocks" ? (
             <div className="email-stage">
               <div className="email-card">
@@ -803,14 +793,7 @@ export function AnnouncementComposer({
         individual email draft is prepared for each recipient. Email delivery is
         not connected in this review.
       </p>
-      {state.message ? (
-        <p
-          className={`form-feedback ${state.ok ? "success" : "error"}`}
-          role="status"
-        >
-          {state.message}
-        </p>
-      ) : null}
+      <Notify result={state} />
 
       {saving ? (
         <Modal
@@ -831,11 +814,6 @@ export function AnnouncementComposer({
               Saves the subject, blocks and footer setting. Recipients are not
               saved.
             </p>
-            {templateMutation.feedback && !templateMutation.feedback.ok ? (
-              <p className="form-feedback error" role="status">
-                {templateMutation.feedback.message}
-              </p>
-            ) : null}
           </div>
           <footer className="media-picker-foot">
             <button

@@ -1,5 +1,6 @@
 "use client";
 import { askConfirm } from "./confirm-dialog";
+import { Notify } from "./toast";
 import {
   useEffect,
   useId,
@@ -48,14 +49,7 @@ function useMutation() {
   return { pending, feedback, setFeedback, run };
 }
 function FeedbackLine({ feedback }: { feedback: Feedback }) {
-  return feedback?.message ? (
-    <p
-      className={`form-feedback ${feedback.ok ? "success" : "error"}`}
-      role="status"
-    >
-      {feedback.message}
-    </p>
-  ) : null;
+  return <Notify result={feedback} />;
 }
 
 function MediaGrid({

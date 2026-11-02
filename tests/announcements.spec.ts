@@ -70,14 +70,14 @@ test("individual announcements are private, sanitized, personalized and include 
   await page
     .getByRole("button", { name: "Publish & prepare email", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
+  await expect(page.locator(".toast").last()).toContainText(
     "Use a protected session page link",
   );
   await page.getByLabel("Message HTML code").fill(editedHtml);
   await page
     .getByRole("button", { name: "Publish & prepare email", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
+  await expect(page.locator(".toast").last()).toContainText(
     "Published to 1 member and prepared 1 individual email",
   );
   const history = page
@@ -163,7 +163,7 @@ test("member groups and individual recipients are deduplicated", async ({
   await page
     .getByRole("button", { name: "Publish & prepare email", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText(
+  await expect(page.locator(".toast").last()).toContainText(
     `Published to ${initial!.split(" ")[0]} members`,
   );
 });

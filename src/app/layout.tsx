@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SiteCopyProvider } from "@/components/site-copy";
+import { ToastProvider } from "@/components/toast";
 import { getStore } from "@/lib/store";
 
 const inter = localFont({
@@ -50,12 +51,14 @@ export default function RootLayout({
       className={`${inter.variable} ${poppins.variable}`}
     >
       <body>
-        <SiteCopyProvider
-          values={getStore().siteCopy ?? {}}
-          weekday={getStore().settings.meetingWeekday}
-        >
-          {children}
-        </SiteCopyProvider>
+        <ToastProvider>
+          <SiteCopyProvider
+            values={getStore().siteCopy ?? {}}
+            weekday={getStore().settings.meetingWeekday}
+          >
+            {children}
+          </SiteCopyProvider>
+        </ToastProvider>
       </body>
     </html>
   );
