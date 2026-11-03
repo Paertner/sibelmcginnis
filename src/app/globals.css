@@ -8622,3 +8622,21 @@ label a {
   height: 200px;
   color: var(--muted);
 }
+
+/* The locked podcast card uses the panel color with readable text */
+.zoomcard.locked {
+  background: var(--panel);
+}
+.zoomcard.locked h2 {
+  color: var(--panel-ink);
+}
+.zoomcard.locked p {
+  color: #5c4a3f;
+}
+.zoomcard .btn {
+  background: var(--ad-accent);
+  color: #fff;
+}
+.zoomcard .btn:hover {
+  background: var(--ad-accent-deep);
+}

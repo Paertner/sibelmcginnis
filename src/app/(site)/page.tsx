@@ -10,6 +10,13 @@ export const generateMetadata = () => pageMetadata("home");
 export default async function Page() {
   const settings = getStore().settings;
   const role = (await getUser())?.role ?? "visitor";
+  // Premium members go straight to their podcast; everyone else to the page that lets them get access.
+  const podcastHref =
+    role === "premium" || role === "admin"
+      ? "/account?tab=podcast"
+      : role === "free"
+        ? "/account?tab=membership"
+        : "/join?plan=premium";
   const latest = getStore()
     .posts.filter((p) => p.status === "published")
     .toSorted((a, b) => b.date.localeCompare(a.date))
@@ -124,7 +131,7 @@ export default async function Page() {
               </p>
               <span className="btn">{siteText("home.schedule-a-session")}</span>
             </Link>
-            <Link className="pcard" href="/podcast">
+            <Link className="pcard" href={podcastHref}>
               <div
                 className="img"
                 {...siteBackground("home.program-podcast")}

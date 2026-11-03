@@ -36,15 +36,6 @@ const FRAME_STYLE = `
 html{scroll-behavior:auto!important}
 `;
 
-/** The page as the server sends it, without the scripts that would start the app inside the preview. */
-function staticPage(html: string) {
-  return html
-    .replace(/<script[^>]*src=[^>]*>\s*<\/script>/gi, "")
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, (tag) =>
-      /__next_f|__next/.test(tag) ? "" : tag,
-    );
-}
-
 export type SeoValues = Record<string, { title: string; description: string }>;
 
 export function VisualEditor({
@@ -89,21 +80,7 @@ export function VisualEditor({
   } | null>(null);
   const page = editorPages.find((entry) => entry.key === pageKey)!;
   const frameKey = `${pageKey}-${reload}`;
-  const [doc, setDoc] = useState<{ key: string; html: string } | null>(null);
-  useEffect(() => {
-    let live = true;
-    fetch(page.path, { credentials: "same-origin" })
-      .then((response) => response.text())
-      .then((html) => {
-        if (live) setDoc({ key: frameKey, html: staticPage(html) });
-      })
-      .catch(() => {
-        if (live) toast("The page preview could not be loaded.", false);
-      });
-    return () => {
-      live = false;
-    };
-  }, [frameKey, page.path, toast]);
+
   const defaults = defaultSeo[pageKey];
   const seoNow = seoDraft[pageKey] ?? defaults;
   const seoSaved = savedSeo[pageKey] ?? defaults;
@@ -150,7 +127,11 @@ export function VisualEditor({
     setSelected({
       element,
       resettable: canReset(element),
-      top: Math.max(4, outer.top - base.top + box.top - 44),
+      // Above the text with a clear gap; below it when the text is at the top of the preview.
+      top:
+        box.top < 64
+          ? outer.top - base.top + box.bottom + 12
+          : outer.top - base.top + box.top - 62,
       left: Math.min(
         Math.max(4, outer.left - base.left + box.left),
         Math.max(4, base.width - 230),
@@ -452,21 +433,15 @@ export function VisualEditor({
         </label>
       </div>
       <div className="ve-stage" ref={stage}>
-        {doc?.key === frameKey ? (
-          <iframe
-            key={frameKey}
-            ref={frame}
-            className={`ve-frame ${device}`}
-            title={`Preview of ${page.label}`}
-            srcDoc={doc.html}
-            sandbox="allow-same-origin allow-scripts"
-            onLoad={prepare}
-          />
-        ) : (
-          <p className="ve-loading" role="status">
-            Loading the page…
-          </p>
-        )}
+        <iframe
+          key={frameKey}
+          ref={frame}
+          className={`ve-frame ${device}`}
+          title={`Preview of ${page.label}`}
+          src={`/api/preview?path=${encodeURIComponent(page.path)}&v=${reload}`}
+          sandbox="allow-same-origin allow-scripts"
+          onLoad={prepare}
+        />
         {selected ? (
           <div
             className="ve-toolbar"

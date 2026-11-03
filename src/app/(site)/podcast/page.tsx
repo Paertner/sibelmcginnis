@@ -37,7 +37,10 @@ export default async function Podcast() {
                 {getStore().settings.premiumPrice}
                 {siteText("podcast.month-premium-membership")}
               </p>
-              <Link className="btn" href="/morning-coffee#plans">
+              <Link
+                className="btn"
+                href={user ? "/account?tab=membership" : "/join?plan=premium"}
+              >
                 {siteText("podcast.see-membership-plans")}
               </Link>
             </div>
