@@ -89,3 +89,36 @@ test("clicking a picture in the preview opens the image picker", async ({
   await page.keyboard.press("Escape");
   await expect(picker).not.toBeVisible();
 });
+
+test("the home headline from Settings is edited in the preview too", async ({
+  page,
+}) => {
+  const frame = await openEditor(page);
+  const headline = frame.locator(".hero-copy h1[data-ve]");
+  await expect(headline).toBeVisible();
+  const original = (await headline.textContent())!.trim();
+  const stamp = `${Date.now()}`;
+  try {
+    await headline.click();
+    await page.keyboard.press("Control+End");
+    await page.keyboard.type(` ${stamp}`);
+    await page.getByRole("button", { name: "Save and publish" }).click();
+    await expect(toast(page)).toHaveText(/saved/i);
+    await page.goto("/");
+    await expect(page.locator("h1").first()).toContainText(stamp);
+  } finally {
+    await page.goto("/admin/content");
+    await page.getByRole("tab", { name: "Visual editor", exact: true }).click();
+    const edited = page
+      .frameLocator("iframe.ve-frame")
+      .locator(".hero-copy h1[data-ve]");
+    await edited.waitFor();
+    await edited.click();
+    await page.keyboard.press("Control+A");
+    await page.keyboard.type(original);
+    await page.getByRole("button", { name: "Save and publish" }).click();
+    await expect(toast(page)).toHaveText(/saved/i);
+  }
+  await page.goto("/");
+  await expect(page.locator("h1").first()).toHaveText(original);
+});

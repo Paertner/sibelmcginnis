@@ -891,6 +891,12 @@ export default async function Admin({
                   siteImageCatalog.map((slot) => [slot.id, siteImage(slot.id)]),
                 )}
                 media={media}
+                settingsText={{
+                  heroTitle: settings.heroTitle,
+                  heroSub: settings.heroSub,
+                  topics: settings.topics,
+                  premiumPrice: settings.premiumPrice,
+                }}
                 {...seoProps(data.siteCopy ?? {}, data.siteSettings?.siteTitle)}
               />
             }

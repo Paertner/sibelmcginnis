@@ -12,7 +12,20 @@ import { useToast } from "./toast";
 
 type Entry = (typeof catalog)[number];
 /** One edited element of the previewed page. */
-type Edit = { ids: string[]; text: string; reset: boolean };
+type Edit = {
+  ids: string[];
+  text: string;
+  reset: boolean;
+  /** Set for texts that live in Settings rather than the text catalog: heroTitle, heroSub or topic:<n>. */
+  setting?: string;
+};
+/** The home page texts that come from Settings and not from the text catalog. */
+export type SettingsText = {
+  heroTitle: string;
+  heroSub: string;
+  topics: string[];
+  premiumPrice: number;
+};
 const normalize = (value: string) => value.replace(/[\s ]+/g, " ").trim();
 const SKIP = new Set([
   "SCRIPT",
@@ -45,6 +58,7 @@ export function VisualEditor({
   media,
   seo,
   defaultSeo,
+  settingsText,
 }: {
   values: Record<string, string>;
   weekday: number;
@@ -53,6 +67,7 @@ export function VisualEditor({
   seo: SeoValues;
   /** What the search engines get when nothing was saved, per page key. */
   defaultSeo: SeoValues;
+  settingsText: SettingsText;
 }) {
   const toast = useToast();
   const router = useRouter();
@@ -70,7 +85,10 @@ export function VisualEditor({
   const edits = useRef(new Map<HTMLElement, Edit>());
   const active = useRef<HTMLElement | null>(null);
   const imagesRef = useRef(images);
-  const meta = useRef(new Map<HTMLElement, { ids: string[]; shown: string }>());
+  const settingsRef = useRef(settingsText);
+  const meta = useRef(
+    new Map<HTMLElement, { ids: string[]; shown: string; setting?: string }>(),
+  );
   const [editCount, setEditCount] = useState(0);
   const [selected, setSelected] = useState<{
     element: HTMLElement;
@@ -112,7 +130,7 @@ export function VisualEditor({
   const canReset = (element: HTMLElement | undefined) => {
     if (!element) return false;
     const edit = edits.current.get(element);
-    if (edit) return !edit.reset;
+    if (edit) return !edit.setting && !edit.reset;
     const ids = meta.current.get(element)?.ids ?? [];
     return ids.some((id) => savedValues.current[id] !== undefined);
   };
@@ -144,6 +162,24 @@ export function VisualEditor({
     (doc: Document) => {
       if (!doc.body) return;
       const known = lookup();
+      // Home page texts that come from Settings are told apart by where they sit, since the same
+      // words can also be a catalog text further down the page.
+      const topics = settingsRef.current.topics.map(normalize);
+      const settingFor = (element: HTMLElement, shown: string) => {
+        if (
+          element.matches(".hero-copy h1") &&
+          shown === normalize(settingsRef.current.heroTitle)
+        )
+          return "heroTitle";
+        if (
+          element.matches(".hero-intro") &&
+          shown === normalize(settingsRef.current.heroSub)
+        )
+          return "heroSub";
+        if (element.closest("#topics") && topics.includes(shown))
+          return `topic:${topics.indexOf(shown)}`;
+        return undefined;
+      };
       for (const element of doc.body.querySelectorAll<HTMLElement>("*")) {
         if (meta.current.has(element)) continue;
         if (SKIP.has(element.tagName.toUpperCase())) continue;
@@ -153,8 +189,9 @@ export function VisualEditor({
         if (!nodes.length || !nodes.every((node) => node.nodeType === 3))
           continue;
         const shown = normalize(element.textContent ?? "");
-        const match = known.get(shown);
-        if (!shown || !match) continue;
+        const setting = settingFor(element, shown);
+        const match = setting ? undefined : known.get(shown);
+        if (!shown || (!match && !setting)) continue;
         element.setAttribute("data-ve", "");
         try {
           element.contentEditable = "plaintext-only";
@@ -164,8 +201,9 @@ export function VisualEditor({
         if (element.contentEditable !== "plaintext-only")
           element.contentEditable = "true";
         meta.current.set(element, {
-          ids: match.map((entry) => entry.id),
+          ids: match ? match.map((entry) => entry.id) : [],
           shown,
+          setting,
         });
       }
     },
@@ -272,6 +310,7 @@ export function VisualEditor({
           ids: original.ids,
           text,
           reset: false,
+          setting: original.setting,
         });
         element.setAttribute("data-ve-dirty", "");
       }
@@ -328,12 +367,18 @@ export function VisualEditor({
     const form = new FormData();
     form.set("entity", "siteCopy");
     const applied: Record<string, string | null> = {};
-    for (const edit of edits.current.values())
+    const fromSettings = new Map<string, string>();
+    for (const edit of edits.current.values()) {
+      if (edit.setting) {
+        fromSettings.set(edit.setting, edit.text);
+        continue;
+      }
       for (const id of edit.ids) {
         const original = catalog.find((entry) => entry.id === id)!.text;
         form.set(`copy:${id}`, edit.reset ? original : edit.text);
         applied[id] = edit.reset ? null : edit.text;
       }
+    }
     const nextSeo = { ...seoNow };
     if (seoChanged) {
       for (const field of ["title", "description"] as const)
@@ -343,16 +388,39 @@ export function VisualEditor({
             seoNow[field] === defaults[field] ? "" : seoNow[field],
           );
     }
-    const result = await adminMutation({ message: "" }, form);
+    const copyChanged = [...form.keys()].some((key) => key.startsWith("copy:"));
+    if (copyChanged) {
+      const result = await adminMutation({ message: "" }, form);
+      toast(result.message, !!result.ok);
+      if (!result.ok) return setSaving(false);
+      const merged = { ...savedValues.current };
+      for (const [id, value] of Object.entries(applied))
+        if (value === null) delete merged[id];
+        else merged[id] = value;
+      savedValues.current = merged;
+      setSavedSeo((current) => ({ ...current, [pageKey]: nextSeo }));
+    }
+    if (fromSettings.size) {
+      const next = {
+        ...settingsRef.current,
+        topics: [...settingsRef.current.topics],
+      };
+      for (const [key, text] of fromSettings)
+        if (key.startsWith("topic:")) next.topics[Number(key.slice(6))] = text;
+        else if (key === "heroTitle") next.heroTitle = text;
+        else if (key === "heroSub") next.heroSub = text;
+      const settingsForm = new FormData();
+      settingsForm.set("entity", "content");
+      settingsForm.set("heroTitle", next.heroTitle);
+      settingsForm.set("heroSub", next.heroSub);
+      settingsForm.set("topics", next.topics.join("\n"));
+      settingsForm.set("premiumPrice", String(next.premiumPrice));
+      const result = await adminMutation({ message: "" }, settingsForm);
+      toast(result.message, !!result.ok);
+      if (!result.ok) return setSaving(false);
+      settingsRef.current = next;
+    }
     setSaving(false);
-    toast(result.message, !!result.ok);
-    if (!result.ok) return;
-    const merged = { ...savedValues.current };
-    for (const [id, value] of Object.entries(applied))
-      if (value === null) delete merged[id];
-      else merged[id] = value;
-    savedValues.current = merged;
-    setSavedSeo((current) => ({ ...current, [pageKey]: nextSeo }));
     edits.current.clear();
     setEditCount(0);
     setReload((n) => n + 1);
