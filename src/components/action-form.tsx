@@ -1,6 +1,7 @@
 "use client";
 import { startTransition, useActionState, useRef } from "react";
 import { useAdminDialog } from "./admin-dialog";
+import { useToast } from "./toast";
 import { askConfirm } from "./confirm-dialog";
 import { Notify } from "./toast";
 export type ActionResult = {
@@ -8,6 +9,8 @@ export type ActionResult = {
   ok?: boolean;
   id?: string;
   keepOpen?: boolean;
+  /** Also show the message as a toast, for results that would vanish with a closing dialog. */
+  toast?: boolean;
 };
 export function ActionForm({
   action,
@@ -29,10 +32,12 @@ export function ActionForm({
   actions?: React.ReactNode;
 }) {
   const closeDialog = useAdminDialog();
+  const toast = useToast();
   const form = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(
     async (previous: ActionResult, data: FormData) => {
       const result = await action(previous, data);
+      if (result.toast) toast(result.message, !!result.ok);
       if (result.ok && !result.keepOpen) {
         form.current?.reset();
         closeDialog?.();

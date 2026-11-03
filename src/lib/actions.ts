@@ -17,7 +17,7 @@ import { memberRole } from "./membership";
 import { checkoutUrl, portalUrl } from "./billing";
 import { stripeConfigured, stripe, modeOf } from "./stripe";
 import { getSecret, saveSecret } from "./secrets";
-import { createResetLink } from "./password-reset";
+import { createResetLink, sendWelcomeEmail } from "./password-reset";
 import { resetZoomToken, testZoomCredentials } from "./zoom";
 import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
 import { addDays, nextWeekday, today } from "./dates";
@@ -789,13 +789,22 @@ export async function adminMutation(
           throw new Error("Could not create the member. Please try again.");
         Object.assign(created, value);
         refresh();
+        // The new member gets the link to set their password by email; the admin never sees it.
         const link = await createResetLink(address);
+        const problem = !link
+          ? "the link could not be created"
+          : await sendWelcomeEmail(created, link);
+        if (problem)
+          return {
+            ok: false,
+            keepOpen: true,
+            toast: true,
+            message: `Member created for ${address}, but the password email could not be sent: ${problem}. Use “Create password link” to send it yourself.`,
+          };
         return {
           ok: true,
-          keepOpen: true,
-          message: link
-            ? `Member added. They have no password yet. Send them this link to set one (works once): ${link}`
-            : "Member added. Use “Create password link” on their profile to let them set a password.",
+          toast: true,
+          message: `A new member profile was created for ${address}. A password link was sent by email.`,
         };
       } else data.members.push({ id: uid(), joined: today(), ...value });
       // A member who is no longer Premium loses their personal meeting links.

@@ -1,6 +1,8 @@
 import "server-only";
 import { adminClient } from "./supabase";
 import { sendEmail } from "./mailer";
+import { assertEmailQuota, recordEmails } from "./email-quota";
+import { escapeHtml } from "./safe-html";
 import { siteOrigin } from "./site-url";
 
 /**
@@ -37,6 +39,51 @@ The link works once. If you did not ask for it, you can ignore this email.`;
   });
   if (error) console.error("[reset] email not sent:", error);
   return !error;
+}
+
+/** Emails a new member the link to set their first password, counts it and writes the email log. Returns an error text or null. */
+export async function sendWelcomeEmail(
+  member: { id: string; name: string; email: string },
+  link: string,
+) {
+  const first = member.name.trim().split(/\s+/)[0] || "there";
+  const subject = "Set your password for Morning Coffee Community";
+  try {
+    assertEmailQuota(1);
+  } catch (error) {
+    return error instanceof Error
+      ? error.message
+      : "Daily email limit reached.";
+  }
+  const { id, error } = await sendEmail({
+    to: member.email,
+    subject,
+    text: `Hello ${first},
+
+Sibel has added you to Morning Coffee Community. Use this link to set your password:
+
+${link}
+
+The link can be used once. If it stops working, choose "Forgot your password?" on the login page and we will send you a new one.
+
+Warmly,
+Sibel's team`,
+    html: `<p>Hello ${escapeHtml(first)},</p><p>Sibel has added you to Morning Coffee Community. Use the button to set your password.</p><p><a href="${link}" style="display:inline-block;padding:12px 22px;background:#8b5e3c;color:#fff;border-radius:8px;text-decoration:none">Set my password</a></p><p>Or paste this link into your browser:<br><a href="${link}">${link}</a></p><p>The link can be used once. If it stops working, choose “Forgot your password?” on the login page and we will send you a new one.</p><p>Warmly,<br>Sibel’s team</p>`,
+  });
+  if (!error) recordEmails(1);
+  const { error: logError } = await adminClient()
+    .from("email_log")
+    .insert({
+      member_id: member.id,
+      to_email: member.email,
+      subject,
+      resend_id: id ?? null,
+      status: error ? "failed" : "sent",
+      error: error ?? null,
+    });
+  if (logError)
+    console.error("[email] could not write the log:", logError.message);
+  return error ?? null;
 }
 
 const lastAsked = new Map<string, number>();
