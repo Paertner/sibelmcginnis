@@ -17,7 +17,11 @@ import { memberRole } from "./membership";
 import { checkoutUrl, portalUrl } from "./billing";
 import { stripeConfigured, stripe, modeOf } from "./stripe";
 import { getSecret, saveSecret } from "./secrets";
-import { createResetLink, sendWelcomeEmail } from "./password-reset";
+import {
+  askedRecently,
+  createResetLink,
+  sendWelcomeEmail,
+} from "./password-reset";
 import { resetZoomToken, testZoomCredentials } from "./zoom";
 import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
 import { addDays, nextWeekday, today } from "./dates";
@@ -737,6 +741,37 @@ export async function adminMutation(
         ok: true,
         keepOpen: true,
         message: `Password link for ${member.email}. It works once. Send it to the member: ${link}`,
+      };
+    } else if (entity === "members" && op === "emailLink") {
+      if (!usesDatabase())
+        throw new Error("Password links need the real sign-in.");
+      const member = data.members.find((x) => x.id === id);
+      if (!member) throw new Error("Save the member first.");
+      if (member.status !== "active")
+        throw new Error(
+          `${member.email} is not an active member, so no link was sent.`,
+        );
+      if (askedRecently(`admin-link:${member.id}`))
+        return {
+          ok: false,
+          toast: true,
+          message: `A password link was already sent to ${member.email} less than a minute ago. Please wait a moment.`,
+        };
+      const link = await createResetLink(member.email);
+      const problem = !link
+        ? "the link could not be created"
+        : await sendWelcomeEmail(member, link, { existing: true });
+      if (problem)
+        return {
+          ok: false,
+          toast: true,
+          message: `The password email to ${member.email} could not be sent: ${problem}. Use “Create password link” to send it yourself.`,
+        };
+      return {
+        ok: true,
+        keepOpen: true,
+        toast: true,
+        message: `A password link was sent to ${member.email}.`,
       };
     } else if (entity === "members") {
       const address = email(form);

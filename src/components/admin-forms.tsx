@@ -1,4 +1,5 @@
 import { SiteSelect } from "./site-select";
+import { EmailLinkButton } from "./email-link-button";
 import { ActionForm, ConfirmDelete } from "./action-form";
 import { AdminDialog, AdminCancel } from "./admin-dialog";
 import { adminMutation } from "@/lib/actions";
@@ -7,13 +8,7 @@ import { BlocksField } from "./blocks-field";
 import { textToBlocks } from "./block-content";
 import type { MediaItem, SiteImage } from "@/lib/site-images";
 import { fmtDate, today, nextWeekday } from "@/lib/dates";
-import type {
-  Episode,
-  EventItem,
-  Member,
-  Post,
-  Session,
-} from "@/lib/store";
+import type { Episode, EventItem, Member, Post, Session } from "@/lib/store";
 type InputProps = {
   name: string;
   label: string;
@@ -137,14 +132,17 @@ export function MemberEditor({
       id={member?.id}
       trigger={asName ? member?.name : undefined}
       extraActions={
-        <button
-          className="btn btn-sm btn-ghost"
-          name="op"
-          value="resetLink"
-          formNoValidate
-        >
-          Create password link
-        </button>
+        <>
+          <EmailLinkButton email={member?.email ?? ""} />
+          <button
+            className="btn btn-sm btn-ghost"
+            name="op"
+            value="resetLink"
+            formNoValidate
+          >
+            Create password link
+          </button>
+        </>
       }
     >
       <div className="row">

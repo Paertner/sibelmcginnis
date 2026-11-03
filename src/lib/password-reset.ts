@@ -45,7 +45,11 @@ The link works once. If you did not ask for it, you can ignore this email.`;
 export async function sendWelcomeEmail(
   member: { id: string; name: string; email: string },
   link: string,
+  { existing = false }: { existing?: boolean } = {},
 ) {
+  const intro = existing
+    ? "Sibel’s team sent you a link to set your password for Morning Coffee Community."
+    : "Sibel has added you to Morning Coffee Community.";
   const first = member.name.trim().split(/\s+/)[0] || "there";
   const subject = "Set your password for Morning Coffee Community";
   try {
@@ -60,7 +64,7 @@ export async function sendWelcomeEmail(
     subject,
     text: `Hello ${first},
 
-Sibel has added you to Morning Coffee Community. Use this link to set your password:
+${intro} Use this link to set your password:
 
 ${link}
 
@@ -68,7 +72,7 @@ The link can be used once. If it stops working, choose "Forgot your password?" o
 
 Warmly,
 Sibel's team`,
-    html: `<p>Hello ${escapeHtml(first)},</p><p>Sibel has added you to Morning Coffee Community. Use the button to set your password.</p><p><a href="${link}" style="display:inline-block;padding:12px 22px;background:#8b5e3c;color:#fff;border-radius:8px;text-decoration:none">Set my password</a></p><p>Or paste this link into your browser:<br><a href="${link}">${link}</a></p><p>The link can be used once. If it stops working, choose “Forgot your password?” on the login page and we will send you a new one.</p><p>Warmly,<br>Sibel’s team</p>`,
+    html: `<p>Hello ${escapeHtml(first)},</p><p>${intro} Use the button to set your password.</p><p><a href="${link}" style="display:inline-block;padding:12px 22px;background:#8b5e3c;color:#fff;border-radius:8px;text-decoration:none">Set my password</a></p><p>Or paste this link into your browser:<br><a href="${link}">${link}</a></p><p>The link can be used once. If it stops working, choose “Forgot your password?” on the login page and we will send you a new one.</p><p>Warmly,<br>Sibel’s team</p>`,
   });
   if (!error) recordEmails(1);
   const { error: logError } = await adminClient()
