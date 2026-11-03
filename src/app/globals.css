@@ -8640,3 +8640,73 @@ label a {
 .zoomcard .btn:hover {
   background: var(--ad-accent-deep);
 }
+
+/* Editor actions fit narrow dialogs */
+.admin-dialog .form-actions,
+.wide-editor-side .form-actions {
+  gap: 8px;
+  min-width: 0;
+}
+.admin-dialog .form-actions .btn,
+.admin-dialog .editor-delete .btn,
+.wide-editor-side .editor-delete .btn,
+.wide-editor-side .form-actions .btn {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 0.8rem;
+  min-width: 0;
+}
+.admin-dialog .form-actions .btn:focus-visible {
+  outline-offset: 2px;
+}
+@media (max-width: 420px) {
+  .admin-dialog .form-actions {
+    flex-wrap: wrap;
+  }
+  .admin-dialog .form-actions .form-actions-gap {
+    display: none;
+  }
+}
+
+/* Editor actions: Cancel and Save on the first row, Delete below on the left */
+.admin-dialog .form-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 10px;
+}
+.admin-dialog .form-actions > * {
+  order: 4;
+}
+.admin-dialog .form-actions > .btn-ghost {
+  order: 1;
+}
+.admin-dialog .form-actions > .btn:last-child:not(.btn-danger) {
+  order: 2;
+}
+.admin-dialog .form-actions .form-actions-gap {
+  display: block;
+  order: 3;
+  flex: 0 0 100%;
+  height: 0;
+}
+.admin-dialog .form-actions > .btn-danger {
+  margin-right: auto;
+}
+
+/* Wide editors: Delete sits at the very bottom of the settings column */
+.admin-dialog .wide-editor > .form-actions .form-actions-gap {
+  display: none;
+}
+.admin-dialog .wide-editor > .wide-editor-delete {
+  grid-column: 2;
+  grid-row: 3;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ad-line);
+}
+@media (max-width: 960px) {
+  .admin-dialog .wide-editor > .wide-editor-delete {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}

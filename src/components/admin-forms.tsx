@@ -214,7 +214,6 @@ function WideEditor({
         className="wide-editor"
         actions={
           <>
-            {id ? <ConfirmDelete /> : null}
             <span className="form-actions-gap" />
             <AdminCancel />
           </>
@@ -223,6 +222,11 @@ function WideEditor({
         <EntityFields entity={entity} id={id} />
         <div className="wide-editor-main">{main}</div>
         <aside className="wide-editor-side">{side}</aside>
+        {id ? (
+          <div className="wide-editor-delete">
+            <ConfirmDelete />
+          </div>
+        ) : null}
       </ActionForm>
     </AdminDialog>
   );
