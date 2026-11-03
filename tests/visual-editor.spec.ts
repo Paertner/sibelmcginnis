@@ -206,3 +206,21 @@ test("a button label, a sentence beside a link and a password hint are edited in
     page.getByRole("button", { name: "Create free account" }),
   ).toBeVisible();
 });
+
+test("answers inside folded questions and the strip captions are editable", async ({
+  page,
+}) => {
+  const frame = await openEditor(page);
+  await expect(frame.locator("details[open]").first()).toBeAttached();
+  await expect(
+    frame.locator("[data-ve]", { hasText: /^weekly live sessions$/ }),
+  ).toBeVisible();
+  await expect(
+    frame.locator("[data-ve]", { hasText: /^join from anywhere$/ }),
+  ).toBeVisible();
+  await expect(
+    frame.locator("[data-ve]", {
+      hasText: /^Premium members get post-meeting/,
+    }),
+  ).toBeVisible();
+});

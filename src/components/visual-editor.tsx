@@ -48,6 +48,7 @@ const FRAME_STYLE = `
 [data-site-image]{cursor:pointer}
 [data-site-image]:hover{outline:3px solid #9b5e41;outline-offset:-3px}
 html{scroll-behavior:auto!important}
+.skip-link{pointer-events:none!important}
 `;
 
 /** Where a text that this preview cannot change is edited. */
@@ -192,6 +193,9 @@ export function VisualEditor({
     (doc: Document) => {
       if (!doc.body) return;
       const known = lookup();
+      // Answers inside folded questions are reachable only when they are open.
+      for (const details of doc.querySelectorAll("details"))
+        details.open = true;
       // Home page texts that come from Settings are told apart by where they sit, since the same
       // words can also be a catalog text further down the page.
       const topics = settingsRef.current.topics.map(normalize);
@@ -213,7 +217,12 @@ export function VisualEditor({
       for (const element of doc.body.querySelectorAll<HTMLElement>("*")) {
         if (meta.current.has(element)) continue;
         if (SKIP.has(element.tagName.toUpperCase())) continue;
-        if (element.closest("svg,script,style,noscript,select")) continue;
+        if (
+          element.closest(
+            "svg,script,style,noscript,select,audio,video,.site-select",
+          )
+        )
+          continue;
         const nodes = [...element.childNodes];
         if (!nodes.length) continue;
         const onlyText = nodes.every((node) => node.nodeType === 3);
