@@ -139,37 +139,63 @@ export function VisualEditor({
     });
   }, []);
 
+  // Marks every text of the page that matches a catalog text. Safe to repeat: marked elements are skipped.
+  const scan = useCallback(
+    (doc: Document) => {
+      if (!doc.body) return;
+      const known = lookup();
+      for (const element of doc.body.querySelectorAll<HTMLElement>("*")) {
+        if (meta.current.has(element)) continue;
+        if (SKIP.has(element.tagName.toUpperCase())) continue;
+        if (element.closest("svg,script,style,noscript,button,select"))
+          continue;
+        const nodes = [...element.childNodes];
+        if (!nodes.length || !nodes.every((node) => node.nodeType === 3))
+          continue;
+        const shown = normalize(element.textContent ?? "");
+        const match = known.get(shown);
+        if (!shown || !match) continue;
+        element.setAttribute("data-ve", "");
+        try {
+          element.contentEditable = "plaintext-only";
+        } catch {
+          element.contentEditable = "true";
+        }
+        if (element.contentEditable !== "plaintext-only")
+          element.contentEditable = "true";
+        meta.current.set(element, {
+          ids: match.map((entry) => entry.id),
+          shown,
+        });
+      }
+    },
+    [lookup],
+  );
+
   const prepare = useCallback(() => {
     const doc = frame.current?.contentDocument;
-    if (!doc?.body) return;
+    const view = doc?.defaultView;
+    if (!doc?.body || !view) return;
     edits.current.clear();
+    meta.current = new Map();
     setEditCount(0);
     setSelected(null);
     const style = doc.createElement("style");
     style.textContent = FRAME_STYLE;
     doc.head.append(style);
-    const known = lookup();
-    const originals = new Map<HTMLElement, { ids: string[]; shown: string }>();
-    meta.current = originals;
-    for (const element of doc.body.querySelectorAll<HTMLElement>("*")) {
-      if (SKIP.has(element.tagName.toUpperCase())) continue;
-      if (element.closest("svg,script,style,noscript,button,select")) continue;
-      const nodes = [...element.childNodes];
-      if (!nodes.length || !nodes.every((node) => node.nodeType === 3))
-        continue;
-      const shown = normalize(element.textContent ?? "");
-      const match = known.get(shown);
-      if (!shown || !match) continue;
-      element.setAttribute("data-ve", "");
-      try {
-        element.contentEditable = "plaintext-only";
-      } catch {
-        element.contentEditable = "true";
-      }
-      if (element.contentEditable !== "plaintext-only")
-        element.contentEditable = "true";
-      originals.set(element, { ids: match.map((entry) => entry.id), shown });
-    }
+    // The page starts its own scripts inside the preview. Marking waits for that to settle
+    // and repeats whenever the page changes its content.
+    let timer: number | undefined;
+    const later = () => {
+      view.clearTimeout(timer);
+      timer = view.setTimeout(() => scan(doc), 350);
+    };
+    view.setTimeout(() => scan(doc), 1200);
+    new view.MutationObserver(later).observe(doc.body, {
+      childList: true,
+      subtree: true,
+    });
+    const originals = meta.current;
     const itemFor = (target: EventTarget | null) =>
       (target as HTMLElement | null)?.closest?.(
         "[data-ve]",
@@ -258,7 +284,7 @@ export function VisualEditor({
         return current;
       }),
     );
-  }, [lookup, positionToolbar, toast, weekday]);
+  }, [scan, positionToolbar, toast, weekday]);
 
   const switchPage = async (key: string) => {
     if (key === pageKey) return;
@@ -438,7 +464,7 @@ export function VisualEditor({
           ref={frame}
           className={`ve-frame ${device}`}
           title={`Preview of ${page.label}`}
-          src={`/api/preview?path=${encodeURIComponent(page.path)}&v=${reload}`}
+          src={page.path}
           sandbox="allow-same-origin allow-scripts"
           onLoad={prepare}
         />
