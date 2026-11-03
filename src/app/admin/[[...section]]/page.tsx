@@ -18,6 +18,11 @@ import {
   type MediaItem,
 } from "@/lib/site-images";
 import { AdminTable, AdminRow } from "@/components/admin-table";
+import {
+  BulkCheckbox,
+  BulkHeaderCheckbox,
+  BulkProvider,
+} from "@/components/bulk-members";
 import { AnnouncementComposer } from "@/components/announcement-composer";
 import { AnnouncementHistory } from "@/components/announcement-history";
 import { CopyIconButton } from "@/components/copy-link";
@@ -279,65 +284,83 @@ export default async function Admin({
         </div>
         {section === "dashboard" ? <AdminDashboard data={data} /> : null}
         {section === "members" ? (
-          <AdminTable kind="members" count={data.members.length}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Tier</th>
-                  <th>Status</th>
-                  <th>Joined</th>
-                  <th aria-label="Actions" />
-                </tr>
-              </thead>
-              <tbody>
-                {data.members.map((m) => (
-                  <AdminRow
-                    key={m.id}
-                    search={`${m.name} ${m.email}`}
-                    category={m.tier}
-                  >
-                    <td>
-                      <span className="person">
-                        <span className="avatar-soft" aria-hidden="true">
-                          {initials(m.name)}
-                        </span>
-                        <span>
-                          <span className="member-name">
-                            <MemberEditor member={m} asName />
-                            <MailLink id={m.id} name={m.name} />
+          <BulkProvider
+            members={data.members.map((m) => ({
+              id: m.id,
+              name: m.name,
+              email: m.email,
+              status: m.status,
+              hasStripe: !!m.stripeCustomerId,
+            }))}
+            quotaLeft={emailQuota().left}
+            live={usesDatabase() && mailerConfigured()}
+          >
+            <AdminTable kind="members" count={data.members.length}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      <BulkHeaderCheckbox />
+                    </th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Tier</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th aria-label="Actions" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.members.map((m) => (
+                    <AdminRow
+                      key={m.id}
+                      search={`${m.name} ${m.email}`}
+                      category={m.tier}
+                    >
+                      <td>
+                        <BulkCheckbox id={m.id} name={m.name} />
+                      </td>
+                      <td>
+                        <span className="person">
+                          <span className="avatar-soft" aria-hidden="true">
+                            {initials(m.name)}
                           </span>
-                          {m.note && (
-                            <small className="muted person-note">
-                              {m.note}
-                            </small>
-                          )}
+                          <span>
+                            <span className="member-name">
+                              <MemberEditor member={m} asName />
+                              <MailLink id={m.id} name={m.name} />
+                            </span>
+                            {m.note && (
+                              <small className="muted person-note">
+                                {m.note}
+                              </small>
+                            )}
+                          </span>
                         </span>
-                      </span>
-                    </td>
-                    <td>{m.email}</td>
-                    <td>
-                      <span className={`badge b-${m.tier}`}>{m.tier}</span>
-                    </td>
-                    <td>
-                      <Status value={m.status} />
-                    </td>
-                    <td>
-                      {fmtDate(m.joined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td>
-                      <MemberEditor member={m} />
-                    </td>
-                  </AdminRow>
-                ))}
-              </tbody>
-            </table>
-          </AdminTable>
+                      </td>
+                      <td>{m.email}</td>
+                      <td>
+                        <span className={`badge b-${m.tier}`}>{m.tier}</span>
+                      </td>
+                      <td>
+                        <Status value={m.status} />
+                      </td>
+                      <td>
+                        {fmtDate(m.joined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td>
+                        <MemberEditor member={m} />
+                      </td>
+                    </AdminRow>
+                  ))}
+                </tbody>
+              </table>
+            </AdminTable>
+          </BulkProvider>
         ) : null}
         {section === "posts" ? (
           <AdminTable kind="posts">

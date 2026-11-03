@@ -1,6 +1,6 @@
 import "server-only";
 import { adminClient } from "./supabase";
-import { sendEmail } from "./mailer";
+import { sendBatch, sendEmail } from "./mailer";
 import { assertEmailQuota, recordEmails } from "./email-quota";
 import { siteOrigin } from "./site-url";
 import { getStore } from "./store";
@@ -81,6 +81,36 @@ export async function sendWelcomeEmail(
   if (logError)
     console.error("[email] could not write the log:", logError.message);
   return error ?? null;
+}
+
+/** Emails many members their password link in batches, counts them and writes the email log. */
+export async function sendWelcomeEmails(
+  items: {
+    member: { id: string; name: string; email: string };
+    link: string;
+  }[],
+) {
+  if (!items.length) return [];
+  const mails = items.map(({ member, link }) => ({
+    to: member.email,
+    ...systemEmailFor("set-password", member, link),
+  }));
+  const results = await sendBatch(mails);
+  recordEmails(results.filter((result) => !result.error).length);
+  const { error } = await adminClient()
+    .from("email_log")
+    .insert(
+      results.map((result, index) => ({
+        member_id: items[index].member.id,
+        to_email: items[index].member.email,
+        subject: mails[index].subject,
+        resend_id: result.id ?? null,
+        status: result.error ? "failed" : "sent",
+        error: result.error ?? null,
+      })),
+    );
+  if (error) console.error("[email] could not write the log:", error.message);
+  return results;
 }
 
 const lastAsked = new Map<string, number>();

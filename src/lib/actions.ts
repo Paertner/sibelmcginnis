@@ -21,9 +21,16 @@ import {
   askedRecently,
   createResetLink,
   sendWelcomeEmail,
+  sendWelcomeEmails,
 } from "./password-reset";
 import { resetZoomToken, testZoomCredentials } from "./zoom";
-import { demoEnabled, getDemoState, getStore, usesDatabase } from "./store";
+import {
+  demoEnabled,
+  getDemoState,
+  getStore,
+  usesDatabase,
+  type Member,
+} from "./store";
 import { addDays, nextWeekday, today } from "./dates";
 import { weekdayIndex, weekdays } from "./weekday";
 import { isPast } from "./event-posts";
@@ -39,7 +46,7 @@ import {
   type Delivery,
 } from "./announcement-mail";
 import { mailerConfigured, sendBatch, sendEmail } from "./mailer";
-import { assertEmailQuota, recordEmails } from "./email-quota";
+import { assertEmailQuota, emailQuota, recordEmails } from "./email-quota";
 import { htmlText, safeHtml } from "./safe-html";
 import {
   buildSystemEmail,
@@ -155,6 +162,23 @@ const blocksText = (blocks: ReturnType<typeof parseBlocks>) =>
     )
     .filter(Boolean)
     .join("\n\n");
+/** The members chosen in a bulk action (at most 500 at a time). */
+function bulkMembers(form: FormData, members: Member[]) {
+  let ids: unknown;
+  try {
+    ids = JSON.parse(text(form, "ids", 100000));
+  } catch {
+    ids = null;
+  }
+  if (!Array.isArray(ids) || !ids.length)
+    throw new Error("Select some members first.");
+  if (ids.length > 500)
+    throw new Error("Choose at most 500 members at a time.");
+  const chosen = new Set(ids.map(String));
+  const found = members.filter((m) => chosen.has(m.id));
+  if (!found.length) throw new Error("Those members no longer exist.");
+  return found;
+}
 const refresh = () => revalidatePath("/", "layout");
 const errorResult = (error: unknown): ActionResult => ({
   message:
@@ -715,6 +739,14 @@ export async function adminMutation(
           );
           data.members = data.members.filter((x) => x.id !== id);
           data.bookings = data.bookings.filter((x) => x.memberId !== id);
+          if (usesDatabase() && id !== user.id) {
+            const { error } = await adminClient().auth.admin.deleteUser(id);
+            if (error)
+              console.error(
+                "[members] could not delete the account:",
+                error.code,
+              );
+          }
           break;
         case "posts":
           data.posts = data.posts.filter((x) => x.id !== id);
@@ -736,7 +768,113 @@ export async function adminMutation(
       }
       return success("Item deleted.");
     }
-    if (entity === "members" && op === "resetLink") {
+    if (entity === "members" && op === "bulkDelete") {
+      const targets = bulkMembers(form, data.members).filter(
+        (member) => member.id !== user.id,
+      );
+      let failed = 0;
+      for (const member of targets) {
+        await revokeFromUpcoming(member.email);
+        // A member also has a sign-in account in the real database; it must go too.
+        if (usesDatabase()) {
+          const { error } = await adminClient().auth.admin.deleteUser(
+            member.id,
+          );
+          if (error) {
+            failed++;
+            console.error(
+              "[members] could not delete the account:",
+              error.code,
+            );
+          }
+        }
+      }
+      const gone = new Set(targets.map((m) => m.id));
+      data.members = data.members.filter((m) => !gone.has(m.id));
+      data.bookings = data.bookings.filter((b) => !gone.has(b.memberId));
+      refresh();
+      return {
+        ok: failed === 0,
+        message: failed
+          ? `Deleted ${gone.size} members; ${failed} sign-in accounts could not be removed. Try again.`
+          : `Deleted ${gone.size} member${gone.size === 1 ? "" : "s"}.`,
+      };
+    } else if (entity === "members" && op === "bulkEdit") {
+      const targets = bulkMembers(form, data.members);
+      const tier = text(form, "tier", 20),
+        status = text(form, "status", 20),
+        note = text(form, "note", 2000),
+        clearUntil = form.get("clearPremiumUntil") === "on";
+      let until = text(form, "premiumUntil", 40);
+      if (tier && !["free", "premium"].includes(tier))
+        throw new Error("Choose a valid membership.");
+      if (status && !["active", "paused", "cancelled"].includes(status))
+        throw new Error("Choose a valid status.");
+      if (until) {
+        const utc = until.endsWith("Z") ? until : until + "Z";
+        if (
+          !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(until) ||
+          Number.isNaN(Date.parse(utc))
+        )
+          throw new Error("Enter a valid membership expiry.");
+        until = new Date(utc).toISOString();
+      }
+      if (!tier && !status && !until && !clearUntil && !note)
+        throw new Error("Choose at least one thing to change.");
+      for (const member of targets) {
+        if (tier) member.tier = tier as Member["tier"];
+        if (status) member.status = status as Member["status"];
+        if (until) member.premiumUntil = until;
+        else if (clearUntil) member.premiumUntil = undefined;
+        if (note) member.note = [member.note, note].filter(Boolean).join("\n");
+        // Someone who is no longer Premium loses their personal meeting links.
+        if (memberRole(member) !== "premium")
+          await revokeFromUpcoming(member.email);
+      }
+      return success(
+        `Updated ${targets.length} member${targets.length === 1 ? "" : "s"}.`,
+      );
+    } else if (entity === "members" && op === "bulkLink") {
+      if (!usesDatabase())
+        throw new Error("Password links need the real sign-in.");
+      if (!mailerConfigured())
+        throw new Error(
+          "Email is not set up yet. Save the Resend key and the sender in Settings first.",
+        );
+      const targets = bulkMembers(form, data.members);
+      const active = targets.filter((m) => m.status === "active"),
+        skipped = targets.length - active.length,
+        left = emailQuota().left;
+      if (active.length > left && form.get("partial") !== "yes")
+        throw new Error(
+          `Only ${left} of today’s emails are left, but ${active.length} members would get one. Nothing was sent.`,
+        );
+      const batch = active.slice(0, left),
+        notSent = active.length - batch.length;
+      const ready: { member: (typeof batch)[number]; link: string }[] = [];
+      let failed = 0,
+        reason = "";
+      for (const member of batch) {
+        const link = await createResetLink(member.email);
+        if (link) ready.push({ member, link });
+        else {
+          failed++;
+          reason ||= "the link could not be created";
+        }
+      }
+      const results = await sendWelcomeEmails(ready);
+      let sent = 0;
+      for (const result of results)
+        if (result.error) {
+          failed++;
+          reason ||= result.error;
+        } else sent++;
+      refresh();
+      return {
+        ok: failed === 0 && notSent === 0,
+        message: `Sent ${sent}, skipped ${skipped}, failed ${failed}${reason ? ` (${reason})` : ""}.${notSent ? ` ${notSent} not sent because of today’s email limit.` : ""}`,
+      };
+    } else if (entity === "members" && op === "resetLink") {
       if (!usesDatabase())
         throw new Error("Password links need the real sign-in.");
       const member = data.members.find((x) => x.id === id);
