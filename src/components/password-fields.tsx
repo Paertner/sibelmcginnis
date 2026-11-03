@@ -1,5 +1,6 @@
 "use client";
 import { useId, useState } from "react";
+import { SiteText } from "./site-copy";
 
 /** Password and repeat-password fields with show/hide and a live match check. */
 export function PasswordFields({
@@ -40,7 +41,9 @@ export function PasswordFields({
             aria-pressed={visible}
             onClick={() => setVisible(!visible)}
           >
-            {visible ? "Hide" : "Show"}
+            <SiteText
+              id={visible ? "password-fields.hide" : "password-fields.show"}
+            />
           </button>
         </div>
         <small
@@ -69,11 +72,15 @@ export function PasswordFields({
           className={`password-hint${repeat ? (matches ? " ok" : " warn") : ""}`}
           aria-live="polite"
         >
-          {repeat
-            ? matches
-              ? "Passwords match."
-              : "Passwords don’t match yet."
-            : "Type the same password again."}
+          {repeat ? (
+            matches ? (
+              <SiteText id="password-fields.passwords-match" />
+            ) : (
+              <SiteText id="password-fields.passwords-don-t-match-yet" />
+            )
+          ) : (
+            <SiteText id="password-fields.type-the-same-password-again" />
+          )}
         </small>
       </div>
     </>

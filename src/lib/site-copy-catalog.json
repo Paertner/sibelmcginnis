@@ -2268,5 +2268,40 @@
     "id": "company.contact-us",
     "group": "Company booking",
     "text": "Contact Sibel"
+  },
+  {
+    "id": "password-fields.type-the-same-password-again",
+    "group": "Join",
+    "text": "Type the same password again."
+  },
+  {
+    "id": "password-fields.passwords-match",
+    "group": "Join",
+    "text": "Passwords match."
+  },
+  {
+    "id": "password-fields.passwords-don-t-match-yet",
+    "group": "Join",
+    "text": "Passwords don’t match yet."
+  },
+  {
+    "id": "password-fields.show",
+    "group": "Join",
+    "text": "Show"
+  },
+  {
+    "id": "password-fields.hide",
+    "group": "Join",
+    "text": "Hide"
+  },
+  {
+    "id": "site-chrome.skip-to-content",
+    "group": "Header & footer",
+    "text": "Skip to content"
+  },
+  {
+    "id": "datetime-picker.choose-a-date-and-time",
+    "group": "Contact",
+    "text": "Choose a date and time"
   }
 ]

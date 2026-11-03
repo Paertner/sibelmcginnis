@@ -38,7 +38,6 @@ const SKIP = new Set([
   "INPUT",
   "SELECT",
   "OPTION",
-  "BUTTON",
   "TITLE",
 ]);
 const FRAME_STYLE = `
@@ -50,6 +49,20 @@ const FRAME_STYLE = `
 [data-site-image]:hover{outline:3px solid #9b5e41;outline-offset:-3px}
 html{scroll-behavior:auto!important}
 `;
+
+/** Where a text that this preview cannot change is edited. */
+function editedElsewhere(target: HTMLElement) {
+  if (target.closest(".post-card,.post-related,.post-pager"))
+    return "Posts are edited in Blog posts.";
+  if (target.closest(".event-card,.event-date"))
+    return "Events are edited in Events.";
+  if (target.closest(".ep")) return "Podcast episodes are edited in Podcast.";
+  if (target.closest(".price,.pricebox,.plan-solo-price"))
+    return "The Premium price is set in Settings, Payments.";
+  if (target.closest(".photo-chip,.tag"))
+    return "The day and time are set in Settings, Weekly session.";
+  return "";
+}
 
 export type SeoValues = Record<string, { title: string; description: string }>;
 
@@ -200,28 +213,46 @@ export function VisualEditor({
       for (const element of doc.body.querySelectorAll<HTMLElement>("*")) {
         if (meta.current.has(element)) continue;
         if (SKIP.has(element.tagName.toUpperCase())) continue;
-        if (element.closest("svg,script,style,noscript,button,select"))
-          continue;
+        if (element.closest("svg,script,style,noscript,select")) continue;
         const nodes = [...element.childNodes];
-        if (!nodes.length || !nodes.every((node) => node.nodeType === 3))
-          continue;
-        const shown = normalize(element.textContent ?? "");
-        const setting = settingFor(element, shown);
-        const match = setting ? undefined : known.get(shown);
-        if (!shown || (!match && !setting)) continue;
-        element.setAttribute("data-ve", "");
-        try {
-          element.contentEditable = "plaintext-only";
-        } catch {
-          element.contentEditable = "true";
+        if (!nodes.length) continue;
+        const onlyText = nodes.every((node) => node.nodeType === 3);
+        // A text on its own is marked directly. A text beside other elements (a sentence followed
+        // by a link) or inside a button is wrapped in a span, which is marked instead.
+        const targets: { owner: HTMLElement; text: Text | null }[] =
+          onlyText && element.tagName !== "BUTTON"
+            ? [{ owner: element, text: null }]
+            : nodes
+                .filter((node): node is Text => node.nodeType === 3)
+                .map((node) => ({ owner: element, text: node }));
+        for (const target of targets) {
+          const shown = normalize(
+            (target.text ?? target.owner).textContent ?? "",
+          );
+          if (!shown) continue;
+          const setting = settingFor(target.owner, shown);
+          const match = setting ? undefined : known.get(shown);
+          if (!match && !setting) continue;
+          let marked = target.owner;
+          if (target.text) {
+            marked = doc.createElement("span");
+            target.text.replaceWith(marked);
+            marked.append(target.text);
+          }
+          marked.setAttribute("data-ve", "");
+          try {
+            marked.contentEditable = "plaintext-only";
+          } catch {
+            marked.contentEditable = "true";
+          }
+          if (marked.contentEditable !== "plaintext-only")
+            marked.contentEditable = "true";
+          meta.current.set(marked, {
+            ids: match ? match.map((entry) => entry.id) : [],
+            shown,
+            setting,
+          });
         }
-        if (element.contentEditable !== "plaintext-only")
-          element.contentEditable = "true";
-        meta.current.set(element, {
-          ids: match ? match.map((entry) => entry.id) : [],
-          shown,
-          setting,
-        });
       }
     },
     [lookup],
@@ -272,6 +303,10 @@ export function VisualEditor({
               false,
             );
           return;
+        }
+        if (!itemFor(target) && !target.closest?.("[data-site-image]")) {
+          const where = editedElsewhere(target);
+          if (where) toast(where, true);
         }
         if (
           target.closest?.("a,button,label") ||

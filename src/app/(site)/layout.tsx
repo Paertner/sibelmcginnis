@@ -1,4 +1,5 @@
 import { Header, Footer } from "@/components/site-chrome";
+import { siteText } from "@/lib/site-copy";
 export default function SiteLayout({
   children,
 }: {
@@ -7,7 +8,7 @@ export default function SiteLayout({
   return (
     <>
       <a className="skip-link" href="#main-content">
-        Skip to content
+        {siteText("site-chrome.skip-to-content")}
       </a>
       <Header />
       <main id="main-content">{children}</main>

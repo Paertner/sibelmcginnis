@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { SiteText } from "./site-copy";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const key = (d: Date) =>
@@ -109,7 +110,9 @@ export function DateTimePicker({
           <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
           <path d="M8 3v4M16 3v4M3.5 10h17" />
         </svg>
-        <span id={`${id}-value`}>{summary || "Choose a date and time"}</span>
+        <span id={`${id}-value`}>
+          {summary || <SiteText id="datetime-picker.choose-a-date-and-time" />}
+        </span>
       </button>
       <input
         type="hidden"
