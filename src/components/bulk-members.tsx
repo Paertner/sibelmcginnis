@@ -1,8 +1,16 @@
 "use client";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Notify } from "./toast";
 import { askConfirm } from "./confirm-dialog";
-import { Modal, useMutation } from "./block-editor";
+import { useMutation } from "./block-editor";
+import { SiteSelect } from "./site-select";
 
 export type BulkMember = {
   id: string;
@@ -260,69 +268,125 @@ function BulkToolbar({
         </div>
       ) : null}
       {editing && n ? (
-        <Modal title={`Edit ${noun(n)}`} onClose={() => setEditing(false)}>
-          <form
-            className="bulk-edit"
-            onSubmit={async (event) => {
-              event.preventDefault();
-              const form = new FormData(event.currentTarget);
-              const fields: Record<string, string> = { op: "bulkEdit" };
-              for (const [key, value] of form.entries())
-                fields[key] = String(value);
-              const result = await run(fields);
-              if (result.ok) setEditing(false);
-            }}
-          >
-            <p className="hint">
-              Only the things you fill in change; everything else stays as it
-              is.
-            </p>
-            <label className="field">
-              Membership
-              <select name="tier" defaultValue="">
-                <option value="">Don’t change</option>
-                <option value="free">Free</option>
-                <option value="premium">Premium</option>
-              </select>
-            </label>
-            <label className="field">
-              Status
-              <select name="status" defaultValue="">
-                <option value="">Don’t change</option>
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </label>
-            <label className="field">
-              Premium access ends (UTC)
-              <input name="premiumUntil" type="datetime-local" />
-            </label>
+        <BulkEditDialog
+          title={`Edit ${noun(n)}`}
+          applyLabel={`Apply to ${noun(n)}`}
+          pending={mutation.pending}
+          onClose={() => setEditing(false)}
+          onApply={async (fields) => {
+            const result = await run({ op: "bulkEdit", ...fields });
+            if (result.ok) setEditing(false);
+          }}
+        />
+      ) : null}
+      <Notify result={mutation.feedback} />
+    </div>
+  );
+}
+
+/** Same look as the other admin dialogs (admin-dialog.tsx), so the fields and buttons line up. */
+function BulkEditDialog({
+  title,
+  applyLabel,
+  pending,
+  onClose,
+  onApply,
+}: {
+  title: string;
+  applyLabel: string;
+  pending: boolean;
+  onClose: () => void;
+  onApply: (fields: Record<string, string>) => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    if (!dialog.current?.open) dialog.current?.showModal();
+  }, []);
+  return (
+    <dialog
+      ref={dialog}
+      className="admin-dialog"
+      aria-labelledby={titleId}
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) dialog.current?.close();
+      }}
+    >
+      <div className="admin-dialog-body">
+        <button
+          type="button"
+          className="admin-dialog-close"
+          aria-label="Close editor"
+          onClick={() => dialog.current?.close()}
+        >
+          ×
+        </button>
+        <h3 id={titleId}>{title}</h3>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const fields: Record<string, string> = {};
+            for (const [key, value] of new FormData(event.currentTarget))
+              fields[key] = String(value);
+            onApply(fields);
+          }}
+        >
+          <p className="hint">
+            Only the things you fill in change; everything else stays as it is.
+          </p>
+          <div className="row">
+            <SiteSelect
+              name="tier"
+              label="Membership"
+              defaultValue=""
+              options={[
+                { value: "", label: "Don’t change" },
+                { value: "free", label: "Free" },
+                { value: "premium", label: "Premium" },
+              ]}
+            />
+            <SiteSelect
+              name="status"
+              label="Status"
+              defaultValue=""
+              options={[
+                { value: "", label: "Don’t change" },
+                { value: "active", label: "Active" },
+                { value: "paused", label: "Paused" },
+                { value: "cancelled", label: "Cancelled" },
+              ]}
+            />
+          </div>
+          <label className="field">
+            Premium access ends (UTC)
+            <input name="premiumUntil" type="datetime-local" />
+          </label>
+          <div className="field">
             <label className="checkbox-field">
               <input name="clearPremiumUntil" type="checkbox" />
               Remove the end date
             </label>
-            <label className="field">
-              Add to the private note
-              <textarea name="note" rows={3} maxLength={2000} />
-            </label>
-            <footer className="media-picker-foot">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                style={{ marginRight: "auto" }}
-                onClick={() => setEditing(false)}
-              >
-                Cancel
-              </button>
-              <button className="btn" disabled={mutation.pending}>
-                {mutation.pending ? "Saving…" : `Apply to ${noun(n)}`}
-              </button>
-            </footer>
-          </form>
-        </Modal>
-      ) : null}
-      <Notify result={mutation.feedback} />
-    </div>
+          </div>
+          <label className="field">
+            Add to the private note
+            <textarea name="note" rows={3} maxLength={2000} />
+          </label>
+          <div className="form-actions">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => dialog.current?.close()}
+            >
+              Cancel
+            </button>
+            <span className="form-actions-gap" />
+            <button className="btn" disabled={pending}>
+              {pending ? "Saving…" : applyLabel}
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
   );
 }

@@ -47,7 +47,8 @@ test("admin selects members, edits them in bulk and deletes them", async ({
   // Bulk edit: only the filled-in things change.
   await toolbar.getByRole("button", { name: "Bulk edit" }).click();
   const edit = page.getByRole("dialog", { name: "Edit 2 members" });
-  await edit.getByLabel("Status").selectOption("paused");
+  await edit.getByRole("combobox", { name: "Status" }).click();
+  await edit.getByRole("option", { name: "Paused" }).click();
   await edit.getByLabel("Add to the private note").fill("Imported in bulk");
   await edit.getByRole("button", { name: "Apply to 2 members" }).click();
   await expect(page.getByText("Updated 2 members.")).toBeVisible();
