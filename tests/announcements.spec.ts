@@ -115,6 +115,11 @@ test("individual announcements are private, sanitized, personalized and include 
   const memberMessage = target.locator(".card").filter({
     has: target.getByRole("heading", { name: subject, exact: true }),
   });
+  // Messages are folded; the content shows once the message is opened.
+  await expect(
+    memberMessage.getByRole("heading", { name: "Hello Amelia", exact: true }),
+  ).toBeHidden();
+  await memberMessage.locator("summary").click();
   await expect(
     memberMessage.getByRole("heading", { name: "Hello Amelia", exact: true }),
   ).toBeVisible();
@@ -294,4 +299,28 @@ test("emails are built from blocks, saved as reusable templates and share a comm
     .getByRole("button", { name: /^Yes/ })
     .click();
   await expect(page.getByText("Template deleted.")).toBeVisible();
+});
+
+test("member messages are folded, open and close on click, and at most ten are listed", async ({
+  page,
+}) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Layla/ }).click();
+  await expect(page).toHaveURL(/\/account/);
+  const messages = page.locator(".member-messages details.message-item");
+  expect(await messages.count()).toBeGreaterThan(0);
+  expect(await messages.count()).toBeLessThanOrEqual(10);
+  const first = messages.first();
+  await expect(first).not.toHaveAttribute("open", "");
+  await expect(first.locator(".message-body")).toBeHidden();
+  await expect(first.locator(".message-preview")).not.toBeEmpty();
+  await first.locator("summary").click();
+  await expect(first).toHaveAttribute("open", "");
+  await expect(first.locator(".message-body")).toBeVisible();
+  // The keyboard opens and closes it as well, and others stay as they are.
+  await first.locator("summary").focus();
+  await page.keyboard.press("Enter");
+  await expect(first.locator(".message-body")).toBeHidden();
+  await page.keyboard.press("Space");
+  await expect(first.locator(".message-body")).toBeVisible();
 });

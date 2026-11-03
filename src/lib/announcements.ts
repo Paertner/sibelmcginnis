@@ -217,3 +217,11 @@ export function emailDraft(draftId: string) {
   lines.push(`--${boundary}--`, "");
   return lines.join("\r\n");
 }
+
+/** The first words of a message as plain text, for the folded list in the member's account. */
+export function messagePreview(announcement: Announcement, name: string) {
+  const text = htmlText(personalizedHtml(announcement, { name }))
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 120 ? `${text.slice(0, 117).trimEnd()}…` : text;
+}

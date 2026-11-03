@@ -13,7 +13,7 @@ import { postImageProps } from "@/lib/site-images";
 import { fmtTime, upcomingEvents } from "@/lib/event-posts";
 import { CalendarButtons } from "@/components/calendar-buttons";
 import { AnnouncementContent } from "@/components/announcement-content";
-import { announcementVisible } from "@/lib/announcements";
+import { announcementVisible, messagePreview } from "@/lib/announcements";
 import { meetingUrl } from "@/lib/site-url";
 import { Icon, type IconName } from "@/components/admin-icons";
 import { BookingForm } from "@/components/consultation-calendar";
@@ -83,9 +83,13 @@ export default async function Account({
   const posts = data.posts
     .filter((p) => p.status === "published")
     .toSorted((a, b) => b.date.localeCompare(a.date));
-  const messages = data.announcements.filter((a) =>
-    announcementVisible(a, user.id, user.role),
-  );
+  // The ten latest messages, newest first; messages of the same day keep the order they were sent in.
+  const messages = data.announcements
+    .map((a, index) => ({ a, index }))
+    .filter(({ a }) => announcementVisible(a, user.id, user.role))
+    .toSorted((x, y) => y.a.date.localeCompare(x.a.date) || y.index - x.index)
+    .slice(0, 10)
+    .map(({ a }) => a);
   const member = data.members.find((m) => m.id === user.id);
   const myEvents = upcomingEvents().filter((e) =>
     e.attendees.includes(user.id),
@@ -138,7 +142,10 @@ export default async function Account({
                   .toSorted((a, b) => b.date.localeCompare(a.date))
                   .map((s) => (
                     <li key={s.id}>
-                      <Link className="session-card" href={`/session/${slugOf(s)}`}>
+                      <Link
+                        className="session-card"
+                        href={`/session/${slugOf(s)}`}
+                      >
                         <span className="date-chip" aria-hidden="true">
                           <b>{fmtDate(s.date, { day: "numeric" })}</b>
                           {fmtDate(s.date, { month: "short" })}
@@ -564,10 +571,36 @@ export default async function Account({
               {siteText("account.messages-from-sibel")}
             </h2>
             {messages.map((a) => (
-              <div className="card" key={a.id}>
-                <h3>{a.subject}</h3>
-                <AnnouncementContent announcement={a} name={user.name} />
-              </div>
+              <details className="card message-item" key={a.id}>
+                <summary>
+                  <span className="message-head">
+                    <h3>{a.subject}</h3>
+                    <small className="muted">
+                      <time dateTime={a.date}>{fmtDate(a.date)}</time>
+                    </small>
+                    <span className="message-preview">
+                      {messagePreview(a, user.name)}
+                    </span>
+                  </span>
+                  <svg
+                    className="message-chevron"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </summary>
+                <div className="message-body">
+                  <AnnouncementContent announcement={a} name={user.name} />
+                </div>
+              </details>
             ))}
           </section>
         ) : null}
@@ -610,7 +643,8 @@ export default async function Account({
                         </span>
                         <div className="consult-info">
                           <b>
-                            {fmtDate(b.date)} {siteText("account.at")} {clock(b.time)}
+                            {fmtDate(b.date)} {siteText("account.at")}{" "}
+                            {clock(b.time)}
                           </b>
                           <span className="consult-topic">{b.topic}</span>
                           <span
