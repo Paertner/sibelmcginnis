@@ -19,7 +19,7 @@ export type Announcement = (typeof seed)["announcements"][number] & {
   recipientIds?: string[];
   html?: string;
   imageId?: string;
-  emailStatus?: "prepared";
+  emailStatus?: "prepared" | "sent";
 };
 export type SiteSettings = {
   siteTitle?: string;

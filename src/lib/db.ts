@@ -338,7 +338,12 @@ const tables: Table[] = [
         recipientIds: (r.recipient_ids ?? []) as string[],
         ...(r.html ? { html: str(r.html) } : {}),
         ...(r.image_id ? { imageId: str(r.image_id) } : {}),
-        ...(r.email_status ? { emailStatus: "prepared" as const } : {}),
+        ...(r.email_status
+          ? {
+              emailStatus:
+                r.email_status === "sent" ? ("sent" as const) : ("prepared" as const),
+            }
+          : {}),
       })) as never;
     },
   },

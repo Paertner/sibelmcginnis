@@ -160,7 +160,10 @@ export function AnnouncementComposer({
   siteSettings,
   draft,
   weekday,
+  sending = false,
 }: {
+  /** Real emails go out when this is published (Resend is connected). */
+  sending?: boolean;
   /** The weekly session day; template wording written for Saturday follows it. */
   weekday: number;
   initialRecipients?: string[];
@@ -227,6 +230,8 @@ export function AnnouncementComposer({
   );
   const [templateName, setTemplateName] = useState("");
   const search = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const confirmed = useRef(false);
   const templateMutation = useMutation();
   const [state, action, pending] = useActionState<ActionResult, FormData>(
     (previous, form) => adminMutation(previous, form),
@@ -337,8 +342,33 @@ export function AnnouncementComposer({
 
   return (
     <form
+      ref={formRef}
       action={action}
       className="composer panel"
+      onSubmit={async (event) => {
+        // Real emails cannot be taken back: ask first, showing who gets one and what is left today.
+        const submitter = (event.nativeEvent as SubmitEvent)
+          .submitter as HTMLButtonElement | null;
+        if (!sending || submitter?.value === "testSend") return;
+        if (confirmed.current) {
+          confirmed.current = false;
+          return;
+        }
+        event.preventDefault();
+        if (
+          await askConfirm(
+            `${emails} ${emails === 1 ? "person" : "people"} will get this email now. After sending, ${Math.max(0, quota.left - emails)} of today’s ${quota.limit} emails will be left.`,
+            {
+              title: "Publish and send the email?",
+              confirmLabel: "Yes, send it",
+              danger: false,
+            },
+          )
+        ) {
+          confirmed.current = true;
+          formRef.current?.requestSubmit(submitter ?? undefined);
+        }
+      }}
       onKeyDown={(event) => {
         // Enter in a block or dialog field must not publish the announcement.
         const target = event.target as HTMLInputElement;
@@ -785,13 +815,29 @@ export function AnnouncementComposer({
           className="btn"
           disabled={pending || !count || emails > quota.left}
         >
-          {pending ? "Preparing…" : "Publish & prepare email"}
+          {pending
+            ? sending
+              ? "Sending…"
+              : "Preparing…"
+            : sending
+              ? "Publish & send"
+              : "Publish & prepare email"}
         </button>
+        {sending ? (
+          <button
+            className="btn btn-ghost"
+            name="op"
+            value="testSend"
+            disabled={pending}
+          >
+            Send a test to me
+          </button>
+        ) : null}
       </div>
       <p className="composer-delivery-note">
-        Your announcement appears only in the selected members’ accounts. An
-        individual email draft is prepared for each recipient. Email delivery is
-        not connected in this review.
+        {sending
+          ? "Your announcement appears in the selected members’ accounts and one personal email is sent to each of them who has not turned this kind of email off. Nothing is sent until you press Publish & send."
+          : "Your announcement appears only in the selected members’ accounts. An individual email draft is prepared for each recipient. Email delivery is not connected yet."}
       </p>
       <Notify result={state} />
 

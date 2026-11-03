@@ -39,7 +39,11 @@ export function personalizedHtml(
   );
 }
 
-export async function publishAnnouncement(form: FormData) {
+/** With `deliver`, the caller sends the real emails; otherwise a draft file is prepared for each. */
+export async function publishAnnouncement(
+  form: FormData,
+  { deliver = false }: { deliver?: boolean } = {},
+) {
   const subject = String(form.get("subject") ?? "").trim();
   const raw = String(form.get("html") ?? "").trim();
   if (!subject || subject.length > 250 || /[\r\n]/.test(subject))
@@ -107,7 +111,7 @@ export async function publishAnnouncement(form: FormData) {
   // Resolve recipients once and deduplicate groups + individuals, preserving delivery history.
   const id = randomUUID(),
     state = getDemoState();
-  state.data.announcements.push({
+  const announcement: Announcement = {
     id,
     subject,
     body,
@@ -118,10 +122,11 @@ export async function publishAnnouncement(form: FormData) {
     recipientIds: recipients.map((m) => m.id),
     date: today(),
     imageId: upload ? id : undefined,
-    emailStatus: "prepared",
-  });
+    ...(deliver ? {} : { emailStatus: "prepared" as const }),
+  };
+  state.data.announcements.push(announcement);
   if (upload) state.images.set(id, upload);
-  for (const member of emailed)
+  for (const member of deliver ? [] : emailed)
     state.emailDrafts.push({
       id: randomUUID(),
       announcementId: id,
@@ -130,8 +135,10 @@ export async function publishAnnouncement(form: FormData) {
       name: member.name,
       subject,
     });
-  recordEmails(emailed.length);
+  if (!deliver) recordEmails(emailed.length);
   return {
+    announcement,
+    members: emailed,
     recipients: recipients.length,
     emails: emailed.length,
     skipped: recipients.length - emailed.length,

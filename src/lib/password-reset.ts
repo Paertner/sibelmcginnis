@@ -1,7 +1,6 @@
 import "server-only";
 import { adminClient } from "./supabase";
-import { getSecret } from "./secrets";
-import { getStore } from "./store";
+import { sendEmail } from "./mailer";
 import { siteOrigin } from "./site-url";
 
 /**
@@ -25,39 +24,19 @@ export async function createResetLink(address: string) {
 
 /** Sends the reset email through Resend. Returns false (and logs) when it cannot. */
 export async function sendResetEmail(address: string, link: string) {
-  const key = getSecret("resendApiKey");
-  const sender = getStore().integrations?.resend;
-  const from = sender?.fromEmail
-    ? `${(sender.fromName || "Morning Coffee Community").replace(/[<>"]/g, "")} <${sender.fromEmail}>`
-    : process.env.EMAIL_FROM;
-  if (!key || !from) {
-    console.error("[reset] email not sent: Resend key or sender is not set up.");
-    return false;
-  }
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: [address],
-        subject: "Set a new password",
-        text: `Use this link to choose a new password for your Morning Coffee Community account:\n\n${link}\n\nThe link works once. If you did not ask for it, you can ignore this email.`,
-      }),
-    });
-    if (!response.ok)
-      console.error("[reset] Resend refused the email:", response.status);
-    return response.ok;
-  } catch (error) {
-    console.error(
-      "[reset] email request failed:",
-      error instanceof Error ? error.message : "unknown",
-    );
-    return false;
-  }
+  const text = `Use this link to choose a new password for your Morning Coffee Community account:
+
+${link}
+
+The link works once. If you did not ask for it, you can ignore this email.`;
+  const { error } = await sendEmail({
+    to: address,
+    subject: "Set a new password",
+    text,
+    html: `<p>Use this link to choose a new password for your Morning Coffee Community account:</p><p><a href="${link}">Set a new password</a></p><p>The link works once. If you did not ask for it, you can ignore this email.</p>`,
+  });
+  if (error) console.error("[reset] email not sent:", error);
+  return !error;
 }
 
 const lastAsked = new Map<string, number>();

@@ -6,6 +6,7 @@ import type { MediaItem, SiteImage } from "@/lib/site-images";
 import type { Integrations, SiteSettings } from "@/lib/store";
 import type { EmailQuota } from "@/lib/email-quota";
 import { ActionForm } from "./action-form";
+import { TestEmailButton } from "./test-email-button";
 import { Icon } from "./admin-icons";
 import { MediaPicker } from "./media-library";
 import { SiteSelect } from "./site-select";
@@ -611,6 +612,7 @@ function IntegrationsTab({
           </div>
         </div>
       </ActionForm>
+      {live ? <TestEmailButton /> : null}
     </>
   );
 }

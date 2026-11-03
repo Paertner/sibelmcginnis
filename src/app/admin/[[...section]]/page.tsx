@@ -31,6 +31,7 @@ import { meetingUrl, siteOrigin } from "@/lib/site-url";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
+import { mailerConfigured } from "@/lib/mailer";
 import {
   getStore,
   upcomingSessions,
@@ -834,6 +835,7 @@ export default async function Admin({
             <AnnouncementComposer
               key={`${to ?? ""}|${about ?? ""}`}
               quota={emailQuota()}
+              sending={usesDatabase() && mailerConfigured()}
               draft={draft}
               siteSettings={data.siteSettings}
               initialRecipients={(

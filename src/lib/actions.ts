@@ -27,10 +27,25 @@ import { isPremium } from "./access";
 import { slugify } from "./slug";
 import type { ActionResult } from "@/components/action-form";
 import { publishAnnouncement } from "./announcements";
+import {
+  assertCanSend,
+  buildAnnouncementMessage,
+  failedRecipients,
+  sendAnnouncement,
+  type Delivery,
+} from "./announcement-mail";
+import { mailerConfigured, sendBatch, sendEmail } from "./mailer";
+import { assertEmailQuota, recordEmails } from "./email-quota";
+import { htmlText, safeHtml } from "./safe-html";
 import { parseBlocks } from "./email-blocks";
 import copyCatalog from "./site-copy-catalog.json";
 import { deleteMedia, updateSiteImage, uploadMedia } from "./site-images";
-import { emailCategories, type EmailPreferences } from "./email-preferences";
+import {
+  emailCategories,
+  wantsEmail,
+  type EmailCategory,
+  type EmailPreferences,
+} from "./email-preferences";
 import {
   LINK_DAYS,
   findLink,
@@ -1130,7 +1145,77 @@ export async function adminMutation(
       booking.zoomId = meeting.zoomId;
       return success("Booking approved. The member can now join.");
     } else if (entity === "announcements") {
-      const { recipients, emails, skipped } = await publishAnnouncement(form);
+      const real = usesDatabase() && mailerConfigured();
+      if (op === "testSend" || op === "retry") {
+        if (!real)
+          throw new Error(
+            "Email is not set up yet. Save the Resend key and the sender in Settings.",
+          );
+        assertCanSend();
+      }
+      if (op === "testSend") {
+        const subject = required(form, "subject", 250);
+        const html = safeHtml(required(form, "html", 150000));
+        assertEmailQuota(1);
+        const [result] = await sendBatch([
+          buildAnnouncementMessage(
+            {
+              id: "test",
+              subject,
+              html,
+              body: htmlText(html),
+              category: "announcement",
+            },
+            { id: user.id, name: user.name, email: user.email },
+            { subjectPrefix: "[Test] " },
+          ),
+        ]);
+        if (result.error) throw new Error(`Test email failed: ${result.error}`);
+        recordEmails(1);
+        return {
+          ok: true,
+          message: `Test email sent to ${user.email}. It counts as 1 of today’s emails.`,
+        };
+      }
+      const outcome = (delivery: Delivery, skipped = 0) => ({
+        ok: delivery.failed === 0,
+        message: `Sent ${delivery.sent}${delivery.failed ? `, failed ${delivery.failed}: ${delivery.firstError}. Open the announcement in the history below to retry the failed ones` : ""}.${skipped ? ` ${skipped} ${skipped === 1 ? "person was" : "people were"} skipped because of their email preferences.` : ""}`,
+      });
+      if (op === "retry") {
+        const announcement = data.announcements.find((x) => x.id === id);
+        if (!announcement) throw new Error("Announcement not found.");
+        // Someone who turned this kind of email off since the first try is not emailed now.
+        const members = (await failedRecipients(id)).filter((m) =>
+          wantsEmail(
+            m.emailPreferences,
+            (announcement.category as EmailCategory | undefined) ??
+              "announcement",
+          ),
+        );
+        if (!members.length)
+          return { ok: true, message: "Nothing is left to retry." };
+        assertEmailQuota(members.length);
+        const delivery = await sendAnnouncement(announcement, members);
+        if (delivery.sent) announcement.emailStatus = "sent";
+        refresh();
+        return outcome(delivery);
+      }
+      if (real) assertCanSend();
+      const published = await publishAnnouncement(form, { deliver: real });
+      const { recipients, emails, skipped } = published;
+      if (real) {
+        const delivery = await sendAnnouncement(
+          published.announcement,
+          published.members,
+        );
+        if (delivery.sent) published.announcement.emailStatus = "sent";
+        refresh();
+        const result = outcome(delivery, skipped);
+        return {
+          ...result,
+          message: `Published to ${recipients} member${recipients === 1 ? "" : "s"}. ${result.message}`,
+        };
+      }
       return success(
         `Published to ${recipients} member${recipients === 1 ? "" : "s"} and prepared ${emails} individual email${emails === 1 ? "" : "s"}.${skipped ? ` ${skipped} ${skipped === 1 ? "person was" : "people were"} skipped because of their email preferences.` : ""} Email delivery is not connected; nothing was sent.`,
       );
@@ -1167,6 +1252,24 @@ export async function adminMutation(
       const integrations = { ...data.integrations },
         now = new Date().toISOString();
       let message = "Saved.";
+      if (op === "resend-test") {
+        if (!mailerConfigured())
+          throw new Error(
+            "Save the Resend key and the sender email first, then send the test.",
+          );
+        const { error } = await sendEmail({
+          to: user.email,
+          subject: "Test email from Morning Coffee Community",
+          text: "This is a test. If you can read it, email delivery works.",
+          html: "<p>This is a test. If you can read it, email delivery works.</p>",
+        });
+        if (error) throw new Error(`Test email failed: ${error}`);
+        recordEmails(1);
+        return {
+          ok: true,
+          message: `Test email sent to ${user.email}. It counts as 1 of today’s emails.`,
+        };
+      }
       if (op === "stripe-connect" && usesDatabase()) {
         // The owner types the keys here; check the secret key works before keeping it.
         const secretKey = text(form, "secretKey", 300);

@@ -65,3 +65,13 @@ export function optedOut(preferences?: EmailPreferences): string[] {
     .filter((category) => !wantsEmail(preferences, category.key))
     .map((category) => category.key);
 }
+/** The member's choices after they unsubscribe from one kind of email, or from all of them. */
+export function withUnsubscribed(
+  preferences: EmailPreferences | undefined,
+  category: EmailCategory | "all",
+): EmailPreferences {
+  if (category === "all")
+    return { ...resolvedPreferences(preferences), unsubscribedAll: true };
+  const field = emailCategories.find((entry) => entry.key === category)!.field;
+  return { ...resolvedPreferences(preferences), [field]: false };
+}
