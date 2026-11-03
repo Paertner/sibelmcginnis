@@ -260,23 +260,6 @@ test("admin can publish gated content, upload protected audio and edit site copy
       .locator("audio"),
   ).toHaveAttribute("src", audioPath);
   await visitor.close();
-  await page.goto("/admin/content");
-  const original = await page
-    .getByLabel("Headline", { exact: true })
-    .inputValue();
-  await page
-    .getByLabel("Headline", { exact: true })
-    .fill("A thoughtful next chapter starts here.");
-  await page.getByRole("button", { name: "Save changes" }).click();
-  await expect(page.getByRole("status")).toContainText("Changes saved");
-  await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "A thoughtful next chapter starts here.",
-  );
-  await page.goto("/admin/content");
-  await page.getByLabel("Headline", { exact: true }).fill(original);
-  await page.getByRole("button", { name: "Save changes" }).click();
-  await expect(page.getByRole("status")).toContainText("Changes saved");
 });
 
 test("mobile menu works and public pages stay inside the viewport", async ({

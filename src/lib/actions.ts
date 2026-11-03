@@ -1339,6 +1339,8 @@ export async function adminMutation(
         premiumPrice: number(form, "premiumPrice", 1, 1000),
       };
       Object.assign(data.settings, value);
+    } else if (entity === "membership") {
+      data.settings.premiumPrice = number(form, "premiumPrice", 1, 1000);
     } else if (entity === "weekly") {
       const meetingTime = required(form, "meetingTime", 20);
       if (!/^(0?[1-9]|1[0-2]):[0-5]\d (AM|PM)$/.test(meetingTime))

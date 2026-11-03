@@ -266,6 +266,46 @@ function Payments({
   stripe,
   live,
   webhookUrl,
+  premiumPrice,
+}: {
+  stripe: Integrations["stripe"];
+  live: boolean;
+  webhookUrl: string;
+  premiumPrice: number;
+}) {
+  return (
+    <>
+      <ActionForm
+        action={adminMutation}
+        className="panel settings-form"
+        submitLabel="Save membership"
+      >
+        <input type="hidden" name="entity" value="membership" />
+        <input type="hidden" name="id" value="" />
+        <h3>Membership</h3>
+        <p className="muted">
+          The monthly price of Premium shown on the site. The amount Stripe
+          charges is set in your Stripe account.
+        </p>
+        <div className="row">
+          <Text
+            name="premiumPrice"
+            label="Premium price ($ / month)"
+            type="number"
+            value={String(premiumPrice)}
+            required
+          />
+        </div>
+      </ActionForm>
+      <StripePanel stripe={stripe} live={live} webhookUrl={webhookUrl} />
+    </>
+  );
+}
+
+function StripePanel({
+  stripe,
+  live,
+  webhookUrl,
 }: {
   stripe: Integrations["stripe"];
   live: boolean;
@@ -584,8 +624,10 @@ export function AdminSettings({
   live,
   webhookUrl,
   weekly,
+  premiumPrice,
 }: {
   weekly: WeeklySettings;
+  premiumPrice: number;
   /** Real keys are saved (encrypted) instead of only their last four characters. */
   live: boolean;
   webhookUrl: string;
@@ -620,6 +662,7 @@ export function AdminSettings({
           stripe={integrations.stripe}
           live={live}
           webhookUrl={webhookUrl}
+          premiumPrice={premiumPrice}
         />
       ) : (
         <IntegrationsTab

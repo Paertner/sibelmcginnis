@@ -5,7 +5,6 @@ async function openEditor(page: Page) {
   await page.getByRole("button", { name: /Sibel/ }).click();
   await expect(page).toHaveURL(/\/admin$/);
   await page.goto("/admin/content");
-  await page.getByRole("tab", { name: "Visual editor", exact: true }).click();
   return page.frameLocator("iframe.ve-frame");
 }
 const toast = (page: Page) => page.locator(".toast").last();
@@ -30,7 +29,6 @@ test("a text is edited in the page preview, saved, shown on the site and reset",
     await expect(page.getByRole("heading", { name: unique })).toBeVisible();
   } finally {
     await page.goto("/admin/content");
-    await page.getByRole("tab", { name: "Visual editor", exact: true }).click();
     const edited = page
       .frameLocator("iframe.ve-frame")
       .locator("[data-ve]", { hasText: unique });
@@ -68,7 +66,6 @@ test("the search title of a page is saved and used by the public page", async ({
     await expect(page).toHaveTitle(unique);
   } finally {
     await page.goto("/admin/content");
-    await page.getByRole("tab", { name: "Visual editor", exact: true }).click();
     await page.locator(".ve-page select").selectOption({ label: "Meet Sibel" });
     await page.getByLabel("Search title").fill(original);
     await page.getByRole("button", { name: "Save and publish" }).click();
@@ -108,7 +105,6 @@ test("the home headline from Settings is edited in the preview too", async ({
     await expect(page.locator("h1").first()).toContainText(stamp);
   } finally {
     await page.goto("/admin/content");
-    await page.getByRole("tab", { name: "Visual editor", exact: true }).click();
     const edited = page
       .frameLocator("iframe.ve-frame")
       .locator(".hero-copy h1[data-ve]");
@@ -121,4 +117,29 @@ test("the home headline from Settings is edited in the preview too", async ({
   }
   await page.goto("/");
   await expect(page.locator("h1").first()).toHaveText(original);
+});
+
+test("the Premium price is changed in Settings under Payments", async ({
+  page,
+}) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: /Sibel/ }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  await page.goto("/admin/settings");
+  await page.getByRole("tab", { name: "Payments", exact: true }).click();
+  const price = page.getByLabel("Premium price ($ / month)");
+  const original = await price.inputValue();
+  try {
+    await price.fill("27");
+    await page.getByRole("button", { name: "Save membership" }).click();
+    await expect(toast(page)).toBeVisible();
+    await page.goto("/morning-coffee");
+    await expect(page.getByText("$27", { exact: false }).first()).toBeVisible();
+  } finally {
+    await page.goto("/admin/settings");
+    await page.getByRole("tab", { name: "Payments", exact: true }).click();
+    await page.getByLabel("Premium price ($ / month)").fill(original);
+    await page.getByRole("button", { name: "Save membership" }).click();
+    await expect(toast(page)).toBeVisible();
+  }
 });

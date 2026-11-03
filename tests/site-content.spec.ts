@@ -46,28 +46,33 @@ test("admin can edit static page and shared navigation text, then restore defaul
   await page.goto("/login");
   await page.getByRole("button", { name: /Sibel/ }).click();
   await expect(page).toHaveURL(/\/admin$/);
-  const editor = page.locator(".content-copy-editor");
-  const section = async (name: string) => {
-    await editor.getByRole("combobox", { name: "Page or section" }).click();
-    await editor.getByRole("option", { name, exact: true }).click();
+  const open = async () => {
+    await page.goto("/admin/content");
+    await page.locator(".ve-page select").selectOption({ label: "Meet Sibel" });
+    const frame = page.frameLocator("iframe.ve-frame");
+    return {
+      heading: frame
+        .locator("[data-ve]", { hasText: /^What to Expect/ })
+        .first(),
+      home: frame.locator("nav a[data-ve]", { hasText: /^Home$/ }).first(),
+      starter: frame
+        .locator("nav a[data-ve]", { hasText: /^Start here$/ })
+        .first(),
+    };
   };
-  await page.goto("/admin/content");
-  await page.getByRole("tab", { name: "Text list (advanced)", exact: true }).click();
-  await section("Meet Sibel");
-  await editor.getByLabel("Find text in this section").fill("What to Expect");
   const unique = `Your next steps ${Date.now()}`;
-  await editor
-    .getByRole("textbox", { name: "What to Expect", exact: true })
-    .fill(unique);
-  await editor.getByLabel("Find text in this section").fill("");
-  await section("Navigation");
-  await editor
-    .getByRole("textbox", { name: "Home", exact: true })
-    .fill("Start here");
-  await editor
-    .getByRole("button", { name: "Save site text", exact: true })
-    .click();
-  await expect(page.locator(".toast").last()).toHaveText("Site text saved.");
+  const save = async () => {
+    await page.getByRole("button", { name: "Save and publish" }).click();
+    await expect(page.locator(".toast").last()).toHaveText("Site text saved.");
+  };
+  let items = await open();
+  await items.heading.click();
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type(unique);
+  await items.home.click();
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type("Start here");
+  await save();
   await page.goto("/about");
   await expect(
     page.getByRole("heading", { name: unique, exact: true }),
@@ -77,27 +82,23 @@ test("admin can edit static page and shared navigation text, then restore defaul
       .getByRole("navigation", { name: "Main navigation" })
       .getByRole("link", { name: "Start here", exact: true }),
   ).toBeVisible();
-  await page.reload();
-  await expect(
-    page.getByRole("heading", { name: unique, exact: true }),
-  ).toBeVisible();
-  await page.goto("/admin/content");
-  await page.getByRole("tab", { name: "Text list (advanced)", exact: true }).click();
-  await section("Meet Sibel");
-  await editor.getByLabel("Find text in this section").fill("What to Expect");
-  await editor
-    .getByRole("button", { name: "Use original text", exact: true })
+  items = await open();
+  await page
+    .frameLocator("iframe.ve-frame")
+    .locator("[data-ve]", { hasText: unique })
     .click();
-  await editor.getByLabel("Find text in this section").fill("");
-  await section("Navigation");
-  await editor.getByRole("textbox", { name: "Home", exact: true }).fill("Home");
-  await editor
-    .getByRole("button", { name: "Save site text", exact: true })
-    .click();
-  await expect(page.locator(".toast").last()).toHaveText("Site text saved.");
+  await page.getByRole("button", { name: "Use original text" }).click();
+  await items.starter.click();
+  await page.getByRole("button", { name: "Use original text" }).click();
+  await save();
   await page.goto("/about");
   await expect(
     page.getByRole("heading", { name: "What to Expect", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Main navigation" })
+      .getByRole("link", { name: "Home", exact: true }),
   ).toBeVisible();
 });
 

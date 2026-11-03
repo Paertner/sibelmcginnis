@@ -13,7 +13,6 @@ import type {
   Member,
   Post,
   Session,
-  Store,
 } from "@/lib/store";
 type InputProps = {
   name: string;
@@ -596,39 +595,5 @@ export function EpisodeEditor({ episode }: { episode?: Episode }) {
         Up to 10 MB. Members only see Published episodes; Draft stays hidden.
       </p>
     </Editor>
-  );
-}
-export function ContentForm({ settings }: { settings: Store["settings"] }) {
-  return (
-    <ActionForm action={adminMutation} className="admin-content-form">
-      <EntityFields entity="content" />
-      <div className="panel">
-        <h3>Homepage</h3>
-        <Field name="heroTitle" label="Headline" value={settings.heroTitle} />
-        <Field
-          name="heroSub"
-          label="Intro text"
-          value={settings.heroSub}
-          multiline
-        />
-        <Field
-          name="topics"
-          label="Topics (one per line)"
-          value={settings.topics.join("\n")}
-          multiline
-        />
-      </div>
-      <div className="panel">
-        <h3>Membership</h3>
-        <div className="row">
-          <Field
-            name="premiumPrice"
-            label="Premium price ($ / month)"
-            type="number"
-            value={settings.premiumPrice}
-          />
-        </div>
-      </div>
-    </ActionForm>
   );
 }

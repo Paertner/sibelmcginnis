@@ -27,6 +27,8 @@ export type SettingsText = {
   premiumPrice: number;
 };
 const normalize = (value: string) => value.replace(/[\s ]+/g, " ").trim();
+const DESKTOP_WIDTH = 1280;
+const MOBILE_WIDTH = 390;
 const SKIP = new Set([
   "SCRIPT",
   "STYLE",
@@ -76,6 +78,20 @@ export function VisualEditor({
   const [pageKey, setPageKey] = useState(editorPages[0].key);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [reload, setReload] = useState(0);
+  // The desktop preview is drawn 1280px wide and shrunk to fit, so the real desktop layout (menu included) shows.
+  const [fit, setFit] = useState({ scale: 1, height: 640 });
+  useEffect(() => {
+    const measure = () => {
+      const width = (stage.current?.clientWidth ?? 1280) - 28;
+      setFit({
+        scale: device === "desktop" ? Math.min(1, width / DESKTOP_WIDTH) : 1,
+        height: Math.max(420, Math.min(window.innerHeight * 0.72, 760)),
+      });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [device]);
   const [saving, setSaving] = useState(false);
   const [picking, setPicking] = useState<string>();
   // Saved copy as the preview shows it. It follows saves immediately, before the page props refresh.
@@ -142,16 +158,17 @@ export function VisualEditor({
     const box = element.getBoundingClientRect();
     const outer = iframe.getBoundingClientRect();
     const base = holder.getBoundingClientRect();
+    const k = outer.width / (iframe.offsetWidth || outer.width);
     setSelected({
       element,
       resettable: canReset(element),
       // Above the text with a clear gap; below it when the text is at the top of the preview.
       top:
-        box.top < 64
-          ? outer.top - base.top + box.bottom + 12
-          : outer.top - base.top + box.top - 62,
+        box.top * k < 64
+          ? outer.top - base.top + box.bottom * k + 12
+          : outer.top - base.top + box.top * k - 62,
       left: Math.min(
-        Math.max(4, outer.left - base.left + box.left),
+        Math.max(4, outer.left - base.left + box.left * k),
         Math.max(4, base.width - 230),
       ),
     });
@@ -492,8 +509,8 @@ export function VisualEditor({
       </div>
       <p className="hint">
         Click any text in the preview to type over it. Click a picture to
-        replace it. Menus, buttons and labels that the preview cannot reach are
-        in “Text list (advanced)”.
+        replace it. Texts that are not highlighted when you hover (such as
+        buttons, form fields and posts) are changed elsewhere.
       </p>
       <div className="ve-seo">
         <label className="field">
@@ -527,15 +544,29 @@ export function VisualEditor({
         </label>
       </div>
       <div className="ve-stage" ref={stage}>
-        <iframe
-          key={frameKey}
-          ref={frame}
-          className={`ve-frame ${device}`}
-          title={`Preview of ${page.label}`}
-          src={page.path}
-          sandbox="allow-same-origin allow-scripts"
-          onLoad={prepare}
-        />
+        <div
+          className="ve-frame-wrap"
+          style={{
+            width:
+              device === "desktop" ? DESKTOP_WIDTH * fit.scale : MOBILE_WIDTH,
+            height: fit.height,
+          }}
+        >
+          <iframe
+            key={frameKey}
+            ref={frame}
+            className={`ve-frame ${device}`}
+            style={{
+              width: device === "desktop" ? DESKTOP_WIDTH : MOBILE_WIDTH,
+              height: fit.height / fit.scale,
+              transform: `scale(${fit.scale})`,
+            }}
+            title={`Preview of ${page.label}`}
+            src={page.path}
+            sandbox="allow-same-origin allow-scripts"
+            onLoad={prepare}
+          />
+        </div>
         {selected ? (
           <div
             className="ve-toolbar"

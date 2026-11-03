@@ -8,8 +8,6 @@ import { slugOf } from "@/lib/slug";
 import { weekdayIndex, weekdays } from "@/lib/weekday";
 import { optedOut } from "@/lib/email-preferences";
 import { notificationDraft } from "@/lib/notification-drafts";
-import { SiteContentEditor } from "@/components/site-content-editor";
-import { SiteContentTabs } from "@/components/site-content-tabs";
 import { VisualEditor } from "@/components/visual-editor";
 import { siteImageCatalog } from "@/lib/site-image-catalog";
 import { defaultDescription, editorPages, seoId } from "@/lib/editor-pages";
@@ -44,7 +42,6 @@ import { fmtTime, isPast } from "@/lib/event-posts";
 import { adminMutation, cancelBooking, signOut } from "@/lib/actions";
 import { ActionForm } from "@/components/action-form";
 import {
-  ContentForm,
   EntityFields,
   EpisodeEditor,
   EventEditor,
@@ -106,7 +103,7 @@ const sections: [string, string, IconName, string][] = [
     "content",
     "Site content",
     "text",
-    "Homepage settings and all the wording on the site.",
+    "Click any text or picture in the page preview to change it.",
   ],
   [
     "settings",
@@ -872,6 +869,7 @@ export default async function Admin({
             quota={emailQuota()}
             logo={siteImage("shared.logo")}
             media={media}
+            premiumPrice={settings.premiumPrice}
             weekly={{
               weekday: weekdayIndex(settings.meetingWeekday),
               time: settings.meetingTime,
@@ -881,26 +879,20 @@ export default async function Admin({
           />
         ) : null}
         {section === "content" ? (
-          <SiteContentTabs
-            settings={<ContentForm settings={settings} />}
-            visual={
-              <VisualEditor
-                values={data.siteCopy ?? {}}
-                weekday={weekdayIndex(settings.meetingWeekday)}
-                images={Object.fromEntries(
-                  siteImageCatalog.map((slot) => [slot.id, siteImage(slot.id)]),
-                )}
-                media={media}
-                settingsText={{
-                  heroTitle: settings.heroTitle,
-                  heroSub: settings.heroSub,
-                  topics: settings.topics,
-                  premiumPrice: settings.premiumPrice,
-                }}
-                {...seoProps(data.siteCopy ?? {}, data.siteSettings?.siteTitle)}
-              />
-            }
-            text={<SiteContentEditor values={data.siteCopy ?? {}} />}
+          <VisualEditor
+            values={data.siteCopy ?? {}}
+            weekday={weekdayIndex(settings.meetingWeekday)}
+            images={Object.fromEntries(
+              siteImageCatalog.map((slot) => [slot.id, siteImage(slot.id)]),
+            )}
+            media={media}
+            settingsText={{
+              heroTitle: settings.heroTitle,
+              heroSub: settings.heroSub,
+              topics: settings.topics,
+              premiumPrice: settings.premiumPrice,
+            }}
+            {...seoProps(data.siteCopy ?? {}, data.siteSettings?.siteTitle)}
           />
         ) : null}
       </main>
