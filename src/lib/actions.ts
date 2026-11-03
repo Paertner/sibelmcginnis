@@ -41,6 +41,13 @@ import {
 import { mailerConfigured, sendBatch, sendEmail } from "./mailer";
 import { assertEmailQuota, recordEmails } from "./email-quota";
 import { htmlText, safeHtml } from "./safe-html";
+import {
+  buildSystemEmail,
+  findSystemEmail,
+  missingFields,
+} from "./system-emails";
+import { newsletterFooter } from "./email-templates";
+import { siteOrigin } from "./site-url";
 import { parseBlocks } from "./email-blocks";
 import copyCatalog from "./site-copy-catalog.json";
 import { deleteMedia, updateSiteImage, uploadMedia } from "./site-images";
@@ -760,7 +767,7 @@ export async function adminMutation(
       const link = await createResetLink(member.email);
       const problem = !link
         ? "the link could not be created"
-        : await sendWelcomeEmail(member, link, { existing: true });
+        : await sendWelcomeEmail(member, link);
       if (problem)
         return {
           ok: false,
@@ -1441,6 +1448,53 @@ export async function adminMutation(
         { id: templateId, ...value },
       ];
       return { ...success(`Saved as “${value.name}”.`), id: templateId };
+    } else if (entity === "systemEmails") {
+      const key = text(form, "key", 60);
+      if (!findSystemEmail(key)) throw new Error("Unknown email.");
+      if (op === "reset") {
+        const { [key]: _removed, ...rest } = data.systemEmails ?? {};
+        void _removed;
+        data.systemEmails = rest;
+        return success("Back to the default wording.");
+      }
+      const subject = required(form, "subject", 250);
+      const blocks = parseBlocks(text(form, "blocks", 200000));
+      if (!blocks.length) throw new Error("Add some content to the email.");
+      const missing = missingFields(key, subject, blocks);
+      if (missing.length)
+        throw new Error(
+          `The email must contain ${missing.map((f) => `{{${f}}}`).join(", ")}. Without it nobody could set a password, so it was not saved.`,
+        );
+      const footer = form.get("footer") === "on";
+      if (op === "test") {
+        if (!usesDatabase() || !mailerConfigured())
+          throw new Error(
+            "Email is not set up yet. Save the Resend key and the sender in Settings first.",
+          );
+        assertEmailQuota(1);
+        const mail = buildSystemEmail(
+          { subject: `[Test] ${subject}`, blocks, footer },
+          data.emailFooter ?? newsletterFooter,
+          {
+            name: user.name,
+            email: user.email,
+            link: `${siteOrigin()}/reset-password?token_hash=example-test-link`,
+          },
+          { origin: siteOrigin(), settings: data.siteSettings },
+        );
+        const { error } = await sendEmail({ to: user.email, ...mail });
+        if (error) throw new Error(`Test email failed: ${error}`);
+        recordEmails(1);
+        return {
+          ok: true,
+          message: `Test email sent to ${user.email}. Its link is only an example. It counts as 1 of today’s emails.`,
+        };
+      }
+      data.systemEmails = {
+        ...data.systemEmails,
+        [key]: { subject, blocks, footer, updatedAt: new Date().toISOString() },
+      };
+      return success("Template saved. The next email uses this wording.");
     } else if (entity === "emailFooter") {
       data.emailFooter = parseBlocks(text(form, "blocks", 200000));
       return success(

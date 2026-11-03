@@ -28,12 +28,13 @@ export async function forgotPassword(
   try {
     const { data } = await adminClient()
       .from("profiles")
-      .select("status")
+      .select("status,name")
       .eq("email", address)
       .maybeSingle();
     if (data?.status === "active") {
       const link = await createResetLink(address);
-      if (link) await sendResetEmail(address, link);
+      if (link)
+        await sendResetEmail({ name: data.name ?? "", email: address }, link);
     }
   } catch (error) {
     console.error(

@@ -174,6 +174,8 @@ type Placeholder = {
   path?: string;
   sample?: string;
   setting?: keyof PlaceholderSettings;
+  /** Only offered when editing the automatic (system) emails, which fill them in themselves. */
+  system?: boolean;
 };
 /** Merge fields such as {{first_name}}, filled in for each recipient or from Settings. */
 export const placeholders: Placeholder[] = [
@@ -192,6 +194,32 @@ export const placeholders: Placeholder[] = [
     setting: "mailingAddress",
   },
   { key: "year", label: "Current year" },
+  {
+    key: "name",
+    label: "Member’s full name (same as full_name)",
+    sample: "Amelia Hart",
+    system: true,
+  },
+  {
+    key: "email",
+    label: "Member’s email address",
+    sample: "amelia@example.com",
+    system: true,
+  },
+  {
+    key: "site_name",
+    label: "Site name (Settings)",
+    sample: "Morning Coffee Community",
+    setting: "siteTitle",
+    system: true,
+  },
+  {
+    key: "link",
+    label: "The one-use password link",
+    path: "",
+    sample: "https://example.com/reset-password?token_hash=example",
+    system: true,
+  },
   { key: "site_url", label: "Website home page", path: "/" },
   { key: "account_url", label: "Member account", path: "/account" },
   { key: "blog_url", label: "Blog", path: "/blog" },
@@ -248,22 +276,31 @@ export function fillPlaceholders(
     origin = "",
     name,
     settings = {},
-  }: { origin?: string; name?: string; settings?: PlaceholderSettings },
+    values = {},
+  }: {
+    origin?: string;
+    name?: string;
+    settings?: PlaceholderSettings;
+    /** Exact values for some fields, such as the link of a system email. */
+    values?: Record<string, string>;
+  },
 ) {
   let out = html;
   for (const field of placeholders) {
     const fromSettings = field.setting ? settings[field.setting] : undefined;
-    const value = fromSettings
-      ? fromSettings
-      : field.key === "year"
-        ? String(new Date().getFullYear())
-        : isLinkField(field)
-          ? `${origin}${field.path}`
-          : field.key === "first_name"
-            ? (name?.split(" ")[0] ?? field.sample ?? "")
-            : field.key === "full_name"
-              ? (name ?? field.sample ?? "")
-              : (field.sample ?? "");
+    const value = values[field.key]
+      ? values[field.key]
+      : fromSettings
+        ? fromSettings
+        : field.key === "year"
+          ? String(new Date().getFullYear())
+          : isLinkField(field)
+            ? `${origin}${field.path}`
+            : field.key === "first_name"
+              ? (name?.split(" ")[0] ?? field.sample ?? "")
+              : field.key === "full_name" || field.key === "name"
+                ? (name ?? field.sample ?? "")
+                : (field.sample ?? "");
     out = out.replaceAll(`{{${field.key}}}`, value);
   }
   return out;

@@ -1,6 +1,8 @@
 "use client";
 import { askConfirm } from "./confirm-dialog";
 import {
+  createContext,
+  useContext,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -313,9 +315,16 @@ type Suggest = {
   apply: (key: string) => void;
 };
 const mergeMatch = (before: string) => before.match(/\{\{([a-z_]*)$/i);
-const matchingFields = (query: string, kind: Suggest["kind"]) =>
+/** True inside the editor of automatic emails, which offer a few extra merge fields. */
+export const SystemFieldsContext = createContext(false);
+const matchingFields = (
+  query: string,
+  kind: Suggest["kind"],
+  system: boolean,
+) =>
   placeholders.filter(
     (field) =>
+      (system || !field.system) &&
       isLinkField(field) === (kind === "link") &&
       (field.key.startsWith(query.toLowerCase()) ||
         field.label.toLowerCase().includes(query.toLowerCase())),
@@ -351,7 +360,10 @@ export function BlockEditor({
   const look = blockLook(block);
   const imageSrc =
     media.find((item) => item.path === block.path)?.src ?? block.path;
-  const options = suggest ? matchingFields(suggest.query, suggest.kind) : [];
+  const system = useContext(SystemFieldsContext);
+  const options = suggest
+    ? matchingFields(suggest.query, suggest.kind, system)
+    : [];
   const close = () => setSuggest(null);
 
   // Typing "{{" in a field opens the list of merge fields that can go there.

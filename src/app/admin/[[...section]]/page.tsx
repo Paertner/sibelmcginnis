@@ -32,6 +32,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { mailerConfigured } from "@/lib/mailer";
+import { resolveSystemEmail, systemEmails } from "@/lib/system-emails";
 import {
   getStore,
   upcomingSessions,
@@ -872,6 +873,20 @@ export default async function Admin({
             logo={siteImage("shared.logo")}
             media={media}
             premiumPrice={settings.premiumPrice}
+            emailFooter={data.emailFooter ?? newsletterFooter}
+            systemEmails={systemEmails.map((email) => ({
+              key: email.key,
+              name: email.name,
+              description: email.description,
+              when: email.when,
+              fields: email.fields,
+              defaults: {
+                subject: email.subject,
+                blocks: email.blocks,
+                footer: email.footer,
+              },
+              current: resolveSystemEmail(email.key, data.systemEmails),
+            }))}
             weekly={{
               weekday: weekdayIndex(settings.meetingWeekday),
               time: settings.meetingTime,

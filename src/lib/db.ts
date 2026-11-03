@@ -382,6 +382,7 @@ const settingKeys = [
   "emailUsage",
   "emailTemplates",
   "emailFooter",
+  "systemEmails",
 ] as const;
 
 type Saved = Map<string, Map<string, string>>;

@@ -7,6 +7,8 @@ import type { Integrations, SiteSettings } from "@/lib/store";
 import type { EmailQuota } from "@/lib/email-quota";
 import { ActionForm } from "./action-form";
 import { TestEmailButton } from "./test-email-button";
+import { SystemEmailsTab, type SystemEmailItem } from "./system-email-editor";
+import type { EmailBlock } from "@/lib/email-blocks";
 import { Icon } from "./admin-icons";
 import { MediaPicker } from "./media-library";
 import { SiteSelect } from "./site-select";
@@ -17,6 +19,7 @@ const tabs = [
   ["weekly", "Weekly session"],
   ["payments", "Payments"],
   ["integrations", "Integrations"],
+  ["emails", "Email templates"],
 ] as const;
 const shortDate = (iso?: string) =>
   iso
@@ -627,7 +630,11 @@ export function AdminSettings({
   webhookUrl,
   weekly,
   premiumPrice,
+  systemEmails,
+  emailFooter,
 }: {
+  systemEmails: SystemEmailItem[];
+  emailFooter: EmailBlock[];
   weekly: WeeklySettings;
   premiumPrice: number;
   /** Real keys are saved (encrypted) instead of only their last four characters. */
@@ -665,6 +672,14 @@ export function AdminSettings({
           live={live}
           webhookUrl={webhookUrl}
           premiumPrice={premiumPrice}
+        />
+      ) : tab === "emails" ? (
+        <SystemEmailsTab
+          items={systemEmails}
+          footer={emailFooter}
+          media={media}
+          settings={settings}
+          live={live}
         />
       ) : (
         <IntegrationsTab

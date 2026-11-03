@@ -2,8 +2,10 @@ import "server-only";
 import { adminClient } from "./supabase";
 import { sendEmail } from "./mailer";
 import { assertEmailQuota, recordEmails } from "./email-quota";
-import { escapeHtml } from "./safe-html";
 import { siteOrigin } from "./site-url";
+import { getStore } from "./store";
+import { newsletterFooter } from "./email-templates";
+import { buildSystemEmail, resolveSystemEmail } from "./system-emails";
 
 /**
  * One-use link where a person sets a new password. Built from the hashed token so
@@ -24,34 +26,39 @@ export async function createResetLink(address: string) {
   return `${siteOrigin()}/reset-password?token_hash=${encodeURIComponent(token)}`;
 }
 
+/** The wording of an automatic email filled in for one person: the saved template, or the default. */
+export function systemEmailFor(
+  key: string,
+  person: { name?: string; email: string },
+  link: string,
+) {
+  const store = getStore();
+  const template = resolveSystemEmail(key, store.systemEmails);
+  return buildSystemEmail(
+    template,
+    store.emailFooter ?? newsletterFooter,
+    { name: person.name, email: person.email, link },
+    { origin: siteOrigin(), settings: store.siteSettings },
+  );
+}
+
 /** Sends the reset email through Resend. Returns false (and logs) when it cannot. */
-export async function sendResetEmail(address: string, link: string) {
-  const text = `Use this link to choose a new password for your Morning Coffee Community account:
-
-${link}
-
-The link works once. If you did not ask for it, you can ignore this email.`;
-  const { error } = await sendEmail({
-    to: address,
-    subject: "Set a new password",
-    text,
-    html: `<p>Use this link to choose a new password for your Morning Coffee Community account:</p><p><a href="${link}">Set a new password</a></p><p>The link works once. If you did not ask for it, you can ignore this email.</p>`,
-  });
+export async function sendResetEmail(
+  person: { name?: string; email: string },
+  link: string,
+) {
+  const mail = systemEmailFor("reset-password", person, link);
+  const { error } = await sendEmail({ to: person.email, ...mail });
   if (error) console.error("[reset] email not sent:", error);
   return !error;
 }
 
-/** Emails a new member the link to set their first password, counts it and writes the email log. Returns an error text or null. */
+/** Emails a member the link to set their password, counts it and writes the email log. Returns an error text or null. */
 export async function sendWelcomeEmail(
   member: { id: string; name: string; email: string },
   link: string,
-  { existing = false }: { existing?: boolean } = {},
 ) {
-  const intro = existing
-    ? "Sibel’s team sent you a link to set your password for Morning Coffee Community."
-    : "Sibel has added you to Morning Coffee Community.";
-  const first = member.name.trim().split(/\s+/)[0] || "there";
-  const subject = "Set your password for Morning Coffee Community";
+  const mail = systemEmailFor("set-password", member, link);
   try {
     assertEmailQuota(1);
   } catch (error) {
@@ -59,28 +66,14 @@ export async function sendWelcomeEmail(
       ? error.message
       : "Daily email limit reached.";
   }
-  const { id, error } = await sendEmail({
-    to: member.email,
-    subject,
-    text: `Hello ${first},
-
-${intro} Use this link to set your password:
-
-${link}
-
-The link can be used once. If it stops working, choose "Forgot your password?" on the login page and we will send you a new one.
-
-Warmly,
-Sibel's team`,
-    html: `<p>Hello ${escapeHtml(first)},</p><p>${intro} Use the button to set your password.</p><p><a href="${link}" style="display:inline-block;padding:12px 22px;background:#8b5e3c;color:#fff;border-radius:8px;text-decoration:none">Set my password</a></p><p>Or paste this link into your browser:<br><a href="${link}">${link}</a></p><p>The link can be used once. If it stops working, choose “Forgot your password?” on the login page and we will send you a new one.</p><p>Warmly,<br>Sibel’s team</p>`,
-  });
+  const { id, error } = await sendEmail({ to: member.email, ...mail });
   if (!error) recordEmails(1);
   const { error: logError } = await adminClient()
     .from("email_log")
     .insert({
       member_id: member.id,
       to_email: member.email,
-      subject,
+      subject: mail.subject,
       resend_id: id ?? null,
       status: error ? "failed" : "sent",
       error: error ?? null,

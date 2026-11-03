@@ -1,6 +1,7 @@
 import "server-only";
 import seed from "./seed.json";
 import type { EmailBlock, SavedEmailTemplate } from "./email-blocks";
+import type { SavedSystemEmail } from "./system-emails";
 import { addDays, nextWeekday, today } from "./dates";
 import type { EmailPreferences } from "./email-preferences";
 import { emptyStore } from "./db";
@@ -154,6 +155,8 @@ export type Store = Omit<
   emailUsage?: { date: string; sent: number };
   emailTemplates?: SavedEmailTemplate[];
   emailFooter?: EmailBlock[];
+  /** Customised wording of the automatic emails, by key (see system-emails.ts). */
+  systemEmails?: Record<string, SavedSystemEmail>;
   members: Member[];
   announcements: Announcement[];
 };
