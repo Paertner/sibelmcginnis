@@ -4,24 +4,23 @@ import { SiteSelect } from "@/components/site-select";
 import { ActionForm } from "@/components/action-form";
 import { contact } from "@/lib/actions";
 import { DateTimePicker } from "@/components/datetime-picker";
+import { usesDatabase } from "@/lib/store";
 export const generateMetadata = () =>
   pageMetadata("contact", { title: "Contact" });
 export default function Contact() {
   return (
-    <>
-      <div className="page-hero">
-        <div className="wrap">
-          <p className="eyebrow">{siteText("contact.contact")}</p>
-          <h1>{siteText("contact.let-s-start-a-conversation")}</h1>
-          <p>
-            {siteText(
-              "contact.questions-about-membership-coaching-or-corporate-training-write-t",
-            )}
-          </p>
-        </div>
-      </div>
-      <section className="block">
-        <div className="wrap narrow">
+    <section className="block">
+      <div className="wrap">
+        <div className="cf-side">
+          <aside className="cf-panel">
+            <p className="eyebrow">{siteText("contact.contact")}</p>
+            <h1>{siteText("contact.let-s-start-a-conversation")}</h1>
+            <p>
+              {siteText(
+                "contact.questions-about-membership-coaching-or-corporate-training-write-t",
+              )}
+            </p>
+          </aside>
           <div className="card">
             <ActionForm
               action={contact}
@@ -66,15 +65,24 @@ export default function Contact() {
                 {siteText("contact.message")}
                 <textarea name="message" required maxLength={20000} />
               </label>
-              <p className="hint">
-                {siteText(
-                  "contact.email-delivery-is-being-prepared-this-form-currently-validates-me",
-                )}
-              </p>
+              {/* A field people never see; bots that fill it in are ignored. */}
+              <div className="cf-trap" aria-hidden="true">
+                <label>
+                  Website
+                  <input name="website" tabIndex={-1} autoComplete="off" />
+                </label>
+              </div>
+              {usesDatabase() ? null : (
+                <p className="hint">
+                  {siteText(
+                    "contact.email-delivery-is-being-prepared-this-form-currently-validates-me",
+                  )}
+                </p>
+              )}
             </ActionForm>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

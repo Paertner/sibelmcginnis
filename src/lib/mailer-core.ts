@@ -14,6 +14,8 @@ export type MailMessage = {
   text: string;
   headers?: Record<string, string>;
   attachments?: MailAttachment[];
+  /** Where a reply goes, e.g. the visitor who wrote through the contact form. */
+  replyTo?: string;
 };
 export type MailConfig = { key: string; from: string; base: string };
 export type MailResult = { id?: string; error?: string };
@@ -28,6 +30,7 @@ const payload = (config: MailConfig, message: MailMessage) => ({
   html: message.html,
   text: message.text,
   ...(message.headers ? { headers: message.headers } : {}),
+  ...(message.replyTo ? { reply_to: message.replyTo } : {}),
   ...(message.attachments?.length
     ? {
         attachments: message.attachments.map((file) => ({

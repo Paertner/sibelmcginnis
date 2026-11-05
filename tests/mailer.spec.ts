@@ -153,3 +153,26 @@ test("unsubscribing turns off one kind, or everything, and opted-out members get
   const all = withUnsubscribed(one, "all");
   expect(wantsEmail(all, "announcement")).toBe(false);
 });
+
+test("a reply-to address is sent to Resend as reply_to", async () => {
+  const mock = mockFetch(() => ({ status: 200, json: { id: "x" } }));
+  try {
+    await deliver(
+      config,
+      [
+        message(1, {
+          replyTo: "visitor@example.test",
+          attachments: [
+            { filename: "a", content: "AA", contentType: "text/plain" },
+          ],
+        }),
+      ],
+      { pauseMs: 0 },
+    );
+    expect(mock.calls[0].body).toMatchObject({
+      reply_to: "visitor@example.test",
+    });
+  } finally {
+    mock.restore();
+  }
+});

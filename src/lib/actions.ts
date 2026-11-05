@@ -47,7 +47,7 @@ import {
 } from "./announcement-mail";
 import { mailerConfigured, sendBatch, sendEmail } from "./mailer";
 import { assertEmailQuota, emailQuota, recordEmails } from "./email-quota";
-import { htmlText, safeHtml } from "./safe-html";
+import { escapeHtml, htmlText, safeHtml } from "./safe-html";
 import {
   buildSystemEmail,
   findSystemEmail,
@@ -393,14 +393,19 @@ export async function join(
   }
   redirect(destination);
 }
+const CONTACT_THANKS =
+  "Thank you! Your message was sent. Sibel will reply to you by email.";
+const CONTACT_FAILED =
+  "Sorry, your message could not be sent right now. Please try again later.";
 export async function contact(
   _state: ActionResult,
   form: FormData,
 ): Promise<ActionResult> {
   try {
-    required(form, "name", 120);
-    email(form);
-    required(form, "message");
+    const name = required(form, "name", 120),
+      address = email(form),
+      message = required(form, "message"),
+      interest = text(form, "interest", 80);
     const preferred = text(form, "preferredTime", 16);
     if (
       preferred &&
@@ -409,11 +414,71 @@ export async function contact(
     )
       throw new Error("Choose a valid date and time for a call.");
     checkDemo();
-    return {
-      ok: true,
-      message:
-        "Form validated for review. No message was sent; email delivery will be connected with Resend.",
-    };
+    // Bots fill in the hidden field; they are told it worked and nothing is sent.
+    if (text(form, "website", 200))
+      return { ok: true, message: CONTACT_THANKS };
+    if (!usesDatabase())
+      return {
+        ok: true,
+        message:
+          "Form validated for review. No message was sent; email delivery works on the live site.",
+      };
+    const to =
+      getStore().siteSettings?.contactEmail || process.env.CONTACT_EMAIL;
+    if (!to || !mailerConfigured()) {
+      console.error(
+        "[contact] not sent: set the contact email and the Resend sender in Settings.",
+      );
+      throw new Error(CONTACT_FAILED);
+    }
+    if (askedRecently(`contact:${address}`))
+      throw new Error("Please wait a minute before sending another message.");
+    try {
+      assertEmailQuota(1);
+    } catch {
+      console.error("[contact] not sent: today's email limit is used up.");
+      throw new Error(CONTACT_FAILED);
+    }
+    const subject = `New message from ${name}${interest ? `: ${interest}` : ""}`
+      .replace(/\s+/g, " ")
+      .slice(0, 200);
+    const details = [
+      ["Name", name],
+      ["Email", address],
+      ["Interested in", interest],
+      ["Preferred time for a call", preferred.replace("T", " ")],
+    ].filter(([, value]) => value);
+    const { id, error } = await sendEmail({
+      to,
+      replyTo: address,
+      subject,
+      text: `${details.map(([label, value]) => `${label}: ${value}`).join("\n")}\n\n${message}\n\nReply to this email to answer ${name}.`,
+      html: `<table role="presentation" cellpadding="4" style="font-family:sans-serif">${details
+        .map(
+          ([label, value]) =>
+            `<tr><td><b>${escapeHtml(label)}</b></td><td>${escapeHtml(value)}</td></tr>`,
+        )
+        .join(
+          "",
+        )}</table><p style="white-space:pre-wrap;font-family:sans-serif">${escapeHtml(message)}</p><p style="color:#777;font-family:sans-serif">Reply to this email to answer ${escapeHtml(name)}.</p>`,
+    });
+    if (!error) recordEmails(1);
+    const { error: logError } = await adminClient()
+      .from("email_log")
+      .insert({
+        to_email: to,
+        subject,
+        resend_id: id ?? null,
+        status: error ? "failed" : "sent",
+        error: error ?? null,
+      });
+    if (logError)
+      console.error("[email] could not write the log:", logError.message);
+    if (error) {
+      console.error("[contact] not sent:", error);
+      throw new Error(CONTACT_FAILED);
+    }
+    return { ok: true, message: CONTACT_THANKS };
   } catch (error) {
     return errorResult(error);
   }
