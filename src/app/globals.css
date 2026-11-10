@@ -8848,3 +8848,12 @@ label a {
   height: 1px;
   overflow: hidden;
 }
+
+/* The Premium badge on a post cover is solid black. */
+.post-cover .badge.b-premium {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
