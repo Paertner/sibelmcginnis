@@ -195,44 +195,6 @@ export default async function Page() {
               </ul>
             </div>
             <div className="b-img" {...siteBackground("home.reflection")}></div>
-            <div className="b-light">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: "10px",
-                }}
-              >
-                <span className="big-num">
-                  {siteText("home.90")}
-                  <small style={{ fontSize: "1.1rem", letterSpacing: "0" }}>
-                    {" "}
-                    {siteText("home.min")}
-                  </small>
-                </span>
-                <span style={{ fontSize: ".9rem" }}>
-                  {siteText("home.saturday-circle")}
-                </span>
-              </div>
-              <div className="meter">
-                <div>
-                  <span>{siteText("home.quarterly-themes")}</span>
-                  <span>{siteText("home.4-year")}</span>
-                </div>
-                <i style={{ "--w": "100%" } as React.CSSProperties}></i>
-                <div>
-                  <span>{siteText("home.topics-explored")}</span>
-                  <span>{siteText("home.11")}</span>
-                </div>
-                <i style={{ "--w": "78%" } as React.CSSProperties}></i>
-                <div>
-                  <span>{siteText("home.zoom-notes-podcast")}</span>
-                  <span>{siteText("home.included")}</span>
-                </div>
-                <i style={{ "--w": "92%" } as React.CSSProperties}></i>
-              </div>
-            </div>
           </div>
         </div>
       </section>

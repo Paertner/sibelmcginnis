@@ -1105,51 +1105,6 @@
     "text": "Take one small aligned action"
   },
   {
-    "id": "home.90",
-    "group": "Homepage",
-    "text": "90"
-  },
-  {
-    "id": "home.min",
-    "group": "Homepage",
-    "text": "min"
-  },
-  {
-    "id": "home.saturday-circle",
-    "group": "Homepage",
-    "text": "Saturday circle"
-  },
-  {
-    "id": "home.quarterly-themes",
-    "group": "Homepage",
-    "text": "Quarterly themes"
-  },
-  {
-    "id": "home.4-year",
-    "group": "Homepage",
-    "text": "4 / year"
-  },
-  {
-    "id": "home.topics-explored",
-    "group": "Homepage",
-    "text": "Topics explored"
-  },
-  {
-    "id": "home.11",
-    "group": "Homepage",
-    "text": "11"
-  },
-  {
-    "id": "home.zoom-notes-podcast",
-    "group": "Homepage",
-    "text": "Zoom, notes & podcast"
-  },
-  {
-    "id": "home.included",
-    "group": "Homepage",
-    "text": "included"
-  },
-  {
     "id": "home.why-join",
     "group": "Homepage",
     "text": "Why join"

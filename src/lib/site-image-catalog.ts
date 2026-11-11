@@ -33,7 +33,7 @@ export const siteImageCatalog: ImageSlot[] = [
     label: "Programs · Morning Coffee Circle",
     src: "/images/womens-e1767706912925.webp",
     alt: "",
-    position: "center",
+    position: "60% 30%",
   },
   {
     id: "home.program-coaching",
@@ -41,7 +41,7 @@ export const siteImageCatalog: ImageSlot[] = [
     label: "Programs · One-on-One Coaching",
     src: "/images/hero2-1-2.webp",
     alt: "",
-    position: "center",
+    position: "40% 22%",
   },
   {
     id: "home.program-podcast",
@@ -57,7 +57,7 @@ export const siteImageCatalog: ImageSlot[] = [
     label: "About the community · portrait",
     src: "/images/sibel-about-1.webp",
     alt: "Sibel McGinnis",
-    position: "center",
+    position: "40% 20%",
   },
   {
     id: "home.feature-conversations",
@@ -65,7 +65,7 @@ export const siteImageCatalog: ImageSlot[] = [
     label: "Features · Guided, Gentle Conversations",
     src: "/images/womens-e1767706912925.webp",
     alt: "",
-    position: "center",
+    position: "60% 30%",
   },
   {
     id: "home.feature-catchup",
@@ -73,7 +73,7 @@ export const siteImageCatalog: ImageSlot[] = [
     label: "Features · Catch Up Anytime",
     src: "/images/hero2-1-2.webp",
     alt: "",
-    position: "center",
+    position: "40% 22%",
   },
   {
     id: "home.feature-support",
@@ -81,7 +81,7 @@ export const siteImageCatalog: ImageSlot[] = [
     label: "Features · Support That Lasts",
     src: "/images/sibel-about-1.webp",
     alt: "",
-    position: "center",
+    position: "40% 18%",
   },
   {
     id: "home.join",

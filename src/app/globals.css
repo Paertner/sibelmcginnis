@@ -526,7 +526,7 @@ section.block {
 /* bento */
 .bento {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 @media (max-width: 860px) {
@@ -561,54 +561,6 @@ section.block {
   background-position: center top;
   padding: 0 !important;
 }
-.b-light {
-  background: var(--card);
-}
-.big-num {
-  font: 300 4.2rem var(--font-inter);
-  color: var(--ink);
-  line-height: 1;
-  letter-spacing: -0.04em;
-}
-.meter {
-  margin-top: 14px;
-  font-size: 0.85rem;
-}
-.meter div {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-.meter i {
-  display: block;
-  height: 3px;
-  background: #e6d3c5;
-  border-radius: 3px;
-  position: relative;
-  margin-bottom: 18px;
-}
-.meter i::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: var(--w);
-  background: var(--accent);
-  border-radius: 3px;
-}
-.meter i::after {
-  content: "";
-  position: absolute;
-  left: var(--w);
-  top: 50%;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fff;
-  border: 3px solid var(--accent);
-  transform: translate(-50%, -50%);
-}
 
 /* feature rows */
 .frows {
@@ -617,7 +569,7 @@ section.block {
 }
 .frow {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 190px;
+  grid-template-columns: 1.2fr 1fr 230px;
   gap: 28px;
   align-items: center;
   background: var(--card);
@@ -634,7 +586,7 @@ section.block {
   color: var(--text);
 }
 .frow .th {
-  height: 92px;
+  height: 150px;
   border-radius: 12px;
   background-size: cover;
   background-position: center;
@@ -644,7 +596,8 @@ section.block {
     grid-template-columns: 1fr;
   }
   .frow .th {
-    height: 140px;
+    height: auto;
+    aspect-ratio: 3 / 2;
   }
 }
 
