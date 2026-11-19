@@ -24,12 +24,6 @@ export default async function Page() {
   return (
     <>
       <section className="hero2">
-        <div
-          className="ghost"
-          style={{ fontSize: "clamp(3.2rem,13.5vw,12.5rem)" }}
-        >
-          {siteText("home.sibel-mcginnis")}
-        </div>
         <div className="hero-panel">
           <div className="wrap hero-grid">
             <div
@@ -93,7 +87,7 @@ export default async function Page() {
 
       <section className="programs dark" style={{ marginTop: "14px" }}>
         <div className="wrap">
-          <div className="shead on-dark">
+          <div className="shead shead-center on-dark">
             <div>
               <span className="pill">{siteText("home.programs")}</span>
             </div>
@@ -150,12 +144,7 @@ export default async function Page() {
 
       <section className="block">
         <div className="wrap">
-          <div className="shead" style={{ gridTemplateColumns: "1fr 2fr" }}>
-            <div>
-              <span className="pill">
-                {siteText("home.about-the-community")}
-              </span>
-            </div>
+          <div className="community-lead">
             <p className="lead-text" style={{ color: "#8a8a8a" }}>
               {siteText("home.with-a")}{" "}
               <em>{siteText("home.weekly-circle")}</em>{" "}

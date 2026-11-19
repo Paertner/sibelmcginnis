@@ -27,6 +27,15 @@
   --tan: #c0a385;
   --tan-soft: rgba(192, 163, 133, 0.35);
   --green-soft: #e6e6e6;
+  /* type scale: every public heading and paragraph picks one of these */
+  --fs-display: clamp(2.1rem, 4.4vw, 3.4rem);
+  --fs-title: clamp(1.8rem, 3.4vw, 2.6rem);
+  --fs-subtitle: clamp(1.5rem, 2.4vw, 1.9rem);
+  --fs-card: 1.3rem;
+  --fs-lead: clamp(1.2rem, 2vw, 1.6rem);
+  --fs-body: 1rem;
+  --fs-small: 0.92rem;
+  --fs-tiny: 0.8rem;
 }
 * {
   box-sizing: border-box;
@@ -54,13 +63,13 @@ h4 {
   letter-spacing: -0.02em;
 }
 h1 {
-  font-size: clamp(2.3rem, 6vw, 4.2rem);
+  font-size: var(--fs-display);
 }
 h2 {
-  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-size: var(--fs-title);
 }
 h3 {
-  font-size: 1.35rem;
+  font-size: var(--fs-card);
   font-weight: 400;
 }
 p {
@@ -281,21 +290,8 @@ section.block {
 /* home hero */
 .hero2 {
   position: relative;
-  padding: 10px 0 0;
+  padding: 24px 0 0;
   overflow: hidden;
-}
-.ghost {
-  font:
-    800 clamp(5rem, 20vw, 18rem)/0.9 var(--font-inter),
-    sans-serif;
-  color: #e5e5e5;
-  text-align: center;
-  white-space: nowrap;
-  letter-spacing: -0.04em;
-  margin: 0 0 -0.18em;
-  position: relative;
-  z-index: 0;
-  user-select: none;
 }
 .hero-panel {
   position: relative;
@@ -325,12 +321,12 @@ section.block {
 }
 .hero-copy h1 {
   color: #ededed;
-  font-size: clamp(2.1rem, 4.4vw, 3.9rem);
+  font-size: var(--fs-display);
   margin: 18px 0 30px;
 }
 .hero-intro {
   color: #bdbdbd;
-  font-size: 0.9rem;
+  font-size: var(--fs-small);
   max-width: 510px;
   margin: -10px 0 26px;
 }
@@ -422,7 +418,24 @@ section.block {
 .shead p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--fs-small);
+}
+/* centred head: pill, title and the blurb as a subtitle, stacked */
+.shead.shead-center {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+  gap: 14px;
+}
+.shead.shead-center p {
+  max-width: 560px;
+}
+/* community lead paragraph runs the full width */
+.community-lead {
+  margin-bottom: 46px;
+}
+.community-lead p {
+  margin: 0;
 }
 @media (max-width: 860px) {
   .shead {
@@ -430,6 +443,9 @@ section.block {
   }
   .shead h2 {
     text-align: left;
+  }
+  .shead.shead-center h2 {
+    text-align: center;
   }
 }
 
@@ -476,7 +492,7 @@ section.block {
 }
 .pcard p {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: var(--fs-small);
   color: #a8a8a8;
 }
 .pcard .btn {
@@ -493,14 +509,14 @@ section.block {
 }
 .stats-row b {
   display: block;
-  font: 300 clamp(2.2rem, 4vw, 3.2rem) var(--font-inter);
+  font: 300 var(--fs-title) var(--font-inter);
   color: var(--ink);
   letter-spacing: -0.03em;
   line-height: 1.1;
 }
 .stats-row span {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--fs-small);
 }
 @media (max-width: 700px) {
   .stats-row {
@@ -514,7 +530,7 @@ section.block {
 }
 .shead p.lead-text,
 .lead-text {
-  font: 400 clamp(1.3rem, 2.4vw, 1.9rem)/1.4 var(--font-inter);
+  font: 400 var(--fs-lead)/1.4 var(--font-inter);
   color: #8a8a8a;
   letter-spacing: -0.01em;
 }
@@ -548,7 +564,7 @@ section.block {
 }
 .b-dark h3 {
   color: #ededed;
-  font-size: 1.9rem;
+  font-size: var(--fs-subtitle);
   line-height: 1.2;
 }
 .b-dark li {
@@ -578,11 +594,11 @@ section.block {
 }
 .frow h3 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: var(--fs-card);
 }
 .frow p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-small);
   color: var(--text);
 }
 .frow .th {
@@ -688,7 +704,7 @@ section.block {
   text-align: center;
 }
 .page-hero h1 {
-  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  font-size: var(--fs-display);
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
@@ -940,7 +956,7 @@ ul.ticks li::before {
   margin-bottom: 0.4em;
 }
 .post-meta {
-  font: 0.78rem var(--font-poppins);
+  font: var(--fs-tiny) var(--font-poppins);
   color: var(--muted);
   margin-bottom: 10px;
 }
@@ -1096,7 +1112,7 @@ textarea {
 }
 .site-footer h2 {
   color: #ededed;
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-size: var(--fs-title);
   margin-bottom: 34px;
 }
 .site-footer h4 {
@@ -1111,7 +1127,7 @@ textarea {
 }
 .site-footer li {
   margin-bottom: 6px;
-  font-size: 0.92rem;
+  font-size: var(--fs-small);
 }
 .copy {
   border-top: 1px solid #262626;
@@ -1720,11 +1736,11 @@ button {
   color: #333;
 }
 .ep h3 {
-  font-size: 1.15rem;
+  font-size: var(--fs-card);
   margin-bottom: 4px;
 }
 .ep p {
-  font-size: 0.92rem;
+  font-size: var(--fs-small);
   margin-bottom: 8px;
 }
 .ep audio {
@@ -5667,12 +5683,12 @@ ul.ticks li::before {
 /* Member "next Saturday circle" card, matching the admin Next circle card. */
 .member-circle h2 {
   color: #fff;
-  font: 400 clamp(1.6rem, 3vw, 2.1rem) / 1.2 var(--font-inter);
+  font: 400 var(--fs-subtitle) / 1.2 var(--font-inter);
   margin: 0 0 6px;
 }
 .member-circle .next-circle-row p {
   color: #e5cfc0;
-  font-size: 0.95rem;
+  font-size: var(--fs-small);
 }
 .member-circle .next-circle-actions > .btn {
   background: #e8c9b4;
@@ -5817,7 +5833,7 @@ ul.ticks li::before {
   padding: 44px 46px;
 }
 .join-form h1 {
-  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  font-size: var(--fs-subtitle);
   margin-bottom: 6px;
 }
 .join-form > .muted {
@@ -6057,7 +6073,7 @@ ul.ticks li::before {
   margin: 0;
 }
 .latest-head a {
-  font: 500 0.82rem var(--font-poppins);
+  font: 500 var(--fs-tiny) var(--font-poppins);
   color: var(--accent-d);
   text-decoration: none;
   white-space: nowrap;
@@ -6555,7 +6571,7 @@ ul.ticks li::before {
   margin-top: 18px;
 }
 .block-article h2 {
-  font-size: clamp(1.4rem, 2.6vw, 1.8rem);
+  font-size: var(--fs-subtitle);
   margin-top: 34px;
 }
 .block-article .article-text {
@@ -7262,7 +7278,7 @@ ul.ticks li::before {
 }
 .event-side h2 {
   margin: 0 0 16px;
-  font-size: 1.2rem;
+  font-size: var(--fs-card);
 }
 .event-facts {
   list-style: none;
@@ -7785,7 +7801,7 @@ label a {
   padding: 22px 20px;
 }
 .post-related h2 {
-  font: 400 1.15rem var(--font-inter);
+  font: 400 var(--fs-card) var(--font-inter);
   margin: 0 0 14px;
 }
 .post-related ul {
@@ -7882,9 +7898,6 @@ label a {
   --panel-line: #dcc6b6;
   --panel-ink: #2d221c;
   --panel-sub: #6f5b4e;
-}
-.ghost {
-  color: #fbf6f1;
 }
 .paywall {
   background: linear-gradient(to bottom, rgba(253, 251, 250, 0), var(--bg) 70px);

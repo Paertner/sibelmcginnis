@@ -653,10 +653,6 @@ export default async function Admin({
                 </ActionForm>
               </div>
             ) : null}
-            <CompanyLinks
-              links={data.companyLinks ?? []}
-              bookings={data.bookings}
-            />
             <section className="panel" aria-labelledby="bookings-title">
               <header className="card-head">
                 <div>
@@ -852,6 +848,10 @@ export default async function Admin({
                 </p>
               </div>
             </ActionForm>
+            <CompanyLinks
+              links={data.companyLinks ?? []}
+              bookings={data.bookings}
+            />
           </>
         ) : null}
         {section === "announce" ? (
