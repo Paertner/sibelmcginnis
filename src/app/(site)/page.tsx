@@ -37,19 +37,6 @@ export default async function Page() {
               </span>
             </div>
             <div className="hero-copy">
-              <div className="avatars">
-                <div className="stack">
-                  <span style={{ background: "#C0A385" }}>
-                    {siteText("home.ah")}
-                  </span>
-                  <span style={{ background: "#d9c3ab" }}>
-                    {siteText("home.ld")}
-                  </span>
-                  <span style={{ background: "#a98b6d" }}>
-                    {siteText("home.na")}
-                  </span>
-                </div>
-              </div>
               <h1>{settings.heroTitle}</h1>
               <p className="hero-intro">{settings.heroSub}</p>
               <div className="hero-btns">
