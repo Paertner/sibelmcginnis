@@ -34,6 +34,7 @@
   --fs-card: 1.3rem;
   --fs-lead: clamp(1.2rem, 2vw, 1.6rem);
   --fs-body: 1rem;
+  --fs-desc: 1.08rem;
   --fs-small: 0.92rem;
   --fs-tiny: 0.8rem;
 }
@@ -403,12 +404,13 @@ section.block {
   }
 }
 
-/* section heads: pill left, title centre, blurb right */
+/* section heads: pill, title and the blurb as a subtitle, stacked and centred */
 .shead {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 1fr;
-  gap: 24px;
-  align-items: start;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+  gap: 14px;
   margin-bottom: 46px;
 }
 .shead h2 {
@@ -417,18 +419,9 @@ section.block {
 }
 .shead p {
   margin: 0;
+  max-width: 620px;
   color: var(--muted);
-  font-size: var(--fs-small);
-}
-/* centred head: pill, title and the blurb as a subtitle, stacked */
-.shead.shead-center {
-  grid-template-columns: 1fr;
-  justify-items: center;
-  text-align: center;
-  gap: 14px;
-}
-.shead.shead-center p {
-  max-width: 560px;
+  font-size: var(--fs-desc);
 }
 /* community lead paragraph runs the full width */
 .community-lead {
@@ -439,16 +432,38 @@ section.block {
   max-width: 1000px;
   text-align: center;
 }
-@media (max-width: 860px) {
-  .shead {
-    grid-template-columns: 1fr;
-  }
-  .shead h2 {
-    text-align: left;
-  }
-  .shead.shead-center h2 {
-    text-align: center;
-  }
+
+/* legal pages: one readable column */
+.legal .wrap {
+  max-width: 780px;
+}
+.legal h2 {
+  font-size: var(--fs-card);
+  margin: 2em 0 0.6em;
+}
+.legal h3 {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  margin: 1.4em 0 0.4em;
+}
+.legal p,
+.legal li {
+  font-size: var(--fs-body);
+  color: var(--text);
+}
+.legal ul {
+  margin: 0 0 1em;
+  padding-left: 1.3em;
+}
+.legal li {
+  margin-bottom: 0.35em;
+}
+.legal a {
+  color: var(--accent-d);
+}
+.legal strong {
+  font-weight: 500;
+  color: var(--ink);
 }
 
 /* program cards (on dark panel) */
@@ -715,6 +730,7 @@ section.block {
   max-width: 620px;
   margin: 0 auto;
   color: var(--muted);
+  font-size: var(--fs-desc);
 }
 
 /* layout */
@@ -1137,6 +1153,15 @@ textarea {
   padding-top: 18px;
   font-size: 0.82rem;
   opacity: 0.8;
+}
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 10px;
+}
+.legal-links a {
+  color: inherit;
 }
 
 /* modal */
@@ -1926,9 +1951,6 @@ button {
   .g2,
   .g3 {
     min-width: 0;
-  }
-  .shead[style] {
-    grid-template-columns: 1fr !important;
   }
   .frow {
     padding: 20px;

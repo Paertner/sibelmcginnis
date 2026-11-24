@@ -1,4 +1,5 @@
 import { siteImageProps } from "@/lib/site-images";
+import { legalPages } from "@/lib/legal-pages";
 import { siteText } from "@/lib/site-copy";
 import Link from "next/link";
 import Image from "next/image";
@@ -109,6 +110,13 @@ export function Footer() {
         <div className="copy">
           © {new Date().getFullYear()}{" "}
           {siteText("site-chrome.sibel-mcginnis-morning-coffee-community")}
+          <nav className="legal-links" aria-label="Legal">
+            {legalPages.map((page) => (
+              <Link key={page.slug} href={`/legal/${page.slug}`}>
+                {page.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>

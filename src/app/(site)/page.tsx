@@ -87,7 +87,7 @@ export default async function Page() {
 
       <section className="programs dark" style={{ marginTop: "14px" }}>
         <div className="wrap">
-          <div className="shead shead-center on-dark">
+          <div className="shead on-dark">
             <div>
               <span className="pill">{siteText("home.programs")}</span>
             </div>

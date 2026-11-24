@@ -777,6 +777,10 @@ export default async function Admin({
                 </table>
               </div>
             </section>
+            <CompanyLinks
+              links={data.companyLinks ?? []}
+              bookings={data.bookings}
+            />
             <ActionForm
               action={adminMutation}
               className="availability-form"
@@ -848,10 +852,6 @@ export default async function Admin({
                 </p>
               </div>
             </ActionForm>
-            <CompanyLinks
-              links={data.companyLinks ?? []}
-              bookings={data.bookings}
-            />
           </>
         ) : null}
         {section === "announce" ? (
