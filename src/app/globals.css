@@ -28,14 +28,16 @@
   --tan-soft: rgba(192, 163, 133, 0.35);
   --green-soft: #e6e6e6;
   /* type scale: every public heading and paragraph picks one of these */
-  --fs-display: clamp(2.8rem, 5.2vw, 4.6rem);
-  --fs-title: clamp(2.3rem, 4.2vw, 3.6rem);
-  --fs-subtitle: clamp(1.8rem, 2.8vw, 2.4rem);
-  --fs-card: 1.65rem;
-  --fs-lead: clamp(1.25rem, 2vw, 1.5rem);
-  --fs-body: 1.06rem;
-  --fs-desc: 1.2rem;
-  --fs-small: 0.98rem;
+  /* headings: each step 5px under the previous scale */
+  --fs-display: clamp(2.49rem, calc(5.2vw - 5px), 4.29rem);
+  --fs-title: clamp(1.99rem, calc(4.2vw - 5px), 3.29rem);
+  --fs-subtitle: clamp(1.49rem, calc(2.8vw - 5px), 2.09rem);
+  --fs-card: 1.34rem;
+  /* text: 1-2px under the previous scale */
+  --fs-lead: clamp(1.15rem, 1.8vw, 1.35rem);
+  --fs-body: 1rem;
+  --fs-desc: 1.1rem;
+  --fs-small: 0.92rem;
   --fs-tiny: 0.82rem;
   /* uppercase, spaced-out labels: nav, buttons, pills */
   --track: 0.12em;
@@ -52,7 +54,7 @@ body {
   color: var(--text);
   font-family: var(--font-text), system-ui, sans-serif;
   line-height: 1.65;
-  font-size: 17px;
+  font-size: 16px;
 }
 h1,
 h2,
@@ -1908,7 +1910,7 @@ button {
     margin-right: 8px;
   }
   .hero-copy h1 {
-    font-size: 2.15rem;
+    font-size: 1.84rem;
   }
   .hero-photo {
     height: 340px;
