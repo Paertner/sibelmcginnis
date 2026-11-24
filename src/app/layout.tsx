@@ -6,19 +6,26 @@ import { ToastProvider } from "@/components/toast";
 import { defaultDescription } from "@/lib/editor-pages";
 import { getStore } from "@/lib/store";
 
-const inter = localFont({
-  src: "./fonts/inter-latin-variable.woff2",
-  variable: "--font-inter",
+const openSans = localFont({
+  src: "./fonts/open-sans-latin-wght-normal.woff2",
+  variable: "--font-text",
   display: "swap",
-  weight: "100 900",
+  weight: "300 800",
 });
-const poppins = localFont({
+const instrumentSerif = localFont({
   src: [
-    { path: "./fonts/poppins-latin-400-normal.woff2", weight: "400" },
-    { path: "./fonts/poppins-latin-500-normal.woff2", weight: "500" },
+    {
+      path: "./fonts/instrument-serif-latin-400-normal.woff2",
+      style: "normal",
+    },
+    {
+      path: "./fonts/instrument-serif-latin-400-italic.woff2",
+      style: "italic",
+    },
   ],
-  variable: "--font-poppins",
+  variable: "--font-display",
   display: "swap",
+  weight: "400",
 });
 export const dynamic = "force-dynamic";
 
@@ -48,7 +55,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${inter.variable} ${poppins.variable}`}
+      className={`${openSans.variable} ${instrumentSerif.variable}`}
     >
       <body>
         <ToastProvider>

@@ -11,11 +11,12 @@ export type ImageSlot = {
 };
 export const siteImageCatalog: ImageSlot[] = [
   {
-    id: "shared.logo",
+    // A new id, so the old icon chosen in Settings no longer overrides the new logo.
+    id: "shared.brand-logo",
     group: "Header & footer",
-    label: "Brand icon",
-    src: "/images/brand-cup.svg",
-    alt: "",
+    label: "Logo",
+    src: "/images/sibel-logo.png",
+    alt: "Sibel McGinnis",
     position: "center",
     logo: true,
   },

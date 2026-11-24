@@ -12,15 +12,15 @@ export function Brand() {
   return (
     <Link className="brand" href="/">
       <Image
-        {...siteImageProps("shared.logo")}
-        alt={siteImageProps("shared.logo").alt}
-        width={30}
-        height={30}
+        {...siteImageProps("shared.brand-logo")}
+        alt={
+          getStore().siteSettings?.siteTitle ||
+          siteText("site-chrome.sibel-mcginnis")
+        }
+        width={900}
+        height={437}
+        priority
       />
-      <span className="brand-name">
-        {getStore().siteSettings?.siteTitle ||
-          siteText("site-chrome.sibel-mcginnis")}
-      </span>
     </Link>
   );
 }
@@ -70,7 +70,7 @@ export function Footer() {
             {siteText("site-chrome.join-morning-coffee")}
           </Link>
         </p>
-        <div className="grid g3">
+        <div className="grid g4">
           <div>
             <Brand />
             <p>
@@ -106,17 +106,20 @@ export function Footer() {
               </li>
             </ul>
           </div>
+          <div>
+            <h4>Legal</h4>
+            <ul>
+              {legalPages.map((page) => (
+                <li key={page.slug}>
+                  <Link href={`/legal/${page.slug}`}>{page.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
         <div className="copy">
           © {new Date().getFullYear()}{" "}
           {siteText("site-chrome.sibel-mcginnis-morning-coffee-community")}
-          <nav className="legal-links" aria-label="Legal">
-            {legalPages.map((page) => (
-              <Link key={page.slug} href={`/legal/${page.slug}`}>
-                {page.label}
-              </Link>
-            ))}
-          </nav>
         </div>
       </div>
     </footer>

@@ -893,7 +893,7 @@ export default async function Admin({
             settings={data.siteSettings ?? {}}
             integrations={data.integrations ?? {}}
             quota={emailQuota()}
-            logo={siteImage("shared.logo")}
+            logo={siteImage("shared.brand-logo")}
             media={media}
             premiumPrice={settings.premiumPrice}
             emailFooter={data.emailFooter ?? newsletterFooter}
