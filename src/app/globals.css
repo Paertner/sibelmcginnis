@@ -373,6 +373,14 @@ section.block {
   display: block;
   line-height: 1.1;
 }
+/* Side by side, the photo grows with the text column so no gap opens above it */
+@media (min-width: 901px) {
+  .hero-photo {
+    align-self: stretch;
+    height: auto;
+    min-height: 560px;
+  }
+}
 @media (max-width: 900px) {
   .hero-grid {
     grid-template-columns: 1fr;
