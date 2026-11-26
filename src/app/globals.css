@@ -28,11 +28,11 @@
   --tan-soft: rgba(192, 163, 133, 0.35);
   --green-soft: #e6e6e6;
   /* type scale: every public heading and paragraph picks one of these */
-  /* headings: each step 5px under the previous scale */
-  --fs-display: clamp(2.49rem, calc(5.2vw - 5px), 4.29rem);
-  --fs-title: clamp(1.99rem, calc(4.2vw - 5px), 3.29rem);
-  --fs-subtitle: clamp(1.49rem, calc(2.8vw - 5px), 2.09rem);
-  --fs-card: 1.34rem;
+  /* headings in Georgia-style italic: hero up to 56px, sections 42px, cards 26px */
+  --fs-display: clamp(2.2rem, 4.2vw, 3.5rem);
+  --fs-title: clamp(1.75rem, 3.2vw, 2.625rem);
+  --fs-subtitle: clamp(1.35rem, 2.2vw, 1.75rem);
+  --fs-card: 1.625rem;
   /* text: 1-2px under the previous scale */
   --fs-lead: clamp(1.15rem, 1.8vw, 1.35rem);
   --fs-body: 1rem;
@@ -62,13 +62,14 @@ h3,
 h4 {
   font-family: var(--font-display), Georgia, serif;
   color: var(--ink);
-  line-height: 1.06;
+  line-height: 1.15;
   margin: 0 0 0.5em;
   font-weight: 400;
   letter-spacing: 0;
 }
 h1,
-h2 {
+h2,
+h3 {
   font-style: italic;
 }
 h4 {
@@ -1910,7 +1911,7 @@ button {
     margin-right: 8px;
   }
   .hero-copy h1 {
-    font-size: 1.84rem;
+    font-size: 1.6rem;
   }
   .hero-photo {
     height: 340px;

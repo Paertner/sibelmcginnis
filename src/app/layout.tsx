@@ -12,17 +12,10 @@ const openSans = localFont({
   display: "swap",
   weight: "300 800",
 });
-const instrumentSerif = localFont({
-  src: [
-    {
-      path: "./fonts/instrument-serif-latin-400-normal.woff2",
-      style: "normal",
-    },
-    {
-      path: "./fonts/instrument-serif-latin-400-italic.woff2",
-      style: "italic",
-    },
-  ],
+// Gelasio is drawn to match Georgia's shapes and widths, and is free to ship with the site.
+const gelasio = localFont({
+  src: "./fonts/gelasio-latin-400-italic.woff2",
+  style: "italic",
   variable: "--font-display",
   display: "swap",
   weight: "400",
@@ -55,7 +48,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${openSans.variable} ${instrumentSerif.variable}`}
+      className={`${openSans.variable} ${gelasio.variable}`}
     >
       <body>
         <ToastProvider>
