@@ -17,7 +17,12 @@ import {
   siteImageSlots,
   type MediaItem,
 } from "@/lib/site-images";
-import { AdminTable, AdminRow } from "@/components/admin-table";
+import {
+  AdminTable,
+  AdminRow,
+  SortHeader,
+  SortedRows,
+} from "@/components/admin-table";
 import {
   BulkCheckbox,
   BulkHeaderCheckbox,
@@ -302,61 +307,70 @@ export default async function Admin({
                     <th>
                       <BulkHeaderCheckbox />
                     </th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Tier</th>
-                    <th>Status</th>
-                    <th>Joined</th>
+                    <SortHeader label="Name" sortKey="name" />
+                    <SortHeader label="Email" sortKey="email" />
+                    <SortHeader label="Tier" sortKey="tier" />
+                    <SortHeader label="Status" sortKey="status" />
+                    <SortHeader label="Joined" sortKey="joined" first="desc" />
                     <th aria-label="Actions" />
                   </tr>
                 </thead>
                 <tbody>
-                  {data.members.map((m) => (
-                    <AdminRow
-                      key={m.id}
-                      search={`${m.name} ${m.email}`}
-                      category={m.tier}
-                    >
-                      <td>
-                        <BulkCheckbox id={m.id} name={m.name} />
-                      </td>
-                      <td>
-                        <span className="person">
-                          <span className="avatar-soft" aria-hidden="true">
-                            {initials(m.name)}
-                          </span>
-                          <span>
-                            <span className="member-name">
-                              <MemberEditor member={m} asName />
-                              <MailLink id={m.id} name={m.name} />
+                  <SortedRows>
+                    {data.members.map((m) => (
+                      <AdminRow
+                        key={m.id}
+                        search={`${m.name} ${m.email}`}
+                        category={m.tier}
+                        sortBy={{
+                          name: m.name,
+                          email: m.email,
+                          tier: m.tier,
+                          status: m.status,
+                          joined: m.joined,
+                        }}
+                      >
+                        <td>
+                          <BulkCheckbox id={m.id} name={m.name} />
+                        </td>
+                        <td>
+                          <span className="person">
+                            <span className="avatar-soft" aria-hidden="true">
+                              {initials(m.name)}
                             </span>
-                            {m.note && (
-                              <small className="muted person-note">
-                                {m.note}
-                              </small>
-                            )}
+                            <span>
+                              <span className="member-name">
+                                <MemberEditor member={m} asName />
+                                <MailLink id={m.id} name={m.name} />
+                              </span>
+                              {m.note && (
+                                <small className="muted person-note">
+                                  {m.note}
+                                </small>
+                              )}
+                            </span>
                           </span>
-                        </span>
-                      </td>
-                      <td>{m.email}</td>
-                      <td>
-                        <span className={`badge b-${m.tier}`}>{m.tier}</span>
-                      </td>
-                      <td>
-                        <Status value={m.status} />
-                      </td>
-                      <td>
-                        {fmtDate(m.joined, {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td>
-                        <MemberEditor member={m} />
-                      </td>
-                    </AdminRow>
-                  ))}
+                        </td>
+                        <td>{m.email}</td>
+                        <td>
+                          <span className={`badge b-${m.tier}`}>{m.tier}</span>
+                        </td>
+                        <td>
+                          <Status value={m.status} />
+                        </td>
+                        <td>
+                          {fmtDate(m.joined, {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td>
+                          <MemberEditor member={m} />
+                        </td>
+                      </AdminRow>
+                    ))}
+                  </SortedRows>
                 </tbody>
               </table>
             </AdminTable>

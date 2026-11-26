@@ -1069,7 +1069,9 @@ export async function adminMutation(
         body: blocksText(blocks),
         access: choice(form, "access", ["public", "premium"]),
         status: choice(form, "status", ["draft", "published"]),
-        cover: number(form, "cover", 0, 2),
+        // Which of the three default covers to fall back on. Imported posts carry 1-6;
+        // the site already shows n % 3, so storing that keeps every post's picture.
+        cover: Math.abs(Math.trunc(Number(text(form, "cover")) || 0)) % 3,
       };
       const postId = item?.id ?? uid();
       if (item) Object.assign(item, value);
